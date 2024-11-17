@@ -22,13 +22,13 @@ const tabContents: TabContentProps[] = [
     title: "Mission",
     description: "Breathing life into business workflows.",
     icon: <Compass className="w-5 h-5" />,
-    image: "/assets/img/mission.jpg"
+    image: "/assets/img/aboutus/mission.jpg"
   },
   {
     title: "Vision",
     description: "Our vision is to build the arc that connects people, processes, and technology, empowering businesses to focus on what truly matters by harnessing the power of intelligent solutions.",
     icon: <Eye className="w-5 h-5" />,
-    image: "/assets/img/vision.jpg"
+    image: "/assets/img/aboutus/vision.jpg"
   },
   {
     title: "Values",
@@ -40,7 +40,7 @@ const tabContents: TabContentProps[] = [
     title: "Purpose",
     description: "Our purpose is to revolutionize business process management by infusing it with intelligence, simplicity, and efficiency. Through AI-driven insights and automation, we empower teams to create workflows that are intuitive, adaptable, and impactful, enabling streamlined decision-making and continuous innovation.",
     icon: <Lightbulb className="w-5 h-5" />,
-    image: "/assets/img/purpose.jpg"
+    image: "/assets/img/aboutus/purpose.jpg"
   }
 ]
 
