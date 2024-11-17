@@ -9,6 +9,7 @@ export default async function SignInPage(props: {
     <div className="flex flex-col gap-2">
       {Object.values(providerMap).map((provider) => (
         <form
+          key={provider.id}
           action={async () => {
             "use server"
             try {
