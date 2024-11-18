@@ -21,6 +21,10 @@ const providers: Provider[] = [
     clientId: process.env.GITHUB_CLIENT_ID!,
     clientSecret: process.env.GITHUB_CLIENT_SECRET!,
   }),
+  Resend({
+    from: process.env.RESEND_FROM!,
+    apiKey: process.env.AUTH_RESEND_KEY!,
+  }),
 ]
 
 // provider map
