@@ -1,16 +1,21 @@
 "use client";
-import { useState } from "react";
-import { signIn } from "@/auth";
-import { Mail } from "lucide-react";
 
-export function MagicLinkButton() {
+import { useState } from "react";
+import { Mail } from "lucide-react";
+import { signIn } from "next-auth/react";
+
+const ClientMagicLinkForm = () => {
   const [email, setEmail] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // "success" or "error"
 
   const handleEmailChange = (event) => {
     const email = event.target.value;
     setEmail(email);
     setIsEmailValid(validateEmail(email));
+    setMessage('');
+    setMessageType('');
   };
 
   const validateEmail = (email) => {
@@ -21,7 +26,14 @@ export function MagicLinkButton() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (isEmailValid) {
-      await signIn("resend", { email });
+      const res = await signIn("resend", { email, redirect: false });
+      if (res?.error) {
+        setMessage("Failed to send magic link");
+        setMessageType("error");
+        return;
+      }
+      setMessage("Check your email for the magic link");
+      setMessageType("success");
     }
   };
 
@@ -43,6 +55,13 @@ export function MagicLinkButton() {
         <Mail size={20} />
         Sign in with Email
       </button>
+      {message && (
+        <p className={`mt-4 text-center text-sm ${messageType === 'error' ? 'text-red-500' : 'text-muted-foreground'}`}>
+          {message}
+        </p>
+      )}
     </form>
   );
-}
+};
+
+export default ClientMagicLinkForm;

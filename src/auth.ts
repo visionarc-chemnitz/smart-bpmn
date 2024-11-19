@@ -9,6 +9,11 @@ import Google from "next-auth/providers/google"
 import GitHub from "@auth/core/providers/github"
 // mail providers
 import Resend from "next-auth/providers/resend"
+
+
+import { FcGoogle } from "react-icons/fc";
+import { FaGithub } from "react-icons/fa";
+import { MdEmail } from "react-icons/md";
  
 
 // config providers
@@ -16,28 +21,44 @@ const providers: Provider[] = [
   Google({
     clientId: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    authorization: {
+      params: {
+        redirect_uri: process.env.NEXT_PUBLIC_APP_URL + '/dashboard',
+      },
+    }
   }), 
   GitHub({
     clientId: process.env.GITHUB_CLIENT_ID!,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET!
   }),
   Resend({
     from: process.env.RESEND_FROM!,
-    apiKey: process.env.AUTH_RESEND_KEY!,
+    apiKey: process.env.AUTH_RESEND_KEY!
   }),
 ]
 
-// provider map
+const getProviderIcon = (providerId: string) => {
+  switch (providerId) {
+    case "google":
+      return FcGoogle;
+    case "github":
+      return FaGithub;
+    default:
+      return null;
+  }
+};
+
+// provider map with icons
 export const providerMap = providers
   .map((provider) => {
     if (typeof provider === "function") {
-      const providerData = provider()
-      return { id: providerData.id, name: providerData.name }
+      const providerData = provider();
+      return { id: providerData.id, name: providerData.name, icon: null };
     } else {
-      return { id: provider.id, name: provider.name }
+      return { id: provider.id, name: provider.name, icon: getProviderIcon(provider.id) };
     }
   })
-  .filter((provider) => provider.id !== "credentials")
+  .filter((provider) => provider.id !== "credentials");
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
