@@ -10,7 +10,6 @@ import GitHub from "@auth/core/providers/github"
 // mail providers
 import Resend from "next-auth/providers/resend"
 
-
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
