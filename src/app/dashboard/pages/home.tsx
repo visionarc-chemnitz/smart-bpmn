@@ -50,7 +50,6 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-
 export default function Home() {
   const totalVisitors = chartData.reduce((acc, { visitors }) => acc + visitors, 0)
 
@@ -92,8 +91,7 @@ export default function Home() {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
+          className="mx-auto aspect-square max-h-[250px]">
           <PieChart>
             <ChartTooltip
               cursor={false}
