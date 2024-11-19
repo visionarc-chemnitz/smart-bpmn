@@ -1,0 +1,132 @@
+/* src/app/dashboard/dashboard.module.css */
+
+.dashboard {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  background-color: var(--sidebar-background);
+  color: var(--sidebar-foreground);
+  width: 16rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.dark-mode-toggle {
+  background: none;
+  border: none;
+  color: var(--sidebar-foreground);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+.avatar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+.sidebar-menu-item {
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-menu-button {
+  background: none;
+  border: none;
+  color: var(--sidebar-foreground);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.5rem;
+  text-align: left;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-menu-button:hover {
+  background-color: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.5rem;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--sidebar-border);
+}
+
+.sidebarContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.menuContent {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--sidebar-background);
+  color: var(--sidebar-foreground);
+  border-top: 1px solid var(--sidebar-border);
+  width: 100%;
+  text-align: center;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    transform: translateX(-100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-header {
+    justify-content: center;
+  }
+
+  .sidebar-menu-button {
+    justify-content: center;
+  }
+
+  .main-content {
+    margin-top: 4rem;
+  }
+}

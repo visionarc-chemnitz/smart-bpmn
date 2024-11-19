@@ -1,13 +1,16 @@
-import { auth } from "@/auth"
+// user-avatar.tsx
+"use client"; // This indicates the component is a client component.
 
-export default async function UserAvatar() {
-  const session = await auth()
- 
-  if (!session?.user) return null
- 
+import { useSession } from "next-auth/react";
+
+export default function UserAvatar() {
+  const { data: session } = useSession();
+
+  if (!session?.user) return null;
+
   return (
     <div>
       <img src={session.user.image ?? ""} alt="User Avatar" />
     </div>
-  )
+  );
 }
