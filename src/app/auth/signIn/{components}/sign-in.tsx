@@ -11,7 +11,7 @@ export default function SignIn() {
             <h2 className="text-xl ml-4">Let&apos;s streamline business processes.</h2>
           </div>
         </div>
-        <div className="flex flex-col justify-center w-full md:w-1/2 space-y-4 p-6 bg-white">
+        <div className="flex flex-col justify-center w-full md:w-1/2 rounded-r-lg space-y-4 p-6 bg-white">
           <div className="text-center">
             <img src="/assets/img/logo/vision_arc_logo_transparent.png" alt="Logo" className="mx-auto mb-4 h-20 w-24 rounded-full object-cover" />
             <p className="text-sm text-muted-foreground">
