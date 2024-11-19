@@ -45,7 +45,8 @@ const ClientMagicLinkForm = () => {
         placeholder="Email"
         value={email}
         onChange={handleEmailChange}
-        className="w-full mb-4 p-2 border rounded"
+        className="w-full mb-4 p-2 border rounded bg-transparent text-black"
+        style={{ borderColor: '#ccc', borderWidth: '1px' }}
       />
       <button
         type="submit"

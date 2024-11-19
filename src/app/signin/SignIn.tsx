@@ -4,7 +4,7 @@ import { MagicLinkButton } from "./magiclink-button";
 
 export default function SignIn() {
   return (
-    <div className="flex h-screen items-center justify-center p-4">
+    <div className="flex h-screen items-center justify-center">
       <div className="flex flex-col sm-max:flex-col md:flex-row w-full max-w-4xl h-auto md:h-[500px] rounded-lg border shadow-lg">
         <div className="hidden sm-max:hidden md:flex flex-col justify-between w-1/2 rounded-l-lg bg-themeColor p-6 text-white">
           <div>
@@ -12,7 +12,7 @@ export default function SignIn() {
             <h2 className="text-xl ml-4">Let&apos;s streamline business processes.</h2>
           </div>
         </div>
-        <div className="flex flex-col justify-center w-full md:w-1/2 space-y-4 p-6">
+        <div className="flex flex-col justify-center w-full md:w-1/2 space-y-4 p-6 bg-white">
           <div className="text-center">
             <img src="/assets/img/logo/vision_arc_logo_transparent.png" alt="Logo" className="mx-auto mb-4 h-20 w-24 rounded-full object-cover" />
             <p className="text-sm text-muted-foreground">
@@ -21,11 +21,10 @@ export default function SignIn() {
           </div>
 
           {providerMap.map((provider) => {
-            console.log(provider.icon);
+            const Icon = provider.icon;
             if (provider.id === "resend") {
               return null;
             }
-            const Icon = provider.icon;
             return (
               <form
                 key={provider.id}
