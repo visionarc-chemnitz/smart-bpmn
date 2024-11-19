@@ -1,5 +1,3 @@
-"use client";
-
 import ClientMagicLinkForm from "./client-magic-link-form";
 
 export function MagicLinkButton() {

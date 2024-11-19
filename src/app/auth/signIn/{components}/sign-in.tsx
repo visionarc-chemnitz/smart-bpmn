@@ -1,10 +1,9 @@
-import { signIn } from "next-auth/react";
-import { providerMap } from "@/auth";
+import { signIn, providerMap } from "@/auth"
 import { MagicLinkButton } from "./magiclink-button";
 
 export default function SignIn() {
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex h-screen items-center justify-center p-">
       <div className="flex flex-col sm-max:flex-col md:flex-row w-full max-w-4xl h-auto md:h-[500px] rounded-lg border shadow-lg">
         <div className="hidden sm-max:hidden md:flex flex-col justify-between w-1/2 rounded-l-lg bg-themeColor p-6 text-white">
           <div>
@@ -21,10 +20,8 @@ export default function SignIn() {
           </div>
 
           {providerMap.map((provider) => {
+            if (provider.id === "resend") return;
             const Icon = provider.icon;
-            if (provider.id === "resend") {
-              return null;
-            }
             return (
               <form
                 key={provider.id}
