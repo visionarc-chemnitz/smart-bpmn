@@ -5,7 +5,7 @@ import { Compass, Eye, Heart, Lightbulb, Users, Star } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import SparklesText from '../ui/sparkles-text'
 import AnimatedShinyText from '../ui/animated-shiny-text'
-import { cn } from "../../lib/utils"
+import { cn } from "@/lib/utils"
 import { MagicCard } from '../ui/magic-card'
 import { ValueDialog } from '../ui/value-dialog'
 import { WavyLine } from '../ui/wavy-line'
