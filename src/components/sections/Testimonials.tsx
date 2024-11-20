@@ -1,6 +1,6 @@
 'use client'
 
-import Marquee from "@/components/ui/marquee"
+import Marquee from "../ui/marquee"
 
 const testimonials = [
   {

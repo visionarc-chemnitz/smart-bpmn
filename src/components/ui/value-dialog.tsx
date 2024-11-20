@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog"
 import { X } from "lucide-react" // For close button
 
 interface ValueDialogProps {

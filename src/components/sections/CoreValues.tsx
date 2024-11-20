@@ -3,12 +3,12 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Compass, Eye, Heart, Lightbulb, Users, Star } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import SparklesText from '@/components/ui/sparkles-text'
+import SparklesText from '../ui/sparkles-text'
 import AnimatedShinyText from '../ui/animated-shiny-text'
 import { cn } from "@/lib/utils"
 import { MagicCard } from '../ui/magic-card'
-import { ValueDialog } from '@/components/ui/value-dialog'
-import { WavyLine } from '@/components/ui/wavy-line'
+import { ValueDialog } from '../ui/value-dialog'
+import { WavyLine } from '../ui/wavy-line'
 
 interface TabContentProps {
   title: string

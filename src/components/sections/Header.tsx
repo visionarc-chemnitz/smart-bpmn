@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
-import { Sun, Moon, ChevronDown } from "lucide-react"
-import { useTheme } from "next-themes"
+import { useState } from 'react'
+import { Button } from "../ui/button"
+import { ChevronDown, LogIn } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useToggleButton } from '@/hooks/use-toggle-button'
+import { RainbowButton } from '../ui/rainbow-button'
 
 const navLinks = [
   { name: "Home", id: "home" },
@@ -15,34 +16,7 @@ const navLinks = [
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const { theme, setTheme } = useTheme()
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
-  }
-
-  const renderThemeToggle = () => (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggleTheme}
-      className="hover:bg-white/10 dark:hover:bg-black/10 transition-colors"
-    >
-      {mounted && (theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />)}
-    </Button>
-  )
-
-  // Only render logo after mounting
-  const logoSrc = mounted 
-    ? theme === 'dark' 
-      ? '/assets/img/logo/logo.png'
-      : '/assets/img/logo/logo.png'
-    : '/assets/img/logo/logo.png' // Default logo for SSR
+  const { toggleButton, logoSrc } = useToggleButton()
 
   return (
     <>
@@ -76,9 +50,24 @@ export default function Header() {
             </Link>
           ))}
         </nav>
+
+        <div className="hidden md:block">
+          <Link href="/auth/signin">
+            <RainbowButton type="submit" className="ml-5 mr-2 py-0 text-sm h-8 px-3">
+              SignIn
+            </RainbowButton>
+          </Link>
+        </div>
         
         <div className="flex items-center gap-4 ml-auto md:ml-0">
-          {renderThemeToggle()}
+          <div className="md:hidden ml-auto">
+            <Link href="/auth/signin">
+              <LogIn className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {toggleButton()}
+
           <Button
             variant="ghost" 
             size="icon"

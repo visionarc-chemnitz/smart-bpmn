@@ -1,6 +1,6 @@
 'use client'
 
-import BlurIn from "@/components/ui/blur-in"
+import BlurIn from "../ui/blur-in"
 import Particles from "../ui/particles"
 import { ChevronDown } from "lucide-react"
 import { motion } from "framer-motion"

@@ -1,6 +1,6 @@
 
 import NextAuth from "next-auth"
-import prisma from "@/lib/prisma"
+import prisma from "./lib/prisma"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import type { Provider } from "next-auth/providers"
 
@@ -12,19 +12,13 @@ import Resend from "next-auth/providers/resend"
 
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
-import { MdEmail } from "react-icons/md";
  
 
 // config providers
 const providers: Provider[] = [
   Google({
     clientId: process.env.GOOGLE_CLIENT_ID!,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    authorization: {
-      params: {
-        redirect_uri: process.env.NEXT_PUBLIC_APP_URL + '/dashboard',
-      },
-    }
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET!
   }), 
   GitHub({
     clientId: process.env.GITHUB_CLIENT_ID!,

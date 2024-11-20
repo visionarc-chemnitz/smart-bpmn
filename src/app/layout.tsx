@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
-import Header from "@/components/sections/Header";
-import Footer from "@/components/sections/Footer";
+import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -56,29 +54,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
   return (
-      <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-      <ThemeProvider
+        <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-      >
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </div>
-      </ThemeProvider>
+        >
+        {children}
+        </ThemeProvider>
       </body>
-      </html>
+    </html>
   )
 }

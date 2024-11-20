@@ -1,7 +1,7 @@
 'use client'
 
 import { Zap, Target, Users } from "lucide-react"
-import { MagicCard } from "@/components/ui/magic-card"
+import { MagicCard } from "../ui/magic-card"
 
 const features = [
   { 

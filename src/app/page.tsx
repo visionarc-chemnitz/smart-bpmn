@@ -1,30 +1,18 @@
 'use client'
 
-import { LandingPageComponent } from "@/components/pages/landing-page";
-import { ThemeProvider } from "next-themes";
-import { useState, useEffect } from "react";
+import Header from "@/components/sections/Header";
+import { LandingPageComponent } from "../components/pages/landing-page";
+import Footer from "@/components/sections/Footer";
 
 export default function Home() {
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) {
-        // Return a placeholder with the same structure to prevent layout shift
-        return (
-            <main className="w-full min-h-screen bg-white dark:bg-gray-900">
-                <div aria-hidden="true" />
-            </main>
-        );
-    }
-
+   
     return (
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <main className="w-full min-h-screen">
-                <LandingPageComponent />
-            </main>
-        </ThemeProvider>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1">
+          <LandingPageComponent />
+        </main>
+        <Footer />
+      </div>          
     );
 }

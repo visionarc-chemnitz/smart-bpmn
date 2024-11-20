@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { MagicCard } from "@/components/ui/magic-card"
+import { MagicCard } from "../ui/magic-card"
 
 const progressSteps = [
   { 

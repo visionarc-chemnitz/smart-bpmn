@@ -1,4 +1,4 @@
-import { signIn, providerMap } from "@/auth"
+import { signIn, providerMap } from "@/auth";
 import { MagicLinkButton } from "./magiclink-button";
 
 export default function SignIn() {
@@ -27,7 +27,7 @@ export default function SignIn() {
                 key={provider.id}
                 action={async () => {
                   "use server";
-                  await signIn(provider.id, {
+                  await signIn(provider.id,{
                     redirectTo: "/dashboard",
                   });
                 }}
