@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Github, Linkedin, ChevronLeft, ChevronRight } from "lucide-react"
 
 const teamMembers = [
