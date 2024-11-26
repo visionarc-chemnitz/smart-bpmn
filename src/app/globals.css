@@ -86,3 +86,110 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Update BPMN styles */
+@layer components {
+  /* Base styles for light theme */
+  .djs-palette,
+  .djs-context-pad,
+  .djs-overlay-context-pad,
+  .djs-popup {
+    @apply bg-background border-border;
+  }
+
+  .djs-palette .entry,
+  .djs-context-pad .entry,
+  .djs-overlay-context-pad .entry,
+  .djs-popup .entry {
+    @apply text-foreground;
+  }
+
+  .djs-palette .entry:hover,
+  .djs-context-pad .entry:hover,
+  .djs-overlay-context-pad .entry:hover,
+  .djs-popup .entry:hover {
+    @apply bg-muted;
+  }
+
+  /* Dark theme overrides */
+  [data-theme='dark'] .djs-palette,
+  [data-theme='dark'] .djs-context-pad,
+  [data-theme='dark'] .djs-overlay-context-pad,
+  [data-theme='dark'] .djs-popup,
+  [data-theme='dark'] .djs-context-pad.open {
+    @apply bg-neutral-900 border-neutral-700;
+  }
+
+  [data-theme='dark'] .djs-palette .entry,
+  [data-theme='dark'] .djs-context-pad .entry,
+  [data-theme='dark'] .djs-overlay-context-pad .entry,
+  [data-theme='dark'] .djs-popup .entry {
+    @apply text-white fill-white;
+  }
+
+  [data-theme='dark'] .djs-palette .entry:hover,
+  [data-theme='dark'] .djs-context-pad .entry:hover,
+  [data-theme='dark'] .djs-overlay-context-pad .entry:hover,
+  [data-theme='dark'] .djs-popup .entry:hover {
+    @apply bg-neutral-800;
+  }
+
+  /* Style the icons in dark mode */
+  [data-theme='dark'] .djs-context-pad .entry img,
+  [data-theme='dark'] .djs-palette .entry img,
+  [data-theme='dark'] .djs-popup .entry img {
+    filter: invert(1);
+  }
+
+  /* Hide powered by */
+  .bjs-powered-by {
+    display: none;
+  }
+
+  /* Context menu and popup styles */
+  .djs-popup, 
+  .djs-context-pad, 
+  .djs-overlay-context-pad {
+    @apply bg-background border border-border shadow-md;
+  }
+
+  /* Dark theme specific styles for popups */
+  [data-theme='dark'] .djs-popup,
+  [data-theme='dark'] .djs-context-pad,
+  [data-theme='dark'] .djs-overlay-context-pad {
+    @apply bg-neutral-900 border-neutral-700;
+  }
+
+  /* Style the menu items */
+  [data-theme='dark'] .djs-popup .entry,
+  [data-theme='dark'] .djs-context-pad .entry {
+    @apply text-white bg-neutral-900;
+  }
+
+  /* Style hover states */
+  [data-theme='dark'] .djs-popup .entry:hover,
+  [data-theme='dark'] .djs-context-pad .entry:hover {
+    @apply bg-neutral-800;
+  }
+
+  /* Style the icons within popup menus */
+  [data-theme='dark'] .djs-popup .entry img,
+  [data-theme='dark'] .djs-context-pad .entry img {
+    filter: invert(1) brightness(100%);
+  }
+
+  /* Style separators in popup menus */
+  [data-theme='dark'] .djs-popup .entry.separator {
+    @apply border-neutral-700;
+  }
+
+  /* Style group headers in popup menus */
+  [data-theme='dark'] .djs-popup .group-header {
+    @apply bg-neutral-800 text-white;
+  }
+
+  /* Ensure proper text color in all popup scenarios */
+  [data-theme='dark'] .djs-popup * {
+    @apply text-white;
+  }
+}

@@ -58,6 +58,10 @@ const data = {
       isActive: true,
       items: [
         {
+          title: "Image to BPMN",
+          url: "/dashboard/playground/image-to-bpmn",
+        },
+        {
           title: "History",
           url: "#",
         },
