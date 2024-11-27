@@ -39,3 +39,6 @@ next-env.d.ts
 
 # prisma
 prisma/migrations/
+
+# temp files
+temp_files/

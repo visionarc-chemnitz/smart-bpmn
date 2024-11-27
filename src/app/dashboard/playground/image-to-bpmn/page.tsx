@@ -27,10 +27,28 @@ export default function ImageToBPMNPage() {
     }
   };
 
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     if (file.type.startsWith('image/')) {
-      // TODO: Handle the image processing here
-      console.log('Processing image:', file);
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch('/api/v1/convert', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to process image');
+        }
+
+        const result = await response.json();
+        console.log('Conversion result:', result);
+        // Handle the result as needed
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Failed to upload and process image');
+      }
     } else {
       alert('Please upload an image file');
     }
