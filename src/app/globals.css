@@ -86,3 +86,8 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.large-textarea {
+  height: 150px; /* Adjust the height as needed */
+  width: 100%; /* Make it full width */
+}
