@@ -72,6 +72,18 @@ const data = {
       ],
     },
     {
+      title: "Board",
+      url: "/dashboard",
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "board",
+          url: "/dashboard/board",
+        },
+      ],
+    },
+    {
       title: "Models",
       url: "#",
       icon: Bot,
