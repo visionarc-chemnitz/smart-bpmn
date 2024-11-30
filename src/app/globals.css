@@ -86,3 +86,49 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* BPMN Modeler */
+@layer components {
+  .bpmn-theme-light {
+    --bpmn-bg-color: theme('colors.white');
+    --bpmn-primary-color: theme('colors.gray.900');
+    --bpmn-secondary-color: theme('colors.gray.100');
+    --bpmn-border-color: theme('colors.gray.200');
+  }
+
+  .bpmn-theme-dark {
+    --bpmn-bg-color: theme('colors.gray.900');
+    --bpmn-primary-color: theme('colors.white');
+    --bpmn-secondary-color: theme('colors.gray.800');
+    --bpmn-border-color: theme('colors.gray.700');
+  }
+
+  /* BPMN specific styles */
+  .djs-palette {
+    background-color: var(--bpmn-secondary-color) !important;
+    border-color: var(--bpmn-border-color) !important;
+  }
+
+  .djs-context-pad {
+    background-color: var(--bpmn-secondary-color) !important;
+    border-color: var(--bpmn-border-color) !important;
+  }
+
+  .djs-element {
+    color: var(--bpmn-primary-color) !important;
+  }
+
+  .djs-connection {
+    stroke: var(--bpmn-primary-color) !important;
+  }
+
+  .djs-palette .entry,
+  .djs-context-pad .entry {
+    background-color: var(--bpmn-secondary-color) !important;
+    color: var(--bpmn-primary-color) !important;
+  }
+
+  .bjs-powered-by {
+    display: none !important;
+  }
+}
