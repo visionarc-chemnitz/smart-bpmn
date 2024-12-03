@@ -1,31 +1,29 @@
-// middleware.ts add auth middleware to the app
-// use this only for serverless db like vercel postgres
-
+import {auth} from '@/auth'
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Define the paths that require authentication
-const protectedPaths = ['/dashboard'];
-
-export async function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {                                
   const { pathname } = req.nextUrl;
+  const session = await auth();
+  const user = session?.user;
 
-  // Check if the request path is protected
-  if (protectedPaths.some(path => pathname.startsWith(path))) {
-    const token = req.cookies.get('authjs.session-token');
-
-    if (!token) {
+  if (pathname.startsWith('/dashboard')) {
+    if (!user) {
       // Redirect to the signin page if not authenticated
       const loginUrl = new URL('/auth/signin', req.url);
+      console.log("loginUrl", loginUrl);
       return NextResponse.redirect(loginUrl);
     }
+  } else if (user && pathname.startsWith('/auth/signin')) {
+    // Redirect to the dashboard if authenticated   
+    const dashboardUrl = new URL('/dashboard', req.url);
+    return NextResponse.redirect(dashboardUrl);
   }
 
-  // Allow the request to proceed if authenticated or not a protected path
   return NextResponse.next();
 }
 
 // Specify the paths that the middleware should run on
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/dashboard/:path*', '/auth/signin']
 };
