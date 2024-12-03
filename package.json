@@ -12,6 +12,8 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.3",
     "@bpmn-io/properties-panel": "^3.25.0",
+    "@neondatabase/serverless": "^0.10.4",
+    "@prisma/adapter-neon": "^6.0.1",
     "@prisma/client": "^5.22.0",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-collapsible": "^1.1.1",
