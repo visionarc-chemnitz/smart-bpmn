@@ -53,13 +53,13 @@ const data = {
   navMain: [
     {
       title: "Playground",
-      url: "#",
+      url: "/dashboard",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Text2BPMN",
+          url: "/dashboard/text2bpmn",
         },
         {
           title: "Starred",
@@ -68,18 +68,6 @@ const data = {
         {
           title: "Settings",
           url: "#",
-        },
-      ],
-    },
-    {
-      title: "Board",
-      url: "/dashboard",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "board",
-          url: "/dashboard/board",
         },
       ],
     },
