@@ -1,0 +1,71 @@
+# .dockerignore
+
+# Version Control
+.git
+.gitignore
+.gitattributes
+.github/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+.venv
+pip-log.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+htmlcov/
+
+# Node (if any)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Project specific
+logs/
+*.log
+test/
+tests/
+docs/
+*.md
+!README.md
+.pytest_cache/
+__pycache__/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.docker/
+
+# Development
+*.bak
+*.tmp
+*.temp
+.env.local
+.env.development
+.env.test
