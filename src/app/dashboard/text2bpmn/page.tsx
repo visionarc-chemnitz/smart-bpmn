@@ -15,8 +15,9 @@ interface GenerateResponse {
 export default function BoardPage() {
   const [loading, setLoading] = useState(false);
   const [prompt, setPrompt] = useState('');
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [flowText, setFlowText] = useState('');
+  // const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  // const [flowText, setFlowText] = useState('');
+  const [xml, setXml] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const handleError = (error: Error) => {
@@ -40,9 +41,10 @@ export default function BoardPage() {
     try {
       const response = await apiWrapper(`generate/`, 'POST', { prompt });
 
-      const data: GenerateResponse = response;
-      setGeneratedImage(data.pipeFlowImage);
-      setFlowText(data.pipeFlowText);
+      // const data: GenerateResponse = response;
+      setXml(response.bpmn_xml);
+      // setGeneratedImage(data.pipeFlowImage);
+      // setFlowText(data.pipeFlowText);
     } catch (err) {
       handleError(err as Error);
     } finally {
@@ -51,12 +53,12 @@ export default function BoardPage() {
   };
 
   const handleSave = () => {
-    if (generatedImage) {
-      const link = document.createElement('a');
-      link.download = 'bpmn-diagram.png';
-      link.href = `data:image/png;base64,${generatedImage}`;
-      link.click();
-    }
+    // if (generatedImage) {
+    //   const link = document.createElement('a');
+    //   link.download = 'bpmn-diagram.png';
+    //   link.href = `data:image/png;base64,${generatedImage}`;
+    //   link.click();
+    // }
   };
   
   return (
@@ -86,13 +88,13 @@ export default function BoardPage() {
                 ) : null}
                 Generate
               </button>
-              {generatedImage && (
+              {xml?.length > 0 && (
                 <button
                   onClick={handleSave}
                   className="inline-flex items-center rounded-md  bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Save Image
+                  Download BPMN
                 </button>
               )}
             </div>
@@ -110,34 +112,35 @@ export default function BoardPage() {
         )}
 
         {/* Output Section */}
-        <div className="rounded-xl bg-card p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold">Output</h2>
-          {generatedImage ? (
-            <img
-              src={`data:image/png;base64,${generatedImage}`}
-              alt="Generated BPMN Diagram"
-              className="w-full rounded-md"
-            />
-          ) : (
-            <div className="flex h-[600px] items-center justify-center rounded-md border bg-muted">
-              <p className="text-sm text-muted-foreground">
-                Generated diagram will appear here
-              </p>
-            </div>
-          )}
-        </div>
+        {/*<div className="rounded-xl bg-card p-6 shadow-sm">*/}
+        {/*  <h2 className="mb-4 text-lg font-semibold">Output</h2>*/}
+        {/*  {generatedImage ? (*/}
+        {/*    <img*/}
+        {/*      src={`data:image/png;base64,${generatedImage}`}*/}
+        {/*      alt="Generated BPMN Diagram"*/}
+        {/*      className="w-full rounded-md"*/}
+        {/*    />*/}
+        {/*  ) : (*/}
+        {/*    <div className="flex h-[600px] items-center justify-center rounded-md border bg-muted">*/}
+        {/*      <p className="text-sm text-muted-foreground">*/}
+        {/*        Generated diagram will appear here*/}
+        {/*      </p>*/}
+        {/*    </div>*/}
+        {/*  )}*/}
+        {/*</div>*/}
 
         {/* BPMN Modeler */}
-        {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
+        <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
           <BpmnModelerComponent
             containerId="bpmn-modeler"
             propertiesPanelId="properties-panel"
+            diagramXML={xml}
             onError={handleError}
             onImport={handleImport}
             height="100%"
             width="100%"
           />
-        </div> */}
+        </div>
       </div>
     </>
   )

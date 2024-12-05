@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useBpmnModeler } from '@/hooks/use-bpmn-modeler';
 import { BpmnModelerProps } from '@/types/board/board-types';
 import 'bpmn-js/dist/assets/diagram-js.css';
@@ -18,6 +18,12 @@ export const BpmnModelerComponent = (props: BpmnModelerProps) => {
     height,
     width,
   });
+
+  useEffect(() => {
+    if (diagramXML) {
+      importXML(diagramXML);
+    }
+  }, [diagramXML, importXML]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
