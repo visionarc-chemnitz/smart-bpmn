@@ -1,11 +1,19 @@
 import { signIn, providerMap } from "@/auth";
 import { MagicLinkButton } from "./magiclink-button";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
+import ToggleButton from "@/app/shared/{components}/toggle-btn";
+
 
 export default function SignIn() {
+
   return (
     <div className="flex h-screen items-center justify-center p-">
+      <div className="absolute top-4 right-4">
+        <ToggleButton />
+      </div>
       <div className="flex flex-col sm-max:flex-col md:flex-row w-full max-w-4xl h-auto md:h-[500px] rounded-lg border shadow-lg">
-        <div className="hidden sm-max:hidden md:flex flex-col justify-between w-1/2 rounded-l-lg bg-themeColor p-6 text-white">
+        <div className="hidden sm-max:hidden md:flex flex-col justify-between w-1/2 rounded-l-lg bg-signinCard p-6 text-white">
           <div>
             <h1 className="text- mt-12 mb-4 ml-4">Welcome back,</h1>
             <h2 className="text-xl ml-4">Let&apos;s streamline business processes.</h2>
