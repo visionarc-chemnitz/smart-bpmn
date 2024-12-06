@@ -21,17 +21,13 @@ const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image> & { src: string }
 >(({ className, src, ...props }, ref) => {
-  const [hasError, setHasError] = useState(false);
   return (
-    !hasError ? (
       <AvatarPrimitive.Image
         ref={ref}
         className={cn("aspect-square h-full w-full", className)}
         src={src}
-        onError={() => setHasError(true)}
         {...props}
       />
-    ) : null
   );
 })
 AvatarImage.displayName = AvatarPrimitive.Image.displayName
