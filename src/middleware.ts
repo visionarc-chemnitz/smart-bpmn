@@ -11,7 +11,6 @@ export async function middleware(req: NextRequest) {
     if (!user) {
       // Redirect to the signin page if not authenticated
       const loginUrl = new URL('/auth/signin', req.url);
-      console.log("loginUrl", loginUrl);
       return NextResponse.redirect(loginUrl);
     }
   } else if (user && pathname.startsWith('/auth/signin')) {
