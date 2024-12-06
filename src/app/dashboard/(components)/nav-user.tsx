@@ -31,6 +31,13 @@ import {
 } from "@/components/ui/sidebar"
 import SignOut from "@/app/auth/(components)/sign-out"
 
+function getInitials(name: string) {
+  const words = name.split(" ");
+  if (words.length === 0) return "";
+  if (words.length === 1) return words[0].charAt(0).toUpperCase();
+  return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+}
+
 export function NavUser({
   user,
 }: {
@@ -41,6 +48,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  console.log(user);
 
   return (
     <SidebarMenu>
@@ -53,7 +61,9 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {getInitials(user.name)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
