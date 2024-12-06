@@ -3,6 +3,7 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
+import { RainbowButton } from "@/components/ui/rainbow-button";
 
 const ClientMagicLinkForm = () => {
   const [email, setEmail] = useState("");
@@ -14,8 +15,16 @@ const ClientMagicLinkForm = () => {
     const email = event.target.value;
     setEmail(email);
     setIsEmailValid(validateEmail(email));
+  };
+
+  const handleEmailBlur = () => {
     setMessage('');
     setMessageType('');
+  };
+
+  const handleEmailFocus = () => {
+    setMessage('Note: Sign-in with email is currently limited to some users.');
+    setMessageType('info');
   };
 
   const validateEmail = (email: string) => {
@@ -46,18 +55,18 @@ const ClientMagicLinkForm = () => {
         value={email}
         onChange={handleEmailChange}
         className="w-full mb-4 p-2 border rounded bg-transparent text-black"
-        style={{ borderColor: '#ccc', borderWidth: '1px' }}
+        onBlur={handleEmailBlur}
+        onFocus={handleEmailFocus}
+        style={{ borderColor: '#ccc', borderWidth: '1px', position: 'relative', zIndex: 1 }}
       />
-      <button
-        type="submit"
-        className={`flex w-full items-center justify-center gap-2 rounded-md px-4 py-2 text-white ${isEmailValid ? 'bg-themeColor hover:bg-blue-500' : 'bg-gray-400 cursor-not-allowed'}`}
-        disabled={!isEmailValid}
-      >
-        <Mail size={20} />
-        Sign in with Email
-      </button>
+
+        <RainbowButton type="submit" className={`w-full ${isEmailValid ? "" : "disabled"}`}>
+          <Mail size={20} className="mr-2" />
+          Sign in with Email
+        </RainbowButton>
+
       {message && (
-        <p className={`mt-4 text-center text-sm ${messageType === 'error' ? 'text-red-500' : 'text-muted-foreground'}`}>
+        <p className={`mt-2 text-center text-sm ${messageType === 'error' ? 'text-red-500' : 'text-xs text-gray-500 italic text-center'}`}>
           {message}
         </p>
       )}
