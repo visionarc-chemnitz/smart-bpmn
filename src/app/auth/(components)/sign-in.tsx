@@ -29,7 +29,6 @@ export default function SignIn() {
                   "use server";
                   await signIn(provider.id,{
                     redirectTo: "/dashboard",
-                    prompt: "login",
                   });
                 }}
               >
