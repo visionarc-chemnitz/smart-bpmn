@@ -1,17 +1,23 @@
-import { signIn, providerMap } from "@/auth";
+"use client"
 import { MagicLinkButton } from "./magiclink-button";
-import ToggleButton from "@/app/shared/{components}/toggle-btn";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import FloatingFigures from "@/components/ui/floating-figures";
+import { useToggleButton } from "@/hooks/use-toggle-button";
+import { providerMap } from "@/auth";
+import { signIn } from "next-auth/react";
 
 
 export default function SignIn() {
+  const { toggleButton, logoSrc } = useToggleButton()
+  const handleSignIn = async (providerId: string) => {
+    await signIn(providerId, { redirectTo: "/dashboard" });
+  };
 
   return (
     <div className="flex h-screen items-center justify-center p-">
       <FloatingFigures />
       <div className="absolute top-4 right-4">
-        <ToggleButton />
+        {toggleButton()}
       </div>
       <div className="flex flex-col sm-max:flex-col md:flex-row w-full max-w-4xl h-auto md:h-[500px] rounded-lg border-2 shadow-lg">
       <div className="hidden sm-max:hidden md:flex flex-col justify-between w-1/2 rounded-l-lg p-6 bg-gradient-to-br from-[#0ea5e9] via-[#0284c7] to-[#0369a1] text-white">
@@ -59,11 +65,9 @@ export default function SignIn() {
             return (
               <form
                 key={provider.id}
-                action={async () => {
-                  "use server";
-                  await signIn(provider.id,{
-                    redirectTo: "/dashboard",
-                  });
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSignIn(provider.id);
                 }}
               >
                 <RainbowButton type="submit" className="w-full">

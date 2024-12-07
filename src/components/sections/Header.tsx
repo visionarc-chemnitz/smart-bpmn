@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { LogIn } from "lucide-react"
+import { Button } from '../ui/button'
+import { ChevronDown, LogIn } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useToggleButton } from '@/hooks/use-toggle-button'
 import { RainbowButton } from '../ui/rainbow-button'
-import ToggleButton from '@/app/shared/{components}/toggle-btn'
 
 const navLinks = [
   { name: "Home", id: "home" },
@@ -16,7 +16,7 @@ const navLinks = [
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { logoSrc } = useToggleButton()
+  const { toggleButton, logoSrc } = useToggleButton()
 
   return (
     <>
@@ -66,7 +66,16 @@ export default function Header() {
             </Link>
           </div>
 
-          <ToggleButton/>
+          {toggleButton()}
+
+          <Button
+            variant="ghost" 
+            size="icon"
+            className="md:hidden hover:bg-white/10 dark:hover:bg-black/10 transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`} />
+          </Button>
         </div>
       </header>
 
