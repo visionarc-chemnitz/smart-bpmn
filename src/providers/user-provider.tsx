@@ -1,23 +1,9 @@
 "use client";
 
+import { UserContextValue, UserProviderProps } from "@/types/user/user";
 import React, { createContext, useContext } from "react";
 
-interface User {
-  name: string;
-  email: string;
-  avatar: string;
-}
-
-interface UserContextValue {
-  user: User; 
-}
-
 const UserContext = createContext<UserContextValue | undefined>(undefined);
-
-interface UserProviderProps {
-  user: User;
-  children: React.ReactNode;
-}
 
 export const UserProvider = ({ user, children }: UserProviderProps) => {
   return (
