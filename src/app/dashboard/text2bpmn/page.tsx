@@ -11,7 +11,7 @@ export default function Text2BPMNPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [prompt, setPrompt] = useState<string>('');
   const [xml, setXml] = useState<string>('');
-  const [error, setError] = useState<string | null>("error is here ");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (error) {
