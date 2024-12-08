@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from "../ui/button"
+import { Button } from '../ui/button'
 import { ChevronDown, LogIn } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -54,7 +54,7 @@ export default function Header() {
         <div className="hidden md:block">
           <Link href="/auth/signin">
             <RainbowButton type="submit" className="ml-5 mr-2 py-0 text-sm h-8 px-3">
-              SignIn
+              Sign In
             </RainbowButton>
           </Link>
         </div>
