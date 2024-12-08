@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import { 
   BpmnPropertiesPanelModule, 
@@ -19,25 +19,6 @@ export const useBpmnModeler = ({
   const [modeler, setModeler] = useState<BpmnModeler | null>(null);
   const containerRef = useRef<HTMLElement | null>(null);
   const propertiesPanelRef = useRef<HTMLElement | null>(null);
-
-  const defaultDiagramXML = `
-    <?xml version="1.0" encoding="UTF-8"?>
-    <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                      xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                      xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
-                      xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                      xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-                      xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"
-                      id="sample-diagram"
-                      targetNamespace="http://bpmn.io/schema/bpmn">
-      <bpmn2:process id="Process_1" isExecutable="false">
-      </bpmn2:process>
-      <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
-        </bpmndi:BPMNPlane>
-      </bpmndi:BPMNDiagram>
-    </bpmn2:definitions>
-  `;
 
   useBpmnTheme(modeler);
 
@@ -68,36 +49,40 @@ export const useBpmnModeler = ({
       }
     });
 
-    // Initialize with default or provided XML
-    const xmlToLoad = diagramXML || defaultDiagramXML;
-    bpmnModeler.importXML(xmlToLoad)
-      .then(() => {
-        const canvas = bpmnModeler.get('canvas') as { zoom: (type: string) => void };
-        canvas.zoom('fit-viewport');   
-        onImport?.();
-      })
-      .catch((err) => {
-        onError?.(err as Error);
-      });
-    // if (diagramXML) {
-    //   bpmnModeler.importXML(diagramXML)
-    //     .then(() => {
-    //       const canvas = bpmnModeler.get('canvas') as { zoom: (type: string) => void };
-    //       canvas.zoom('fit-viewport');
-    //       onImport?.();
-    //     })
-    //     .catch((err) => {
-    //       onError?.(err as Error);
-    //     });
-    // }
-
     setModeler(bpmnModeler);
 
     return () => {
       bpmnModeler.destroy();
     };
-  }, [containerId, height, width, diagramXML]);
+  }, [containerId, propertiesPanelId, height, width]);
 
+  useEffect(() => {
+  if (diagramXML && modeler) {
+    importXML(diagramXML);
+  } else {
+    const defaultDiagramXML = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+              xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
+              xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+              xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+              xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"
+              id="sample-diagram"
+              targetNamespace="http://bpmn.io/schema/bpmn">
+      <bpmn:process id="Process_1" isExecutable="false">
+      </bpmn:process>
+      <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+        </bpmndi:BPMNPlane>
+      </bpmndi:BPMNDiagram>
+      </bpmn:definitions>
+    `;
+    importXML(defaultDiagramXML);
+  }
+  }, [diagramXML, modeler]);
+
+  // Import XML
   const importXML = async (xml: string) => {
     if (!modeler) return;
 
@@ -111,6 +96,7 @@ export const useBpmnModeler = ({
     }
   };
 
+  // Export XML
   const exportXML = async (): Promise<string> => {
     if (!modeler) return '';
 
@@ -123,6 +109,7 @@ export const useBpmnModeler = ({
     }
   };
 
+  // Export SVG
   const exportSVG = async (): Promise<string> => {
     if (!modeler) return '';
 
