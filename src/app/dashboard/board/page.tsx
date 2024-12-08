@@ -1,23 +1,27 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BreadcrumbsHeader from '../(components)/breadcrumbs-header'
 import BpmnModelerComponent from './(components)/bpmn-modeler-component';
 import { AlertCircle, Download, Cog } from 'lucide-react';
 import { apiWrapper } from '@/lib/utils';
+import { nanoid } from 'nanoid';
 
+export default function Text2BPMNPage() {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [prompt, setPrompt] = useState<string>('');
+  const [xml, setXml] = useState<string>('');
+  const [error, setError] = useState<string | null>("error is here ");
 
-interface GenerateResponse {
-  pipeFlowImage: string;
-  pipeFlowText: string;
-}
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 2000);
 
-export default function BoardPage() {
-  const [loading, setLoading] = useState(false);
-  const [prompt, setPrompt] = useState('');
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [flowText, setFlowText] = useState('');
-  const [error, setError] = useState<string | null>(null);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleError = (error: Error) => {
     console.error('BPMN Error:', error);
@@ -40,28 +44,18 @@ export default function BoardPage() {
     try {
       const response = await apiWrapper(`generate/`, 'POST', { prompt });
 
-      const data: GenerateResponse = response;
-      setGeneratedImage(data.pipeFlowImage);
-      setFlowText(data.pipeFlowText);
+      if (!response?.bpmn_xml) throw new Error ("Invalid response!")
+      setXml(response.bpmn_xml);
     } catch (err) {
       handleError(err as Error);
     } finally {
       setLoading(false);
     }
   };
-
-  const handleSave = () => {
-    if (generatedImage) {
-      const link = document.createElement('a');
-      link.download = 'bpmn-diagram.png';
-      link.href = `data:image/png;base64,${generatedImage}`;
-      link.click();
-    }
-  };
   
   return (
     <>
-      <BreadcrumbsHeader/>
+      <BreadcrumbsHeader href='/dashboard' current='Text2Bpmn' parent='Playground'/>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         {/* Input Section */}
         <div className="rounded-xl bg-card p-6 shadow-sm">
@@ -86,15 +80,6 @@ export default function BoardPage() {
                 ) : null}
                 Generate
               </button>
-              {generatedImage && (
-                <button
-                  onClick={handleSave}
-                  className="inline-flex items-center rounded-md  bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Save Image
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -110,7 +95,7 @@ export default function BoardPage() {
         )}
 
         {/* Output Section */}
-        <div className="rounded-xl bg-card p-6 shadow-sm">
+        {/* <div className="rounded-xl bg-card p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">Output</h2>
           {generatedImage ? (
             <img
@@ -125,7 +110,7 @@ export default function BoardPage() {
               </p>
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* BPMN Modeler */}
         {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
