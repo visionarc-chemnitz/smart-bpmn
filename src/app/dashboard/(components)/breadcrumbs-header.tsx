@@ -12,7 +12,13 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useToggleButton } from "@/hooks/use-toggle-button";
 
-export default function BreadcrumbsHeader() {
+interface BreadcrumbsHeaderProps {
+  href: string;
+  current: string;
+  parent: string;
+}
+
+export default function BreadcrumbsHeader( { href, current, parent} : BreadcrumbsHeaderProps) {
 
   const { toggleButton } = useToggleButton();
 
@@ -21,19 +27,21 @@ export default function BreadcrumbsHeader() {
       <div className="flex items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="#">
-                Building Your Application
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden md:block" />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        {parent && current && href && (
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href={href}>
+                  {parent}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{current}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        )}
       </div>
       <div className="flex-1" />
       <div className="flex items-center gap-2 px-4">

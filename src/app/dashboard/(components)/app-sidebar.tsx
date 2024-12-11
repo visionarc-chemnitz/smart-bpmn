@@ -63,8 +63,8 @@ const data = {
           url: "/dashboard/text2bpmn",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "Image2BPMN",
+          url: "/dashboard/image2bpmn",
         },
         {
           title: "Settings",
