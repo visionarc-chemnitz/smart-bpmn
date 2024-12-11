@@ -32,3 +32,12 @@ export interface BpmnModelerHookResult {
   exportXML: () => Promise<string>;
   exportSVG: () => Promise<string>;
 }
+
+
+// Types for Upload Section
+export interface UploadSectionProps {
+  onFileSelect: (file: File) => void;
+  onDrop: (e: React.DragEvent) => void;
+  selectedFile: File | null;
+  isLoading: boolean;
+}

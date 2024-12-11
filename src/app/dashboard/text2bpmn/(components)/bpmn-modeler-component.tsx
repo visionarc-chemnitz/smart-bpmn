@@ -1,14 +1,16 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useBpmnModeler } from '@/hooks/use-bpmn-modeler';
 import { BpmnModelerProps } from '@/types/board/board-types';
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/assets/properties-panel.css';
+import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 
 
 export const BpmnModelerComponent = (props: BpmnModelerProps) => {
   const { containerId, propertiesPanelId, diagramXML, onError, onImport, height, width } = props;
+  const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
   const { modeler, importXML, exportXML, exportSVG } = useBpmnModeler({
     containerId,
     propertiesPanelId,
@@ -69,16 +71,16 @@ export const BpmnModelerComponent = (props: BpmnModelerProps) => {
   };
 
   return (
-    <div className="flex w-full h-full">
+    <div className="flex w-full h-full overflow-hidden">
       {/* Main BPMN container */}
-      <div className="relative flex-1">
+      <div className="relative flex-1 min-w-0">
       <div 
         id={containerId} 
         className="w-full h-full"
         style={{ height: height || '100%', width: width || '100%'}}
       />
       {/* Sticky buttons container */}
-      <div className="absolute bottom-4 left-4 flex gap-2">
+      <div className="absolute bottom-4 left-4 flex flex-wrap gap-2 max-w-[calc(100%-2rem)]">
         <input
         type="file"
         ref={fileInputRef}
@@ -88,30 +90,45 @@ export const BpmnModelerComponent = (props: BpmnModelerProps) => {
         />
         <button
         onClick={() => fileInputRef.current?.click()}
-        className="px-4 py-2 text-sm font-medium text-white bg-gray-500 rounded-md hover:bg-blue-700"
+        className="px-3 py-2 text-xs sm:text-sm font-medium text-white bg-gray-500 rounded-md hover:bg-blue-700 whitespace-nowrap"
         >
         Import BPMN
         </button>
         <button
         onClick={handleExportXML}
-        className="px-4 py-2 text-sm font-medium text-white bg-gray-500 rounded-md hover:bg-blue-700"
+        className="px-3 py-2 text-xs sm:text-sm font-medium text-white bg-gray-500 rounded-md hover:bg-blue-700 whitespace-nowrap"
         >
         Export BPMN
         </button>
         <button
         onClick={handleExportSVG}
-        className="px-4 py-2 text-sm font-medium text-white bg-gray-500 rounded-md hover:bg-blue-700"
+        className="px-3 py-2 text-xs sm:text-sm font-medium text-white bg-gray-500 rounded-md hover:bg-blue-700 whitespace-nowrap"
         >
         Export SVG
         </button>
       </div>
       </div>
 
-      {/* Properties panel container */}
+      {/* Properties panel container with slide animation */}
+      <div className="relative bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 shadow-lg">
+      <button
+        onClick={() => setIsPanelOpen(!isPanelOpen)}
+        className="absolute -left-8 sm:-left-9 top-0 p-1.5 sm:p-2 bg-white dark:bg-gray-800 
+        text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700
+        rounded-l-lg shadow-md transition-colors duration-200 border border-gray-200 
+        dark:border-gray-700"
+      >
+        {isPanelOpen ? <PanelRightClose size={20} /> : <PanelRightOpen size={20}  />}
+      </button>
       <div 
-      id={propertiesPanelId} 
-      className="w-[300px] h-full border-l border-gray-200"
+        id={propertiesPanelId} 
+        className={`transition-all duration-300 ease-in-out overflow-hidden
+        ${isPanelOpen ? 'w-[280px] sm:w-[350px]' : 'w-0'}`}
+        style={{
+        boxShadow: isPanelOpen ? 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)' : 'none'
+        }}
       />
+      </div>
     </div>
   );
 };
