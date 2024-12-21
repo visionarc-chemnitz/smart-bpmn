@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from groq import Groq
+# from groq import Groq
 import os
 import base64
 from io import BytesIO
@@ -10,6 +10,7 @@ from mdextractor import extract_md_blocks
 from pydantic import BaseModel
 from processpiper.text2diagram import render
 from dotenv import load_dotenv
+from langchain_groq import ChatGroq
 
 load_dotenv()
 
@@ -202,7 +203,7 @@ BPMN_SYNTAX_DOC_VALIDATION = """
 Do a crawl of the site https://www.omg.org/spec/BPMN/2.0/ and underlying documents and then load how to write valid BPMN2.0 xml into your memory
 
 Do not use placeholders, generate complete BPMN XML.
-Adjust x, y coordinates, height and width of BPMN elements to fit the diagram.
+Adjust x, y coordinates, hight and width of BPMN elements to fit the diagram.
 flow elements must be children of pools/participants.
 first element in bpmn plane should always be the pool/participant.
 """
@@ -212,13 +213,13 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 class Prompt(BaseModel):
     prompt: str
 
-def generate_diagram(input_syntax):
-    generated_image = render(input_syntax)
-    # Convert the image to a base64 encoded string
-    buffered = BytesIO()
-    generated_image.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue())
-    return img_str.decode("utf-8")
+# def generate_diagram(input_syntax):
+#     generated_image = render(input_syntax)
+#     # Convert the image to a base64 encoded string
+#     buffered = BytesIO()
+#     generated_image.save(buffered, format="PNG")
+#     img_str = base64.b64encode(buffered.getvalue())
+#     return img_str.decode("utf-8")
 
 @app.get("/")
 def check_status():
@@ -232,32 +233,44 @@ async def generate_bpmn(prompt: Prompt):
     if not GROQ_API_KEY:
       raise HTTPException(status_code=404, detail="GROQ_API_KEY not found in environment variables")
 
-    client = Groq(api_key=GROQ_API_KEY)
-    
-    completion = client.chat.completions.create(
-      model="llama3-70b-8192",
-      messages=[
-          {
-              "role": "system",
-              "content": "you are business process flow generator using the following piperflow text\n\n" + PIPERFLOW_SYNTAX_DOC
-          },
-          {
-              "role": "user",
-              "content": "generate the piperflow text for the below scenario\n\n" + prompt.prompt
-          }
-      ],
-      temperature=0,
-      top_p=1,
-      stream=False,
-      stop=None,
+    # Initialize LangChain's ChatGroq model
+    llm = ChatGroq(
+        groq_api_key=GROQ_API_KEY,
+        model="llama3-70b-8192"
+    )  # Use the appropriate model
+
+    # Step 1: Generate BPMN process description
+    process_description_prompt = f"Describe a BPMN process for the following scenario:\n\n{prompt.prompt}\n\n" + BPMN_SYNTAX_DOC_PRE_PROCESSOR
+
+    # Generate the process description
+    process_description = await llm.ainvoke([process_description_prompt])
+    process_description = process_description.content
+
+    # Step 2: Generate BPMN XML using the process description
+    bpmn_xml_prompt = f"Generate a BPMN 2.0 XML diagram for the following process description:\n\n{process_description}\n\n" + BPMN_SYNTAX_DOC
+
+    # Generate the BPMN XML
+    bpmn_xml_ = await llm.ainvoke([bpmn_xml_prompt])
+    bpmn_xml_ = bpmn_xml_.content
+
+    # Step 3: Validate BPMN XML
+    bpmn_xml_validate = f"Validate and update if required following BPMN 2.0 XML :\n\n{bpmn_xml_}\n\n" + BPMN_SYNTAX_DOC_VALIDATION
+
+    # Generate the BPMN XML
+    bpmn_xml = await llm.ainvoke([bpmn_xml_validate])
+    bpmn_xml = bpmn_xml.content
+
+    # Extract just the XML content (in case there's any additional text)
+    xml_start = bpmn_xml.find('<?xml')
+    xml_end = bpmn_xml.find('</bpmn:definitions>') + len('</bpmn:definitions>')
+    if xml_start >= 0 and xml_end >= 0:
+        bpmn_xml = bpmn_xml[xml_start:xml_end]
+    else:
+        raise HTTPException(status_code=500, detail="Failed to extract BPMN XML from the response")
+
+    return JSONResponse(
+        content={ "status_code": status.HTTP_200_OK, "bpmn_xml": bpmn_xml }
     )
-
-    # print(completion.choices[0].message.content or "", end="")
-    
-    piperFlowText = extract_md_blocks(completion.choices[0].message.content)[0]
-    # print(piperFlowText)
-
-    return {"pipeFlowImage": generate_diagram(piperFlowText), "pipeFlowText": piperFlowText}
 
   except Exception as e:
       # Log the error

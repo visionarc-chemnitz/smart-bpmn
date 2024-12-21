@@ -113,16 +113,17 @@ export default function Text2BPMNPage() {
         </div> */}
 
         {/* BPMN Modeler */}
-        {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
+        <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
           <BpmnModelerComponent
             containerId="bpmn-modeler"
             propertiesPanelId="properties-panel"
+            diagramXML={xml}
             onError={handleError}
             onImport={handleImport}
             height="100%"
             width="100%"
           />
-        </div> */}
+        </div>
       </div>
     </>
   )

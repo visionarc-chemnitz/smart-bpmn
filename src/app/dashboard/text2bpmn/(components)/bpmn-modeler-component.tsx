@@ -21,6 +21,12 @@ export const BpmnModelerComponent = (props: BpmnModelerProps) => {
     width,
   });
 
+  useEffect(() => {
+    if (diagramXML) {
+      importXML(diagramXML);
+    }
+  }, [diagramXML, importXML]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
