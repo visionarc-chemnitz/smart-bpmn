@@ -2,13 +2,11 @@
 import { useState } from "react";
 import { useToggleButton } from "@/hooks/use-toggle-button";
 import OrganizationModal from "@/hooks/organization-modal";
-//import {TeamSwitcher} from "@/components/team-switcher";
 
 const NewTeam = () => {
   // Add state management
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [organizationName, setOrganizationName] = useState("");
-  const [teamSize, setTeamSize] = useState<number>(0);
   const [teamMemberEmails, setTeamMemberEmails] = useState<string[]>([]);
   const [emailInput, setEmailInput] = useState("");
   const { toggleButton, logoSrc } = useToggleButton()
@@ -26,7 +24,7 @@ const NewTeam = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("New Team Data:", { organizationName, teamSize, teamMemberEmails });
+    console.log("New Team Data:", { organizationName, teamMemberEmails });
     // Implement your form submission logic here
   };
 

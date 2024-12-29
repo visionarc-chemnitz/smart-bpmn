@@ -32,7 +32,6 @@ export function TeamSwitcher({
 
   // State to manage the team name, team size, and email list
   const [organizationName, setOrganizationName] = React.useState("")
-  const [teamSize, setTeamSize] = React.useState<number | null>(null)
   const [teamMemberEmails, setTeamMemberEmails] = React.useState<string[]>([])
   const [emailInput, setEmailInput] = React.useState("")
 
@@ -53,7 +52,7 @@ export function TeamSwitcher({
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("New Team Data:", { organizationName, teamSize, teamMemberEmails })
+    console.log("New Team Data:", { organizationName, teamMemberEmails })
     // Implement further action, like making an API call or redirecting after form submission
   }
 
