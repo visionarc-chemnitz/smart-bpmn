@@ -1,5 +1,5 @@
-import * as React from "react"
-import { ChevronsUpDown, Plus } from "lucide-react"
+import * as React from "react";
+import { ChevronsUpDown, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,53 +8,43 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-import OrganizationModal from "@/hooks/organization-modal";
+import { useOrganizationModal } from "@/hooks/use-organization-modal";
+import OrganizationModal from "@/app/dashboard/organization/(components)/organization-modal";
 
 export function TeamSwitcher({
   organizations,
 }: {
   organizations: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
+    name: string;
+    logo: React.ElementType;
+    plan: string;
+  }[];
 }) {
-  const { isMobile } = useSidebar()
-  const [activeOrganization, setActiveOrganization] = React.useState(organizations[0])
+  const { isMobile } = useSidebar();
+  const [activeOrganization, setActiveOrganization] = React.useState(organizations[0]);
 
-  // State to manage the team name, team size, and email list
-  const [organizationName, setOrganizationName] = React.useState("")
-  const [teamMemberEmails, setTeamMemberEmails] = React.useState<string[]>([])
-  const [emailInput, setEmailInput] = React.useState("")
-
-  // State for modal visibility
-  const [isModalOpen, setIsModalOpen] = React.useState(false)
-
-  const handleAddEmail = () => {
-    if (emailInput.trim() !== "" && !teamMemberEmails.includes(emailInput.trim())) {
-      setTeamMemberEmails([...teamMemberEmails, emailInput.trim()])
-      setEmailInput("")
-    }
-  }
-
-  const handleRemoveEmail = (email: string) => {
-    setTeamMemberEmails(teamMemberEmails.filter((e) => e !== email))
-  }
-
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("New Team Data:", { organizationName, teamMemberEmails })
-    // Implement further action, like making an API call or redirecting after form submission
-  }
+  // Use the useOrganizationModal hook
+  const {
+    isOpen,
+    openModal,
+    closeModal,
+    organizationName,
+    setOrganizationName,
+    emailInput,
+    setEmailInput,
+    teamMemberEmails,
+    handleAddEmail,
+    handleRemoveEmail,
+    handleSubmit,
+  } = useOrganizationModal(); // Using the hook
 
   return (
     <SidebarMenu>
@@ -103,7 +93,7 @@ export function TeamSwitcher({
             <DropdownMenuItem asChild className="gap-2 p-2">
               <div
                 className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150"
-                onClick={() => setIsModalOpen(true)} // Open the modal
+                onClick={openModal} // Open the modal using the hook
               >
                 <Plus className="size-4 text-gray-500 dark:text-gray-300 transition-colors duration-200" />
                 <div className="font-medium text-muted-foreground dark:text-muted-foreground-dark">
@@ -115,19 +105,19 @@ export function TeamSwitcher({
         </DropdownMenu>
       </SidebarMenuItem>
 
-  
+      {/* Organization Modal */}
       <OrganizationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        handleSubmit={handleSubmit}
-        organizationName={organizationName}
-        setOrganizationName={setOrganizationName}
-        emailInput={emailInput}
-        setEmailInput={setEmailInput}
-        teamMemberEmails={teamMemberEmails}
-        handleAddEmail={handleAddEmail}
-        handleRemoveEmail={handleRemoveEmail}
+        isOpen={isOpen} // Using the isOpen from the hook
+        onClose={closeModal} // Using the closeModal from the hook
+        handleSubmit={handleSubmit} // Using the handleSubmit from the hook
+        organizationName={organizationName} // Using the organizationName from the hook
+        setOrganizationName={setOrganizationName} // Using the setOrganizationName from the hook
+        emailInput={emailInput} // Using the emailInput from the hook
+        setEmailInput={setEmailInput} // Using the setEmailInput from the hook
+        teamMemberEmails={teamMemberEmails} // Using the teamMemberEmails from the hook
+        handleAddEmail={handleAddEmail} // Using handleAddEmail from the hook
+        handleRemoveEmail={handleRemoveEmail} // Using handleRemoveEmail from the hook
       />
     </SidebarMenu>
-  )
+  );
 }

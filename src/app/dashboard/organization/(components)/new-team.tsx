@@ -1,40 +1,33 @@
 'use client';
-import { useState } from "react";
+
+import { useOrganizationModal } from "@/hooks/use-organization-modal";
 import { useToggleButton } from "@/hooks/use-toggle-button";
-import OrganizationModal from "@/hooks/organization-modal";
+import OrganizationModal from "@/app/dashboard/organization/(components)/organization-modal";
 
 const NewTeam = () => {
-  // Add state management
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [organizationName, setOrganizationName] = useState("");
-  const [teamMemberEmails, setTeamMemberEmails] = useState<string[]>([]);
-  const [emailInput, setEmailInput] = useState("");
-  const { toggleButton, logoSrc } = useToggleButton()
+  // Use the hook to manage the modal's state and logic
+  const {
+    isOpen,
+    openModal,
+    closeModal,
+    organizationName,
+    setOrganizationName,
+    emailInput,
+    setEmailInput,
+    teamMemberEmails,
+    handleAddEmail,
+    handleRemoveEmail,
+    handleSubmit,
+  } = useOrganizationModal();
 
-  const handleAddEmail = () => {
-    if (emailInput.trim() !== "" && !teamMemberEmails.includes(emailInput.trim())) {
-      setTeamMemberEmails([...teamMemberEmails, emailInput.trim()]);
-      setEmailInput("");
-    }
-  };
-
-  const handleRemoveEmail = (email: string) => {
-    setTeamMemberEmails(teamMemberEmails.filter((e) => e !== email));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("New Team Data:", { organizationName, teamMemberEmails });
-    // Implement your form submission logic here
-  };
+  const { toggleButton, logoSrc } = useToggleButton(); // Assuming you still need this for the toggle button
 
   return (
-    
     <>
       <div className="absolute top-4 right-4">
         {toggleButton()}
       </div>
-      
+
       <div className="flex-1 min-h-[calc(100vh-80px)] p-6">
         <div className="h-full flex flex-col items-center justify-center">
           <img
@@ -58,7 +51,7 @@ const NewTeam = () => {
           
           <div className="mt-6">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={openModal} // Use openModal from the hook
               className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-md px-8"
               type="button"
             >
@@ -68,11 +61,10 @@ const NewTeam = () => {
         </div>
       </div>
 
-      {/* Modal */}
-      
+      {/* Organization Modal */}
       <OrganizationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isOpen}
+        onClose={closeModal} // Use closeModal from the hook
         handleSubmit={handleSubmit}
         organizationName={organizationName}
         setOrganizationName={setOrganizationName}
