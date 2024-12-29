@@ -1,8 +1,7 @@
 'use client';
 import { useState } from "react";
-import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useToggleButton } from "@/hooks/use-toggle-button";
-import OrganizationModal from './new-organization';
+import OrganizationModal from "@/hooks/organization-modal";
 //import {TeamSwitcher} from "@/components/team-switcher";
 
 const NewTeam = () => {
@@ -79,8 +78,6 @@ const NewTeam = () => {
         handleSubmit={handleSubmit}
         organizationName={organizationName}
         setOrganizationName={setOrganizationName}
-        teamSize={teamSize}
-        setTeamSize={setTeamSize}
         emailInput={emailInput}
         setEmailInput={setEmailInput}
         teamMemberEmails={teamMemberEmails}

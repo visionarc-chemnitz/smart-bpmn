@@ -1,4 +1,5 @@
 import React from 'react';
+import { RainbowButton } from "@/components/ui/rainbow-button";
 
 interface OrganizationModalProps {
   isOpen: boolean;
@@ -6,8 +7,6 @@ interface OrganizationModalProps {
   handleSubmit: (e: React.FormEvent) => void;
   organizationName: string;
   setOrganizationName: (name: string) => void;
-  teamSize: number;
-  setTeamSize: (size: number) => void;
   emailInput: string;
   setEmailInput: (email: string) => void;
   teamMemberEmails: string[];
@@ -21,8 +20,6 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
   handleSubmit,
   organizationName,
   setOrganizationName,
-  teamSize,
-  setTeamSize,
   emailInput,
   setEmailInput,
   teamMemberEmails,
@@ -49,16 +46,6 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
             onChange={(e) => setOrganizationName(e.target.value)}
           />
 
-          {/* Team Size Input */}
-          <input
-            type="number"
-            placeholder="Team Size"
-            className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
-            name="teamSize"
-            value={teamSize}
-            onChange={(e) => setTeamSize(Number(e.target.value))}
-          />
-
           {/* Team Member Emails */}
           <div className="flex items-center space-x-2">
             <input
@@ -68,13 +55,13 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
             />
-            <button
+            <RainbowButton
               type="button"
               className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black"
               onClick={handleAddEmail}
             >
               +
-            </button>
+            </RainbowButton>
           </div>
 
           {/* Display Added Emails */}
@@ -85,13 +72,13 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
                 {teamMemberEmails.map((email) => (
                   <li key={email} className="flex items-center justify-between text-sm dark:text-gray-200">
                     <span>{email}</span>
-                    <button
+                    <RainbowButton
                       type="button"
                       className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black"
                       onClick={() => handleRemoveEmail(email)}
                     >
                       -
-                    </button>
+                    </RainbowButton>
                   </li>
                 ))}
               </ul>
@@ -99,12 +86,12 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
           )}
 
           {/* Submit Button */}
-          <button
+          <RainbowButton
             type="submit"
             className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black shadow-lg"
           >
             Create Organization
-          </button>
+          </RainbowButton>
         </form>
 
         {/* Close Button */}
