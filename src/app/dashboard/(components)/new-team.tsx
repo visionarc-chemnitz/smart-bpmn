@@ -13,6 +13,10 @@ const NewTeam = () => {
     organizationName,
     setOrganizationName,
     handleSubmit,
+    ownerName,
+    setOwnerName,
+    ownerEmail,
+    setOwnerEmail,
   } = useOrganizationModal();
 
   const { toggleButton, logoSrc } = useToggleButton();
@@ -58,6 +62,10 @@ const NewTeam = () => {
         handleSubmit={handleSubmit}
         organizationName={organizationName}
         setOrganizationName={setOrganizationName}
+        ownerName={ownerName} 
+        setOwnerName={setOrganizationName}
+        ownerEmail={ownerEmail}
+        setOwnerEmail={setOrganizationName}
       />
     </>
   );

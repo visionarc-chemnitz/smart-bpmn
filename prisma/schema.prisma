@@ -9,12 +9,13 @@ datasource db {
 }
 
 model Organization {
-  id        String   @id @default(uuid())
-  name      String
-  ownerId   String?  // To store the user ID of the organization owner
-  owner     User?    @relation("OrganizationOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  ownerName   String?
+  ownerEmail  String?
+  owner       User?    @relation("OrganizationOwner", fields: [ownerEmail], references: [email], onDelete: Cascade) // Now referring to email
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model User {

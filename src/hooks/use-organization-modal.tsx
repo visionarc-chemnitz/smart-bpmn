@@ -4,8 +4,9 @@ import { useUser } from "@/providers/user-provider" // Assuming this provides us
 export const useOrganizationModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [organizationName, setOrganizationName] = useState('');
+  const [ownerName, setOwnerName] = useState('');
+  const [ownerEmail, setOwnerEmail] = useState('');
   const user = useUser(); // Fetch the current user details
-  //alert('user: ' + user.email);
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
@@ -13,14 +14,16 @@ export const useOrganizationModal = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!user || !user.id) {
-      console.error('User is not logged in or user ID is missing');
+    // Handle case when user.id is missing but user.email is available
+    if (!user || !user.email) {
+      console.error('User is not logged in or user email is missing');
       return;
     }
 
     const requestBody = {
       organizationName: organizationName,
-      ownerId: user.id,
+      ownerName: user.name,
+      ownerEmail: user.email,
     };
     console.log('Request Body:', requestBody);
 
@@ -54,5 +57,9 @@ export const useOrganizationModal = () => {
     organizationName,
     setOrganizationName,
     handleSubmit,
+    ownerName,
+    setOwnerName,
+    ownerEmail,
+    setOwnerEmail, // Expose user email if needed in the component
   };
 };

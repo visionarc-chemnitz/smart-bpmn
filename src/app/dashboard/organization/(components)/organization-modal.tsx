@@ -8,6 +8,10 @@ interface OrganizationModalProps {
   handleSubmit: (e: React.FormEvent) => void;
   organizationName: string;
   setOrganizationName: (name: string) => void;
+  ownerName: string;
+  setOwnerName: (name: string) => void;
+  ownerEmail: string;
+  setOwnerEmail: (name: string) => void;
 }
 
 const OrganizationModal: React.FC<OrganizationModalProps> = ({
@@ -16,6 +20,10 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
   handleSubmit,
   organizationName,
   setOrganizationName,
+  ownerName,
+  setOwnerName,
+  ownerEmail,
+  setOwnerEmail,
 }) => {
   const user = useUser();
   if (!isOpen) return null;
@@ -39,16 +47,16 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
 
           <input
             type="text"
-            placeholder="User Name"
+            placeholder="Owner Name"
             className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
-            name="userName"
+            name="ownerId"
             value={user?.name || ''}
             readOnly
           />
 
           <input
             type="text"
-            placeholder="User Email"
+            placeholder="Owner Email"
             className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
             name="userEmail"
             value={user?.email || ''}
