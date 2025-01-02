@@ -1,5 +1,6 @@
+import { RainbowButton } from '@/components/ui/rainbow-button';
 import React from 'react';
-import { RainbowButton } from "@/components/ui/rainbow-button";
+import { useUser } from "@/providers/user-provider";
 
 interface OrganizationModalProps {
   isOpen: boolean;
@@ -7,11 +8,6 @@ interface OrganizationModalProps {
   handleSubmit: (e: React.FormEvent) => void;
   organizationName: string;
   setOrganizationName: (name: string) => void;
-  emailInput: string;
-  setEmailInput: (email: string) => void;
-  teamMemberEmails: string[];
-  handleAddEmail: () => void;
-  handleRemoveEmail: (email: string) => void;
 }
 
 const OrganizationModal: React.FC<OrganizationModalProps> = ({
@@ -20,12 +16,8 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
   handleSubmit,
   organizationName,
   setOrganizationName,
-  emailInput,
-  setEmailInput,
-  teamMemberEmails,
-  handleAddEmail,
-  handleRemoveEmail,
 }) => {
+  const user = useUser();
   if (!isOpen) return null;
 
   return (
@@ -44,41 +36,25 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
             value={organizationName}
             onChange={(e) => setOrganizationName(e.target.value)}
           />
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              placeholder="Enter team member email"
-              className="flex-1 p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
-              value={emailInput}
-              onChange={(e) => setEmailInput(e.target.value)}
-            />
-            <RainbowButton
-              type="button"
-              className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black"
-              onClick={handleAddEmail}
-            >
-              +
-            </RainbowButton>
-          </div>
-          {teamMemberEmails.length > 0 && (
-            <div className="mt-2">
-              <h6 className="font-semibold dark:text-gray-300">Added Emails</h6>
-              <ul className="space-y-2">
-                {teamMemberEmails.map((email) => (
-                  <li key={email} className="flex items-center justify-between text-sm dark:text-gray-200">
-                    <span>{email}</span>
-                    <RainbowButton
-                      type="button"
-                      className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black"
-                      onClick={() => handleRemoveEmail(email)}
-                    >
-                      -
-                    </RainbowButton>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+
+          <input
+            type="text"
+            placeholder="User Name"
+            className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
+            name="userName"
+            value={user?.name || ''}
+            readOnly
+          />
+
+          <input
+            type="text"
+            placeholder="User Email"
+            className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
+            name="userEmail"
+            value={user?.email || ''}
+            readOnly
+          />
+
           <RainbowButton
             type="submit"
             className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black shadow-lg"

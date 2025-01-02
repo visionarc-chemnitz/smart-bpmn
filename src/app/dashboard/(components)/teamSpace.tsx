@@ -1,12 +1,9 @@
 'use client'
-
-import BreadcrumbsHeader from '../../(components)/breadcrumbs-header'
 import { FaFileAlt, FaImage, FaRobot } from 'react-icons/fa'
 
 export default function TeamSpacePage() {
     return (
         <>
-            <BreadcrumbsHeader href='/dashboard' current='Playground' parent='/' />
             <div className="flex flex-1 flex-col gap-6 p-6 pt-4 bg-gray-200 dark:bg-gray-800 rounded-xl">
                 {/* Section Title */}
                 <h2 className="text-3xl font-extrabold text-gray-800 dark:text-white mb-6 text-center">
