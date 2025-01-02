@@ -1,40 +1,50 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react'
 
 export const useOrganizationModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [organizationName, setOrganizationName] = useState('');
-  const [emailInput, setEmailInput] = useState('');
-  const [teamMemberEmails, setTeamMemberEmails] = useState<string[]>([]);
+  const [isOpen, setIsOpen] = useState(false)
+  const [organizationName, setOrganizationName] = useState("")
+  const [emailInput, setEmailInput] = useState("")
+  const [teamMemberEmails, setTeamMemberEmails] = useState<string[]>([])
 
-  // Open/Close modal
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => setIsOpen(false);
+  const openModal = () => setIsOpen(true)
+  const closeModal = () => setIsOpen(false)
 
-  // Handle email addition
-  const handleAddEmail = useCallback(() => {
-    if (emailInput && !teamMemberEmails.includes(emailInput)) {
-      setTeamMemberEmails((prev) => [...prev, emailInput]);
-      setEmailInput('');
+  const handleAddEmail = () => {
+    if (emailInput.trim() !== "" && !teamMemberEmails.includes(emailInput.trim())) {
+      setTeamMemberEmails([...teamMemberEmails, emailInput.trim()])
+      setEmailInput("")
     }
-  }, [emailInput, teamMemberEmails]);
+  }
 
-  // Handle email removal
-  const handleRemoveEmail = useCallback(
-    (email: string) => {
-      setTeamMemberEmails((prev) => prev.filter((e) => e !== email));
-    },
-    [teamMemberEmails]
-  );
+  const handleRemoveEmail = (email: string) => {
+    setTeamMemberEmails(teamMemberEmails.filter((e) => e !== email))
+  }
 
-  // Form submission
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      console.log('Organization:', organizationName, 'Team Members:', teamMemberEmails);
-      closeModal(); // Close modal after submission
-    },
-    [organizationName, teamMemberEmails]
-  );
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch("/api/organization-action", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: organizationName,
+          teamMemberEmails,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Error creating organization")
+      }
+
+      const data = await response.json()
+      console.log("Organization created:", data)
+      closeModal()
+    } catch (error) {
+      console.error("Error creating organization:", error)
+    }
+  }
 
   return {
     isOpen,
@@ -48,5 +58,5 @@ export const useOrganizationModal = () => {
     handleAddEmail,
     handleRemoveEmail,
     handleSubmit,
-  };
-};
+  }
+}

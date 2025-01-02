@@ -1,5 +1,5 @@
 import React from 'react';
-import { RainbowButton } from '@/components/ui/rainbow-button';
+import { RainbowButton } from "@/components/ui/rainbow-button";
 
 interface OrganizationModalProps {
   isOpen: boolean;
@@ -36,16 +36,14 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
           Fill out the details to create a new organization.
         </p>
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {/* Organization Name Input */}
           <input
             type="text"
             placeholder="Organization Name"
             className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
+            name="organizationName"
             value={organizationName}
             onChange={(e) => setOrganizationName(e.target.value)}
           />
-
-          {/* Team Member Emails */}
           <div className="flex items-center space-x-2">
             <input
               type="text"
@@ -56,32 +54,31 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
             />
             <RainbowButton
               type="button"
-              onClick={handleAddEmail}
               className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black"
+              onClick={handleAddEmail}
             >
               +
             </RainbowButton>
           </div>
-
-          {/* Display Added Emails */}
           {teamMemberEmails.length > 0 && (
-            <ul className="mt-2 space-y-2">
-              {teamMemberEmails.map((email) => (
-                <li key={email} className="flex items-center justify-between text-sm dark:text-gray-200">
-                  <span>{email}</span>
-                  <RainbowButton
-                    type="button"
-                    onClick={() => handleRemoveEmail(email)}
-                    className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black"
-                  >
-                    -
-                  </RainbowButton>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-2">
+              <h6 className="font-semibold dark:text-gray-300">Added Emails</h6>
+              <ul className="space-y-2">
+                {teamMemberEmails.map((email) => (
+                  <li key={email} className="flex items-center justify-between text-sm dark:text-gray-200">
+                    <span>{email}</span>
+                    <RainbowButton
+                      type="button"
+                      className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black"
+                      onClick={() => handleRemoveEmail(email)}
+                    >
+                      -
+                    </RainbowButton>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
-
-          {/* Submit Button */}
           <RainbowButton
             type="submit"
             className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-black shadow-lg"
@@ -89,14 +86,12 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
             Create Organization
           </RainbowButton>
         </form>
-
-        {/* Close Button */}
         <button
-          onClick={onClose}
           className="absolute top-2 right-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+          onClick={onClose}
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
