@@ -46,7 +46,7 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
           />
 
           <input
-            type="text"
+            type="hidden"
             placeholder="Owner Name"
             className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
             name="ownerId"
@@ -55,7 +55,7 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
           />
 
           <input
-            type="text"
+            type="hidden"
             placeholder="Owner Email"
             className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
             name="userEmail"

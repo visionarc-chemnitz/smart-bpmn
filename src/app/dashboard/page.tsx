@@ -1,25 +1,54 @@
-"use client";
+'use client';
 
-import BreadcrumbsHeader from './(components)/breadcrumbs-header'
+import { useEffect, useState } from 'react';
+import BreadcrumbsHeader from './(components)/breadcrumbs-header';
 import NewTeam from './(components)/new-team';
-import { TeamFileList } from './(components)/teamFileList';
 import TeamSpacePage from './(components)/teamSpace';
+import { useUser } from "@/providers/user-provider";
 
 export default function DashBoardPage() {
+  const user = useUser();  // Get user directly here
+  const [hasOrganization, setHasOrganization] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (user && user.email) {
+      const checkUserOrganization = async () => {
+        try {
+          const response = await fetch(`/api/check-organization?email=${user.email}`);
+          const data = await response.json();
+
+          setHasOrganization(data.hasOrganization);
+        } catch (error) {
+          console.error("Error checking organization:", error);
+        } finally {
+          setLoading(false); // Stop loading once the check is done
+        }
+      };
+
+      checkUserOrganization();
+    } else {
+      setLoading(false); // Stop loading if user is not defined
+    }
+  }, [user]); // Re-run when `user` changes
+
+  if (loading) {
+    return (
+      <div>Loading...</div>  // Loading indicator until the check is completed
+    );
+  }
+
   return (
     <>
       <BreadcrumbsHeader href='/dashboard' current='Playground' parent='/' />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        {/* <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-          <div className="aspect-video rounded-xl bg-muted/50" />
-          <div className="aspect-video rounded-xl bg-muted/50" />
-          <div className="aspect-video rounded-xl bg-muted/50" />
-        </div> */}
-        <div />
-        <TeamSpacePage />
-        <TeamFileList />
-        <NewTeam />
+        {/* Conditionally render based on the user's organization status */}
+        {hasOrganization ? (
+          <TeamSpacePage />  // Render TeamSpacePage if user has an organization
+        ) : (
+          <NewTeam />  // Otherwise, show NewTeam to create a new organization
+        )}
       </div>
     </>
-  )
+  );
 }

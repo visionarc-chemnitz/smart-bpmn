@@ -1,11 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { useOrganizationModal } from "@/hooks/use-organization-modal";
 import { useToggleButton } from "@/hooks/use-toggle-button";
 import OrganizationModal from "../organization/(components)/organization-modal";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import TeamSpacePage from './teamSpace';
 
 const NewTeam = () => {
+  const [showTeamSpace, setShowTeamSpace] = useState(false);
+
   const {
     isOpen,
     openModal,
@@ -19,7 +23,9 @@ const NewTeam = () => {
     setOwnerEmail,
   } = useOrganizationModal();
 
-  const { toggleButton, logoSrc } = useToggleButton();
+  if (showTeamSpace) {
+    return <TeamSpacePage />;
+  }
 
   return (
     <>
@@ -44,7 +50,7 @@ const NewTeam = () => {
             Create an organization to get started
           </p>
 
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col space-y-4"> {/* Added flex-col and space-y-4 */}
             <RainbowButton
               onClick={openModal}
               className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-md px-8"
@@ -52,6 +58,19 @@ const NewTeam = () => {
             >
               Create Organization
             </RainbowButton>
+
+            <p className="text-muted-foreground text-sm mt-2">
+              Don't want to create an organization? Explore our features! {/* Added this line */}
+            </p>
+
+            <button
+              onClick={() => setShowTeamSpace(true)} // Set state to show TeamSpacePage
+              className="flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer"
+              type="button"
+            >
+              <span className="text-2xl animate-bounce text-white">★</span>
+              <span className="ml-2 text-md text-white font-semibold">Explore our feature</span>
+            </button>
           </div>
         </div>
       </div>
@@ -62,10 +81,10 @@ const NewTeam = () => {
         handleSubmit={handleSubmit}
         organizationName={organizationName}
         setOrganizationName={setOrganizationName}
-        ownerName={ownerName} 
-        setOwnerName={setOrganizationName}
+        ownerName={ownerName}
+        setOwnerName={setOwnerName}
         ownerEmail={ownerEmail}
-        setOwnerEmail={setOrganizationName}
+        setOwnerEmail={setOwnerEmail}
       />
     </>
   );

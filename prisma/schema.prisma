@@ -10,13 +10,14 @@ datasource db {
 
 model Organization {
   id          String   @id @default(uuid())
-  name        String
-  ownerName   String?
-  ownerEmail  String?
-  owner       User?    @relation("OrganizationOwner", fields: [ownerEmail], references: [email], onDelete: Cascade) // Now referring to email
+  name        String                       
+  ownerName   String?                              
+  ownerEmail  String?                              
+  owner       User?    @relation("OrganizationOwner", fields: [ownerEmail], references: [email], onDelete: Cascade) // Relates to User
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @updatedAt 
 }
+
 
 model User {
   id            String          @id @default(cuid())
