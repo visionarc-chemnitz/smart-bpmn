@@ -14,6 +14,8 @@ import {
   SquareTerminal,
 } from "lucide-react"
 
+import Bpmn from './bpmn-info';
+
 import { NavMain } from "./nav-main"
 import { NavProjects } from "./nav-projects"
 import { NavUser } from "./nav-user"
@@ -92,6 +94,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavProjects projects={projects} />
+        <div className="m-4">
+          <Bpmn />
+        </div>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

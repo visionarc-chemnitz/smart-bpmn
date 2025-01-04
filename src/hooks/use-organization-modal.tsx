@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useUser } from "@/providers/user-provider" // Assuming this provides user data
+import { useUser } from "@/providers/user-provider"; // Assuming this provides user data
 
 export const useOrganizationModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [organizationName, setOrganizationName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
+  const [organizations, setOrganizations] = useState([]); // State to hold organizations
   const user = useUser(); // Fetch the current user details
 
   const openModal = () => setIsOpen(true);
@@ -48,6 +49,8 @@ export const useOrganizationModal = () => {
       console.log('Organization created:', data);
       window.alert('You have created organization successfully!');
       closeModal();
+      // Update the state with the new organization
+      setOrganizations((prevOrganizations) => [...prevOrganizations, data]);
     } catch (error) {
       console.error('Error creating organization:', error);
       window.alert('An error occurred while saving the data.');
@@ -65,5 +68,6 @@ export const useOrganizationModal = () => {
     setOwnerName,
     ownerEmail,
     setOwnerEmail, // Expose user email if needed in the component
+    organizations, // Return the organizations state
   };
 };

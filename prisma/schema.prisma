@@ -37,12 +37,22 @@ model Bpmn {
   projectId         String?
   ownerName         String
   ownerEmail        String
-  createdBy         String
   isFavorite        Boolean  @default(false)
   isShared          Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now())
   project           Project? @relation(fields: [projectId], references: [id]) // this line for the relation
+  invitations       Invitation[] // Add this line to establish the back relation
+}
+
+model Invitation {
+  id        String   @id @default(uuid())
+  email     String
+  token     String
+  bpmnId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  bpmn      Bpmn     @relation(fields: [bpmnId], references: [id]) // Add this line for the relation
 }
 
 model User {
