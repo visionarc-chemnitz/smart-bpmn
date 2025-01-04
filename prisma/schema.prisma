@@ -16,8 +16,34 @@ model Organization {
   owner       User?    @relation("OrganizationOwner", fields: [ownerEmail], references: [email], onDelete: Cascade) // Relates to User
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt 
+  projects    Project[] // Add this line to establish the back relation
 }
 
+model Project {
+  id                String   @id @default(uuid())
+  name              String  
+  ownerName         String?                              
+  ownerEmail        String? 
+  organizationId    String   // the foreign key should be required
+  organization      Organization @relation(fields: [organizationId], references: [id]) // this line for the relation
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  bpmn              Bpmn[] // Add this line to establish the back relation
+}
+
+model Bpmn {
+  id                String   @id @default(uuid())
+  currentVersionId  String
+  projectId         String?
+  ownerName         String
+  ownerEmail        String
+  createdBy         String
+  isFavorite        Boolean  @default(false)
+  isShared          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  project           Project? @relation(fields: [projectId], references: [id]) // this line for the relation
+}
 
 model User {
   id            String          @id @default(cuid())
