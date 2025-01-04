@@ -4,6 +4,7 @@ import { useState, FormEvent, ChangeEvent } from "react";
 import { Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import { socialAccount } from "@/app/services/account";
 
 const ClientMagicLinkForm = () => {
   const [email, setEmail] = useState("");
@@ -34,8 +35,17 @@ const ClientMagicLinkForm = () => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const account = await socialAccount(email);
+
+    // Check if social account with same email already exists in the database
+    if (account && account.provider) {
+      setMessage(`Email already exists. Please sign in with ${account.provider} instead.`);
+      setMessageType("error");
+      return;
+    }
+
     if (isEmailValid) {
-      const res = await signIn("resend", { email, redirect: false });
+      const res = await signIn("sendgrid", { email, redirect: false });
       if (res?.error) {
         setMessage("Failed to send magic link");
         setMessageType("error");
