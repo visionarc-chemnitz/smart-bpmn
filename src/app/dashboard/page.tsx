@@ -5,7 +5,10 @@ import BreadcrumbsHeader from './(components)/breadcrumbs-header';
 import NewTeam from './(components)/new-team';
 import TeamSpacePage from './(components)/teamSpace';
 import { useUser } from "@/providers/user-provider";
+<<<<<<< Updated upstream
 import Bpmn from './(components)/bpmn-info';
+=======
+>>>>>>> Stashed changes
 
 export default function DashBoardPage() {
   const user = useUser();  // Get user directly here

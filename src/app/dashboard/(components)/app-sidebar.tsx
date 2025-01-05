@@ -94,9 +94,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavProjects projects={projects} />
+<<<<<<< Updated upstream
         <div className="m-4">
           <Bpmn />
         </div>
+=======
+>>>>>>> Stashed changes
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
