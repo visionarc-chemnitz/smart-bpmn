@@ -6,7 +6,7 @@ export const useOrganizationModal = () => {
   const [organizationName, setOrganizationName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
-  const [organizations, setOrganizations] = useState([]); // State to hold organizations
+  const [organizations, setOrganizations] = useState<any[]>([]); // State to hold organizations
   const user = useUser(); // Fetch the current user details
 
   const openModal = () => setIsOpen(true);

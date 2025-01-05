@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUser } from "@/providers/user-provider";
 import { FaStar, FaRegStar } from 'react-icons/fa'; // Import Font Awesome star icons
 
@@ -21,18 +21,46 @@ interface BpmnFileInfoModalProps {
   };
 }
 
+interface Project {
+  id: string;
+  name: string;
+}
+
 export default function BpmnFileInfoModal({
   isOpen,
   onClose,
   onSubmit,
   initialData,
 }: BpmnFileInfoModalProps) {
-  const [currentVersionId, setCurrentVersionId] = React.useState(initialData?.currentVersionId || '');
-  const [projectId, setProjectId] = React.useState(initialData?.projectId || '');
-  const [ownerEmail, setOwnerEmail] = React.useState(initialData?.createdBy || '');
-  const [isFavorite, setIsFavorite] = React.useState(initialData?.isFavorite || false);
-  const [isShared, setIsShared] = React.useState(initialData?.isShared || false);
+  const [currentVersionId, setCurrentVersionId] = useState(initialData?.currentVersionId || '');
+  const [projectId, setProjectId] = useState(initialData?.projectId || '');
+  const [isFavorite, setIsFavorite] = useState(initialData?.isFavorite || false);
+  const [isShared, setIsShared] = useState(initialData?.isShared || false);
+  const [projects, setProjects] = useState<Project[]>([]);
   const user = useUser();
+
+  useEffect(() => {
+    if (user && user.email) {
+      const fetchProjects = async () => {
+        try {
+          const response = await fetch(`/api/get-projects?email=${user.email}`);
+          const data = await response.json();
+          setProjects(data.projects);
+        } catch (error) {
+          console.error("Error fetching projects:", error);
+        }
+      };
+
+      fetchProjects();
+    }
+  }, [user]);
+
+  const resetForm = () => {
+    setCurrentVersionId(initialData?.currentVersionId || '');
+    setProjectId(initialData?.projectId || '');
+    setIsFavorite(initialData?.isFavorite || false);
+    setIsShared(initialData?.isShared || false);
+  };
 
   // If the modal is not open, return null to avoid rendering
   if (!isOpen) return null;
@@ -54,6 +82,8 @@ export default function BpmnFileInfoModal({
 
     // Call the parent `onSubmit` handler, passing both event and form data
     onSubmit(e, formData);
+    resetForm(); // Reset the form after submission
+    onClose(); // Close the modal after submission
   };
 
   return (
@@ -72,21 +102,19 @@ export default function BpmnFileInfoModal({
             onChange={(e) => setCurrentVersionId(e.target.value)}
           />
 
-          <input
-            type="text"
-            placeholder="Project ID"
-            className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
+          <select
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
-          />
-
-          <input
-            type="text"
-            placeholder="Created By"
+            required
             className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
-            value={user.email || ownerEmail}
-            readOnly
-          />
+          >
+            <option value="" disabled>Select Project</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+          </select>
 
           <div className="flex items-center space-x-4">
             <label className="flex items-center">
@@ -122,7 +150,10 @@ export default function BpmnFileInfoModal({
             <button
               type="button"
               className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700"
-              onClick={onClose}
+              onClick={() => {
+                resetForm();
+                onClose();
+              }}
             >
               Cancel
             </button>

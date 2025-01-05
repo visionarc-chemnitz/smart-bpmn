@@ -7,7 +7,7 @@ export function useBpmnFileModal() {
     const [projectId, setProjectId] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
     const [isShared, setIsShared] = useState(false);
-    const [bpmnFiles, setBpmnFiles] = useState([]); // State to hold BPMN files
+    const [bpmnFiles, setBpmnFiles] = useState<any[]>([]); // State to hold BPMN files
     const user = useUser();
     const openModal = () => setIsOpen(true);
     const closeModal = () => setIsOpen(false);
