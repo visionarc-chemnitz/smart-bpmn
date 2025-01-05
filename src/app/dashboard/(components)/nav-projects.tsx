@@ -32,8 +32,6 @@ export function NavProjects({
   }[]
   icon?: LucideIcon
 }) {
-<<<<<<< Updated upstream
-=======
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
   const openProjectModal = () => setIsProjectModalOpen(true);
@@ -45,7 +43,6 @@ export function NavProjects({
     closeProjectModal();
   };
 
->>>>>>> Stashed changes
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -68,35 +65,25 @@ export function NavProjects({
                         <span>{project.name}</span>
                       </a>
                     </SidebarMenuSubButton>
-<<<<<<< Updated upstream
                     <SidebarMenuAction showOnHover>
                       <Plus className="mr-2 size-4" />
                       <span>Create Project</span>
                     </SidebarMenuAction>
-=======
->>>>>>> Stashed changes
                   </SidebarMenuSubItem>
                 ))}
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton
                     size="sm"
                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground transition-all ease-in-out duration-200"
-<<<<<<< Updated upstream
-                    onClick={() => alert('Create Project')} // Replace with actual create project logic
-                  >
-                    <Plus className="mr-2 size-4" />
-                    <span>Create Project</span>
-=======
                     onClick={openProjectModal}
                   >
                     <Plus className="mr-2 size-4" />
-                    <div 
-                      className="font-medium text-muted-foreground dark:text-muted-foreground-dark cursor-pointer" 
+                    <button 
+                      className="font-medium text-muted-foreground dark:text-muted-foreground-dark cursor-pointer transition-all ease-in-out duration-200 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                       onClick={openProjectModal}
                     >
                       Create Project
-                    </div>
->>>>>>> Stashed changes
+                    </button>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               </SidebarMenuSub>
