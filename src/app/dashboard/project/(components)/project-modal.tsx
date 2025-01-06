@@ -14,34 +14,37 @@ interface ProjectModalProps {
 
 export default function ProjectModal({ isOpen, onClose, onSubmit }: ProjectModalProps) {
   const [projectName, setProjectName] = useState('');
-  const [organizationId, setOrganizationId] = useState('');
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const user = useUser();
 
   useEffect(() => {
-    if (user && user.email) {
-      const fetchOrganizations = async () => {
+    if (user && user.id) {
+      const fetchOrganization = async () => {
         try {
-          const response = await fetch(`/api/get-organizations?email=${user.email}`);
+          const response = await fetch(`/api/get-organizations?userId=${user.id}`);
           const data = await response.json();
-          setOrganizations(data.organizations);
+          setOrganization(data.organization);
         } catch (error) {
-          console.error("Error fetching organizations:", error);
+          console.error("Error fetching organization:", error);
         }
       };
 
-      fetchOrganizations();
+      fetchOrganization();
     }
   }, [user]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!organization) {
+      window.alert('Organization not found.');
+      return;
+    }
+
     const requestBody = {
       projectName,
-      organizationId,
-      ownerName: user.name,
-      ownerEmail: user.email,
+      organizationId: organization.id,
+      createdBy: user.id,
     };
 
     try {
@@ -63,9 +66,8 @@ export default function ProjectModal({ isOpen, onClose, onSubmit }: ProjectModal
       const data = await response.json();
       console.log('Project created:', data);
       window.alert('Project created successfully!');
-      onSubmit(e, { projectName, organizationId });
+      onSubmit(e, { projectName, organizationId: organization.id });
       setProjectName('');
-      setOrganizationId('');
       onClose(); // Close the modal after submission
     } catch (error) {
       console.error('Error creating project:', error);
@@ -85,23 +87,19 @@ export default function ProjectModal({ isOpen, onClose, onSubmit }: ProjectModal
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
             required
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2 dark:bg-gray-700 dark:border-gray-600"
             placeholder="Enter project name"
           />
 
-          <select
-            value={organizationId}
-            onChange={(e) => setOrganizationId(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-          >
-            <option value="" disabled>Select Organization</option>
-            {organizations.map((organization) => (
-              <option key={organization.id} value={organization.id}>
-                {organization.name}
-              </option>
-            ))}
-          </select>
+          {organization && (
+            <input
+              type="hidden"
+              value={organization.id}
+              readOnly
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-gray-100 dark:bg-gray-700 dark:border-gray-600"
+              placeholder="Organization"
+            />
+          )}
 
           <div className="flex justify-end space-x-4">
             <button

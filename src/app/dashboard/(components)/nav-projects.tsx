@@ -37,9 +37,10 @@ export function NavProjects({
   const openProjectModal = () => setIsProjectModalOpen(true);
   const closeProjectModal = () => setIsProjectModalOpen(false);
 
-  const handleProjectSubmit = (projectName: string, organizationName: string) => {
-    console.log('Project Name:', projectName);
-    console.log('Organization Name:', organizationName);
+  const handleProjectSubmit = (e: React.FormEvent<HTMLFormElement>, data: { projectName: string; organizationId: string }) => {
+    e.preventDefault();
+    console.log('Project Name:', data.projectName);
+    console.log('Organization ID:', data.organizationId);
     closeProjectModal();
   };
 
@@ -78,7 +79,7 @@ export function NavProjects({
                     onClick={openProjectModal}
                   >
                     <Plus className="mr-2 size-4" />
-                    <button 
+                    <button
                       className="font-medium text-muted-foreground dark:text-muted-foreground-dark cursor-pointer transition-all ease-in-out duration-200 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                       onClick={openProjectModal}
                     >

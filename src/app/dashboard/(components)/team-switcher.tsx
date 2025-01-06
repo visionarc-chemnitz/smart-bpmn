@@ -1,12 +1,10 @@
 import * as React from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, Plus, GalleryVerticalEnd } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -20,17 +18,21 @@ import { useOrganizationModal } from "@/hooks/use-organization-modal";
 import OrganizationModal from "@/app/dashboard/organization/(components)/organization-modal";
 
 export function TeamSwitcher({
-  organizations,
+  organization,
 }: {
-  organizations: {
+  organization: {
     name: string;
+    logo?: string; // Updated to string for image URL
     projects?: { name: string; url: string; icon: React.ElementType }[];
-  }[];
+  } | null;
 }) {
   const { isMobile } = useSidebar();
-  const [activeOrganization, setActiveOrganization] = React.useState(organizations[0] || { name: "No Organization", projects: [] });
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [activeOrganization, setActiveOrganization] = React.useState(
+    organization || { name: "No Organization", logo: "", projects: [] }
+  );
 
-  // Use the useOrganizationModal hook
+  // Modal state management
   const {
     isOpen,
     openModal,
@@ -38,17 +40,23 @@ export function TeamSwitcher({
     organizationName,
     setOrganizationName,
     handleSubmit,
-    ownerName,
-    setOwnerName,
-    ownerEmail,
-    setOwnerEmail,
+    organizationLogo,
+    setOrganizationLogo,
   } = useOrganizationModal();
 
+  // Fallback logo if undefined
+  const defaultLogo = GalleryVerticalEnd;
+
   React.useEffect(() => {
-    if (organizations.length > 0) {
-      setActiveOrganization(organizations[0]);
+    if (organization) {
+      setActiveOrganization(organization);
     }
-  }, [organizations]);
+  }, [organization]);
+
+  const getInitials = (name: string) => {
+    const initials = name.split(" ").map(word => word[0]).join("");
+    return initials.toUpperCase();
+  };
 
   return (
     <>
@@ -56,14 +64,26 @@ export function TeamSwitcher({
         <SidebarMenuItem>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground transition-all ease-in-out duration-200"
-              >
+              <SidebarMenuButton size="lg">
                 <div className="grid flex-1 text-left text-sm leading-tight space-y-1">
-                  <span className="truncate font-semibold text-gray-800 dark:text-white">
-                    {activeOrganization?.name}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {activeOrganization.logo ? (
+                      <img
+                        src={activeOrganization.logo}
+                        alt="Organization Logo"
+                        className="h-8 w-8 rounded-full"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded text-white">
+                        {getInitials(activeOrganization.name)}
+                      </div>
+                    )}
+                    {!isCollapsed && (
+                      <span className="truncate font-semibold text-gray-800 dark:text-white">
+                        {activeOrganization?.name}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <ChevronsUpDown className="ml-auto text-gray-500 dark:text-gray-400 transition-all duration-200" />
               </SidebarMenuButton>
@@ -74,37 +94,42 @@ export function TeamSwitcher({
               side={isMobile ? "bottom" : "right"}
               sideOffset={4}
             >
-              <DropdownMenuLabel className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
-                Organizations
-              </DropdownMenuLabel>
-              {organizations.map((team, index) => (
+              <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+              {organization ? (
                 <DropdownMenuItem
-                  key={team.name}
-                  onClick={() => setActiveOrganization(team)}
-                  className="gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150 ease-in-out"
+                  onClick={() => setActiveOrganization(organization)}
+                  className="gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                 >
-                  {team.name}
-                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                  {organization.logo ? (
+                    <img
+                      src={organization.logo}
+                      alt="Organization Logo"
+                      className="h-8 w-8 rounded-full"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded text-white">
+                      {getInitials(organization.name)}
+                    </div>
+                  )}
+                  <span>{organization.name}</span>
                 </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild className="gap-2 p-2">
-                <div
-                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-150"
-                  onClick={openModal} // Open the modal using the hook
-                >
-                  <Plus className="size-4 text-gray-500 dark:text-gray-300 transition-colors duration-200" />
-                  <div className="font-medium text-muted-foreground dark:text-muted-foreground-dark">
-                    Add Your Organization
+              ) : (
+                <DropdownMenuItem asChild>
+                  <div
+                    className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                    onClick={openModal} // Open modal
+                  >
+                    <Plus className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+                    <span className="text-gray-800 dark:text-gray-300">
+                      Add Your Organization
+                    </span>
                   </div>
-                </div>
-              </DropdownMenuItem>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-
-      {/* Projects Menu */}
 
       {/* Organization Modal */}
       <OrganizationModal
@@ -113,10 +138,8 @@ export function TeamSwitcher({
         handleSubmit={handleSubmit}
         organizationName={organizationName}
         setOrganizationName={setOrganizationName}
-        ownerName={ownerName}
-        setOwnerName={setOwnerName}
-        ownerEmail={ownerEmail}
-        setOwnerEmail={setOwnerEmail}
+        organizationLogo={organizationLogo}
+        setOrganizationLogo={setOrganizationLogo}
       />
     </>
   );

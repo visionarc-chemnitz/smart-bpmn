@@ -7,23 +7,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const {
-    currentVersionId,
+    fileName,
     projectId,
-    ownerName,
-    ownerEmail,
+    createdBy,
     isFavorite,
     isShared,
   } = req.body;
 
-  if (
-    !currentVersionId ||
-    !ownerName ||
-    !ownerEmail
-  ) {
+  if (!fileName || !createdBy) {
     console.error('Missing required fields:', {
-      currentVersionId,
-      ownerName,
-      ownerEmail,
+      fileName,
+      createdBy,
     });
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -43,10 +37,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const bpmnFile = await prisma.bpmn.create({
       data: {
-        currentVersionId,
+        fileName,
         projectId,
-        ownerName,
-        ownerEmail,
+        createdBy,
         isFavorite,
         isShared,
       },

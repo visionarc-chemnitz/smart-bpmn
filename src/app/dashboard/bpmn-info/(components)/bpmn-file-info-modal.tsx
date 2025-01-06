@@ -6,14 +6,14 @@ interface BpmnFileInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>, data: {
-    currentVersionId: string;
+    fileName: string;
     projectId: string;
     ownerEmail: string;
     isFavorite: boolean;
     isShared: boolean;
   }) => void;
   initialData: {
-    currentVersionId: string;
+    fileName: string;
     projectId: string;
     ownerEmail: string;
     isFavorite: boolean;
@@ -32,7 +32,7 @@ export default function BpmnFileInfoModal({
   onSubmit,
   initialData,
 }: BpmnFileInfoModalProps) {
-  const [currentVersionId, setCurrentVersionId] = useState(initialData?.currentVersionId || '');
+  const [fileName, setFileName] = useState(initialData?.fileName || '');
   const [projectId, setProjectId] = useState(initialData?.projectId || '');
   const [isFavorite, setIsFavorite] = useState(initialData?.isFavorite || false);
   const [isShared, setIsShared] = useState(initialData?.isShared || false);
@@ -43,7 +43,7 @@ export default function BpmnFileInfoModal({
     if (user && user.email) {
       const fetchProjects = async () => {
         try {
-          const response = await fetch(`/api/get-projects?email=${user.email}`);
+          const response = await fetch(`/api/get-projects?userId=${user.id}`);
           const data = await response.json();
           setProjects(data.projects);
         } catch (error) {
@@ -56,7 +56,7 @@ export default function BpmnFileInfoModal({
   }, [user]);
 
   const resetForm = () => {
-    setCurrentVersionId(initialData?.currentVersionId || '');
+    setFileName(initialData?.fileName || '');
     setProjectId(initialData?.projectId || '');
     setIsFavorite(initialData?.isFavorite || false);
     setIsShared(initialData?.isShared || false);
@@ -71,7 +71,7 @@ export default function BpmnFileInfoModal({
 
     // Collect the form data
     const formData = {
-      currentVersionId,
+      fileName,
       projectId,
       ownerEmail: user.email, // Default to user email if empty
       isFavorite,
@@ -96,10 +96,10 @@ export default function BpmnFileInfoModal({
         >
           <input
             type="text"
-            placeholder="Current Version ID"
+            placeholder="File Name"
             className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
-            value={currentVersionId}
-            onChange={(e) => setCurrentVersionId(e.target.value)}
+            value={fileName}
+            onChange={(e) => setFileName(e.target.value)}
           />
 
           <select

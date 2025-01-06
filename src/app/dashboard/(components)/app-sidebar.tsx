@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   AudioWaveform,
   BookOpen,
@@ -12,22 +12,23 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
-} from "lucide-react"
+} from "lucide-react";
 
 import Bpmn from './bpmn-info';
 
-import { NavMain } from "./nav-main"
-import { NavProjects } from "./nav-projects"
-import { NavUser } from "./nav-user"
-import { TeamSwitcher } from "./team-switcher"
+import { NavMain } from "./nav-main";
+import { NavProjects } from "./nav-projects";
+import { NavUser } from "./nav-user";
+import { TeamSwitcher } from "./team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { useUser } from "@/providers/user-provider"
+} from "@/components/ui/sidebar";
+import { useUser } from "@/providers/user-provider";
+import { NavBpmnFile } from "./nav-bpmn-file";
 
 const data = {
   user: {
@@ -53,20 +54,20 @@ const data = {
       ],
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useUser();
-  const [organizations, setOrganizations] = React.useState([]);
-  const [projects, setProjects] = React.useState([]);
+  const [organization, setOrganization] = React.useState(null);
+  const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (user && user.email) {
       const fetchOrganizations = async () => {
         try {
-          const response = await fetch(`/api/get-organizations?email=${user.email}`);
+          const response = await fetch(`/api/get-organizations?userId=${user.id}`);
           const data = await response.json();
-          setOrganizations(data.organizations);
+          setOrganization(data.organization);
         } catch (error) {
           console.error("Error fetching organizations:", error);
         }
@@ -76,24 +77,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }, [user]);
 
-  const fetchProjects = async (organizationId: string) => {
-    try {
-      const response = await fetch(`/api/get-projects?organizationId=${organizationId}`);
-      const data = await response.json();
-      setProjects(data.projects);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
+  React.useEffect(() => {
+    const storedProjectId = localStorage.getItem("selectedProjectId");
+    if (storedProjectId) {
+      setSelectedProjectId(storedProjectId);
     }
-  };
+  }, []);
+
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher organizations={organizations} />
+        <TeamSwitcher organization={organization} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={projects} />
+        {selectedProjectId && <NavBpmnFile projectId={selectedProjectId} />}
         <div className="m-4">
           <Bpmn />
         </div>
@@ -103,5 +102,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

@@ -7,8 +7,8 @@ export default function BpmnInfo() {
     isOpen,
     openModal,
     closeModal,
-    currentVersionId,
-    setCurrentVersionId,
+    fileName,
+    setFileName,
     projectId,
     setProjectId,
     isFavorite,
@@ -31,7 +31,7 @@ export default function BpmnInfo() {
         onClose={closeModal}
         onSubmit={handleFormSubmit} // Directly pass it
         initialData={{
-          currentVersionId: currentVersionId || '',
+          fileName: fileName || '',
           projectId: projectId || '',
           ownerEmail: '', // Empty by default
           isFavorite: isFavorite || false,

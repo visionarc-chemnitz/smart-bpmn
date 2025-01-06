@@ -3,7 +3,7 @@ import { useUser } from "@/providers/user-provider";
 
 export function useBpmnFileModal() {
     const [isOpen, setIsOpen] = useState(false);
-    const [currentVersionId, setCurrentVersionId] = useState('');
+    const [fileName, setFileName] = useState('');
     const [projectId, setProjectId] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
     const [isShared, setIsShared] = useState(false);
@@ -15,19 +15,14 @@ export function useBpmnFileModal() {
     const handleFormSubmit = async (
         e: React.FormEvent<HTMLFormElement>,
         formData: {
-            currentVersionId: string;
+            fileName: string;
             projectId: string;
-            ownerEmail: string;
             isFavorite: boolean;
             isShared: boolean;
         }
     ) => {
         e.preventDefault(); // Prevent form default behavior
-
-        // Log data to console for debugging
         console.log("Submitting Form with Data:", formData);
-
-        // Now make the API request to save the BPMN data
         try {
             const response = await fetch('/api/save-bpmn-file-action', {
                 method: 'POST',
@@ -35,10 +30,9 @@ export function useBpmnFileModal() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    currentVersionId: formData.currentVersionId,
+                    fileName: formData.fileName,
                     projectId: formData.projectId,
-                    ownerName: user.name,
-                    ownerEmail: formData.ownerEmail,
+                    createdBy: user.id,
                     isFavorite: formData.isFavorite,
                     isShared: formData.isShared,
                 }),
@@ -55,6 +49,7 @@ export function useBpmnFileModal() {
             closeModal();
             // Update the state with the new BPMN file
             setBpmnFiles((prevFiles) => [...prevFiles, data]);
+            window.location.reload();
         } catch (error) {
             console.error('Error saving BPMN file:', error); // Handle the error
             alert('There was an error saving the BPMN file.');
@@ -65,8 +60,8 @@ export function useBpmnFileModal() {
         isOpen,
         openModal,
         closeModal,
-        currentVersionId,
-        setCurrentVersionId,
+        fileName,
+        setFileName,
         projectId,
         setProjectId,
         isFavorite,

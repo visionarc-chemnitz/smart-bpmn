@@ -29,6 +29,7 @@ export async function getUserData() {
   const user = session?.user;
 
   return {
+    id: user?.id ?? "",
     name: user?.name ?? "Guest",
     email: user?.email ?? "",
     avatar: user?.image ?? "",

@@ -16,7 +16,7 @@ export default function DashBoardPage() {
     if (user && user.email) {
       const checkUserOrganization = async () => {
         try {
-          const response = await fetch(`/api/check-organization?email=${user.email}`);
+          const response = await fetch(`/api/check-organization?userId=${user.id}`);
           const data = await response.json();
 
           setHasOrganization(data.hasOrganization);

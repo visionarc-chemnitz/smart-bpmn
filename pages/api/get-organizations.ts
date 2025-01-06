@@ -2,30 +2,31 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '@/lib/prisma'; // Adjust the import path as needed
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { email } = req.query;
+  const { userId } = req.query;
 
-  if (!email || typeof email !== 'string') {
-    console.error('Invalid email:', email);
-    return res.status(400).json({ error: 'Invalid email' });
+  if (!userId || typeof userId !== 'string') {
+    console.error('Invalid user ID:', userId);
+    return res.status(400).json({ error: 'Invalid user ID' });
   }
 
   try {
-    console.log('Fetching organizations for email:', email);
-    const organizations = await prisma.organization.findMany({
+    console.log('Fetching organization for user ID:', userId);
+    const organization = await prisma.organization.findFirst({
       where: {
-        ownerEmail: email,
+        createdBy: userId,
       },
     });
 
-    if (organizations.length === 0) {
-      console.log('No organizations found for email:', email);
+    if (!organization) {
+      console.log('No organization found for user ID:', userId);
+      return res.status(404).json({ error: 'No organization found' });
     } else {
-      console.log('Organizations found:', organizations);
+      console.log('Organization found:', organization);
     }
 
-    res.status(200).json({ organizations });
+    res.status(200).json({ organization });
   } catch (error) {
-    console.error('Error fetching organizations:', error);
+    console.error('Error fetching organization:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }

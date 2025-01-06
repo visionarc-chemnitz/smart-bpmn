@@ -3,19 +3,18 @@ import prisma from '@/lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { organizationName, ownerName, ownerEmail } = req.body;
+    const { organizationName, createdBy } = req.body;
 
-    if (!organizationName || !ownerName || !ownerEmail) {
-      return res.status(400).json({ error: 'Organization name, owner name, and owner email are required' });
+    if (!organizationName || !createdBy) {
+      return res.status(400).json({ error: 'Organization name and createdBy (user ID) are required' });
     }
 
     try {
-      // Create the organization using ownerName and ownerEmail
+      // Create the organization using createdBy (user ID)
       const organization = await prisma.organization.create({
         data: {
           name: organizationName,
-          ownerName: ownerName,    // Save the owner's name
-          ownerEmail: ownerEmail,  // Save the owner's email
+          createdBy: createdBy, // Save the user ID who created the organization
         },
       });
 

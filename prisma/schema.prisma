@@ -11,37 +11,36 @@ datasource db {
 model Organization {
   id          String   @id @default(uuid())
   name        String                       
-  ownerName   String?                              
-  ownerEmail  String?                              
-  owner       User?    @relation("OrganizationOwner", fields: [ownerEmail], references: [email], onDelete: Cascade) // Relates to User
+  createdBy   String   @unique
+  user        User     @relation("OrganizationOwner", fields: [createdBy], references: [id], onDelete: Cascade) // Relates to User
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt 
-  projects    Project[] // Add this line to establish the back relation
+  projects    Project[] @relation("OrganizationProjects") // Add this line to establish the back relation
 }
 
 model Project {
   id                String   @id @default(uuid())
   name              String  
-  ownerName         String?                              
-  ownerEmail        String? 
+  createdBy         String   // the foreign key should be required
+  user              User     @relation("ProjectOwner", fields: [createdBy], references: [id], onDelete: Cascade) // this line for the relation
   organizationId    String   // the foreign key should be required
-  organization      Organization @relation(fields: [organizationId], references: [id]) // this line for the relation
+  organization      Organization @relation("OrganizationProjects", fields: [organizationId], references: [id]) // this line for the relation
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  bpmn              Bpmn[] // Add this line to establish the back relation
+  bpmn              Bpmn[] @relation("ProjectBpmn") // Add this line to establish the back relation
 }
 
 model Bpmn {
   id                String   @id @default(uuid())
-  currentVersionId  String
+  fileName          String
   projectId         String?
-  ownerName         String
-  ownerEmail        String
+  createdBy         String
+  user              User     @relation("BpmnOwner", fields: [createdBy], references: [id], onDelete: Cascade) // this line for the relation
   isFavorite        Boolean  @default(false)
   isShared          Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now())
-  project           Project? @relation(fields: [projectId], references: [id]) // this line for the relation
+  project           Project? @relation("ProjectBpmn", fields: [projectId], references: [id]) // this line for the relation
   invitations       Invitation[] // Add this line to establish the back relation
 }
 
@@ -68,7 +67,9 @@ model User {
   sessions      Session[]
 
   // Explicit relation for the reverse side
-  organizations Organization[]  @relation("OrganizationOwner")
+  organization  Organization?   @relation("OrganizationOwner")
+  projects      Project[]       @relation("ProjectOwner")
+  bpmnFiles     Bpmn[]          @relation("BpmnOwner") 
 }
 
 model Account {
