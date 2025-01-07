@@ -16,26 +16,26 @@ export default function DashBoardPage() {
     if (user && user.email) {
       const checkUserOrganization = async () => {
         try {
-          const response = await fetch(`/api/check-organization?userId=${user.id}`);
+          const response = await fetch(`/api/organization/check-organization?userId=${user.id}`);
           const data = await response.json();
 
           setHasOrganization(data.hasOrganization);
         } catch (error) {
           console.error("Error checking organization:", error);
         } finally {
-          setLoading(false); // Stop loading once the check is done
+          setLoading(false);
         }
       };
 
       checkUserOrganization();
     } else {
-      setLoading(false); // Stop loading if user is not defined
+      setLoading(false);
     }
-  }, [user]); // Re-run when `user` changes
+  }, [user]);
 
   if (loading) {
     return (
-      <div>Loading...</div>  // Loading indicator until the check is completed
+      <div>Loading...</div> 
     );
   }
 
@@ -43,11 +43,10 @@ export default function DashBoardPage() {
     <>
       <BreadcrumbsHeader href='/dashboard' current='Playground' parent='/' />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        {/* Conditionally render based on the user's organization status */}
         {hasOrganization ? (
-          <TeamSpacePage />  // Render TeamSpacePage if user has an organization
+          <TeamSpacePage />
         ) : (
-          <NewTeam />  // Otherwise, show NewTeam to create a new organization
+          <NewTeam />
         )}
       </div>
     </>

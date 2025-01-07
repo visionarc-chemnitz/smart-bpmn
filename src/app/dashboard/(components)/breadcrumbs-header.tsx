@@ -38,36 +38,36 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
   const user = useUser();
 
   useEffect(() => {
-    if (user && user.id) {
-      const checkOrganization = async () => {
+    if (user?.id) {
+      const fetchData = async () => {
         try {
-          const response = await fetch(`/api/organization/check-organization?userId=${user.id}`);
-          const data = await response.json();
-          setHasOrganization(data.hasOrganization);
-        } catch (error) {
-          console.error("Error checking organization:", error);
-        }
-      };
+          // Fetch organization info and projects in parallel
+          const [orgResponse, projectsResponse] = await Promise.all([
+            fetch(`/api/organization/check-organization?userId=${user.id}`),
+            fetch(`/api/project/get-projects?userId=${user.id}`),
+          ]);
 
-      const fetchProjects = async () => {
-        try {
-          const response = await fetch(`/api/project/get-projects?userId=${user.id}`);
-          const data = await response.json();
-          setProjects(data.projects);
+          const orgData = await orgResponse.json();
+          const projectsData = await projectsResponse.json();
+
+          setHasOrganization(orgData.hasOrganization);
+          setProjects(projectsData.projects);
+
+          // Set the selected project from localStorage or default to the first project
           const storedProjectId = localStorage.getItem("selectedProjectId");
           if (storedProjectId) {
             setSelectedProject(storedProjectId);
-          } else if (data.projects.length > 0) {
-            setSelectedProject(data.projects[0].id);
-            localStorage.setItem("selectedProjectId", data.projects[0].id);
+          } else if (projectsData.projects.length > 0) {
+            const firstProject = projectsData.projects[0];
+            setSelectedProject(firstProject.id);
+            localStorage.setItem("selectedProjectId", firstProject.id);
           }
         } catch (error) {
-          console.error("Error fetching projects:", error);
+          console.error("Error fetching data:", error);
         }
       };
 
-      checkOrganization();
-      fetchProjects();
+      fetchData();
     }
   }, [user]);
 
