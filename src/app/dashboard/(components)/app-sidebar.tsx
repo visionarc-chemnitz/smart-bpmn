@@ -65,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     if (user && user.email) {
       const fetchOrganizations = async () => {
         try {
-          const response = await fetch(`/api/get-organizations?userId=${user.id}`);
+          const response = await fetch(`/api/organization/get-organizations?userId=${user.id}`);
           const data = await response.json();
           setOrganization(data.organization);
         } catch (error) {

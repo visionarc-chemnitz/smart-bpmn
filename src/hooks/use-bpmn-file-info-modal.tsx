@@ -24,7 +24,7 @@ export function useBpmnFileModal() {
         e.preventDefault(); // Prevent form default behavior
         console.log("Submitting Form with Data:", formData);
         try {
-            const response = await fetch('/api/save-bpmn-file-action', {
+            const response = await fetch('/api/bpmn/save-bpmn', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

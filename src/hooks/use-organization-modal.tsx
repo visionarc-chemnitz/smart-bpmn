@@ -15,7 +15,7 @@ export const useOrganizationModal = () => {
   const fetchOrganizations = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/get-organizations?userId=${user.id}`);
+      const response = await fetch(`api/organization/get-organizations?userId=${user.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch organizations.");
       }
@@ -44,7 +44,7 @@ export const useOrganizationModal = () => {
 
     try {
       setIsLoading(true); // Show loading
-      const response = await fetch("/api/save-organization-action", {
+      const response = await fetch("/api/organization/save-organization", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

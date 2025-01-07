@@ -1,25 +1,12 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma'; // Adjust the import path as needed
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const {
-    fileName,
-    projectId,
-    createdBy,
-    isFavorite,
-    isShared,
-  } = req.body;
+export async function POST(req: NextRequest) {
+  const { fileName, projectId, createdBy, isFavorite, isShared } = await req.json();
 
   if (!fileName || !createdBy) {
-    console.error('Missing required fields:', {
-      fileName,
-      createdBy,
-    });
-    return res.status(400).json({ error: 'Missing required fields' });
+    console.error('Missing required fields:', { fileName, createdBy });
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
   try {
@@ -31,10 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (!projectExists) {
         console.error('Project ID does not exist:', projectId);
-        return res.status(400).json({ error: 'Project ID does not exist' });
+        return NextResponse.json({ error: 'Project ID does not exist' }, { status: 400 });
       }
     }
 
+    // Create the BPMN file
     const bpmnFile = await prisma.bpmn.create({
       data: {
         fileName,
@@ -46,9 +34,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     console.log('BPMN file created:', bpmnFile);
-    res.status(201).json(bpmnFile);
+    return NextResponse.json(bpmnFile, { status: 201 });
   } catch (error) {
     console.error('Error saving BPMN file:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

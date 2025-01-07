@@ -41,7 +41,7 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
     if (user && user.id) {
       const checkOrganization = async () => {
         try {
-          const response = await fetch(`/api/check-organization?userId=${user.id}`);
+          const response = await fetch(`/api/organization/check-organization?userId=${user.id}`);
           const data = await response.json();
           setHasOrganization(data.hasOrganization);
         } catch (error) {
@@ -51,7 +51,7 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
 
       const fetchProjects = async () => {
         try {
-          const response = await fetch(`/api/get-projects?userId=${user.id}`);
+          const response = await fetch(`/api/project/get-projects?userId=${user.id}`);
           const data = await response.json();
           setProjects(data.projects);
           const storedProjectId = localStorage.getItem("selectedProjectId");
@@ -94,7 +94,7 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
   const handleProjectModalSubmit = async (e: React.FormEvent<HTMLFormElement>, data: { projectName: string; organizationId: string }) => {
     try {
       setIsProjectModalOpen(false);
-      const response = await fetch(`/api/get-projects?userId=${user.id}`);
+      const response = await fetch(`/api/project/get-projects?userId=${user.id}`);
       const updatedProjects = await response.json();
       setProjects(updatedProjects.projects); // Refresh project list
       setSelectedProject(data.projectName);

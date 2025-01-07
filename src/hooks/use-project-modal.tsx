@@ -16,7 +16,7 @@ export const useProjectModal = () => {
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/get-projects?userId=${user.id}`);
+      const response = await fetch(`/api/project/get-projects?userId=${user.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch projects.');
       }
@@ -46,7 +46,7 @@ export const useProjectModal = () => {
 
     try {
       setIsLoading(true);
-      const response = await fetch('/api/add-project-action', {
+      const response = await fetch('/api/project/add-project-action', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

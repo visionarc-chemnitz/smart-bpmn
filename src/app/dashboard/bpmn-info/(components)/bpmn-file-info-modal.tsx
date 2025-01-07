@@ -43,7 +43,7 @@ export default function BpmnFileInfoModal({
     if (user && user.email) {
       const fetchProjects = async () => {
         try {
-          const response = await fetch(`/api/get-projects?userId=${user.id}`);
+          const response = await fetch(`/api/project/get-projects?userId=${user.id}`);
           const data = await response.json();
           setProjects(data.projects);
         } catch (error) {

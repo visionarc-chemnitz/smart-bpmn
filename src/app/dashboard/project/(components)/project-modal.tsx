@@ -21,7 +21,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit }: ProjectModal
     if (user && user.id) {
       const fetchOrganization = async () => {
         try {
-          const response = await fetch(`/api/get-organizations?userId=${user.id}`);
+          const response = await fetch(`/api/organization/get-organizations?userId=${user.id}`);
           const data = await response.json();
           setOrganization(data.organization);
         } catch (error) {
@@ -48,7 +48,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit }: ProjectModal
     };
 
     try {
-      const response = await fetch('/api/add-project-action', {
+      const response = await fetch('/api/project/add-project', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -33,7 +33,7 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
     useEffect(() => {
         const fetchBpmnFiles = async () => {
             try {
-                const response = await fetch(`/api/get-bpmn-files?projectId=${projectId}`);
+                const response = await fetch(`/api/bpmn/get-bpmn-files?projectId=${projectId}`);
                 const data = await response.json();
                 setBpmnFiles(data.bpmnFiles || []);
                 setLoading(false);
