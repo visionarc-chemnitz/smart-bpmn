@@ -9,10 +9,14 @@ import Google from "next-auth/providers/google"
 import GitHub from "@auth/core/providers/github"
 // mail providers
 import Resend from "next-auth/providers/resend"
+import SendGrid from "next-auth/providers/sendgrid"
+
 
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { sendMagicSignInLink } from "./emails/magicLink"
  
+
 
 // config providers
 const providers: Provider[] = [
@@ -24,10 +28,11 @@ const providers: Provider[] = [
     clientId: process.env.GITHUB_CLIENT_ID!,
     clientSecret: process.env.GITHUB_CLIENT_SECRET!
   }),
-  Resend({
-    from: process.env.RESEND_FROM!,
-    apiKey: process.env.AUTH_RESEND_KEY!
-  }),
+  SendGrid({
+    apiKey: process.env.SENDGRID_API_KEY,
+    from: process.env.RESEND_FROM,
+    sendVerificationRequest: sendMagicSignInLink
+  })
 ]
 
 const getProviderIcon = (providerId: string) => {
