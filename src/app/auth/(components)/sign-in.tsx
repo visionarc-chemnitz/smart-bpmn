@@ -60,7 +60,7 @@ export default function SignIn() {
           </div>
 
           {providerMap.map((provider) => {
-            if (provider.id === "resend") return;
+            if (provider.id === "sendgrid") return;
             const Icon = provider.icon;
             return (
               <form
