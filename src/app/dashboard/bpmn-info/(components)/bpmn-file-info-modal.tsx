@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useUser } from "@/providers/user-provider";
+import { useModalManager } from '@/hooks/useModalManager';
 import { FaStar, FaRegStar } from 'react-icons/fa'; // Import Font Awesome star icons
 
 interface BpmnFileInfoModalProps {
@@ -8,22 +9,17 @@ interface BpmnFileInfoModalProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>, data: {
     fileName: string;
     projectId: string;
-    ownerEmail: string;
+    createdBy: string;
     isFavorite: boolean;
     isShared: boolean;
   }) => void;
   initialData: {
     fileName: string;
     projectId: string;
-    ownerEmail: string;
+    createdBy: string;
     isFavorite: boolean;
     isShared: boolean;
   };
-}
-
-interface Project {
-  id: string;
-  name: string;
 }
 
 export default function BpmnFileInfoModal({
@@ -32,35 +28,33 @@ export default function BpmnFileInfoModal({
   onSubmit,
   initialData,
 }: BpmnFileInfoModalProps) {
-  const [fileName, setFileName] = useState(initialData?.fileName || '');
-  const [projectId, setProjectId] = useState(initialData?.projectId || '');
-  const [isFavorite, setIsFavorite] = useState(initialData?.isFavorite || false);
-  const [isShared, setIsShared] = useState(initialData?.isShared || false);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const {
+    fileName,
+    setFileName,
+    projectId,
+    setProjectId,
+    isFavorite,
+    setIsFavorite,
+    isShared,
+    setIsShared,
+    projects,
+    fetchProjects,
+    handleBpmnFileSubmit,
+  } = useModalManager();
   const user = useUser();
 
   useEffect(() => {
-    if (user && user.email) {
-      const fetchProjects = async () => {
-        try {
-          const response = await fetch(`/api/project/get-projects?userId=${user.id}`);
-          const data = await response.json();
-          setProjects(data.projects);
-        } catch (error) {
-          console.error("Error fetching projects:", error);
-        }
-      };
-
+    if (user && user.id) {
       fetchProjects();
     }
   }, [user]);
 
-  const resetForm = () => {
+  useEffect(() => {
     setFileName(initialData?.fileName || '');
     setProjectId(initialData?.projectId || '');
     setIsFavorite(initialData?.isFavorite || false);
     setIsShared(initialData?.isShared || false);
-  };
+  }, [initialData]);
 
   // If the modal is not open, return null to avoid rendering
   if (!isOpen) return null;
@@ -73,7 +67,7 @@ export default function BpmnFileInfoModal({
     const formData = {
       fileName,
       projectId,
-      ownerEmail: user.email, // Default to user email if empty
+      createdBy: user.id, // Default to user email if empty
       isFavorite,
       isShared,
     };
@@ -82,7 +76,7 @@ export default function BpmnFileInfoModal({
 
     // Call the parent `onSubmit` handler, passing both event and form data
     onSubmit(e, formData);
-    resetForm(); // Reset the form after submission
+    handleBpmnFileSubmit(e, formData); // Use the hook's submit handler
     onClose(); // Close the modal after submission
   };
 
@@ -94,15 +88,19 @@ export default function BpmnFileInfoModal({
           className="space-y-4"
           onSubmit={handleSubmit} // Handle the form submit using handleSubmit function
         >
+          <label htmlFor="fileName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">File Name</label>
           <input
             type="text"
+            id="fileName"
             placeholder="File Name"
             className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
             value={fileName}
             onChange={(e) => setFileName(e.target.value)}
           />
 
+          <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project</label>
           <select
+            id="projectId"
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
             required
@@ -117,7 +115,7 @@ export default function BpmnFileInfoModal({
           </select>
 
           <div className="flex items-center space-x-4">
-            <label className="flex items-center">
+            <label htmlFor="isFavorite" className="flex items-center">
               {/* Star icon toggle for "Favorite" */}
               {/* Clicking the star icon will now toggle the favorite state */}
               {isFavorite ? (
@@ -135,9 +133,10 @@ export default function BpmnFileInfoModal({
               )}
               <span className="ml-2">Favorite</span>
             </label>
-            <label className="flex items-center">
+            <label htmlFor="isShared" className="flex items-center">
               <input
                 type="checkbox"
+                id="isShared"
                 className="form-checkbox"
                 checked={isShared}
                 onChange={(e) => setIsShared(e.target.checked)}
@@ -150,10 +149,7 @@ export default function BpmnFileInfoModal({
             <button
               type="button"
               className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700"
-              onClick={() => {
-                resetForm();
-                onClose();
-              }}
+              onClick={onClose}
             >
               Cancel
             </button>

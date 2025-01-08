@@ -14,7 +14,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import { useOrganizationModal } from "@/hooks/use-organization-modal";
+import { useModalManager } from "@/hooks/useModalManager";
 import OrganizationModal from "@/app/dashboard/organization/(components)/organization-modal";
 
 export function TeamSwitcher({
@@ -39,10 +39,8 @@ export function TeamSwitcher({
     closeModal,
     organizationName,
     setOrganizationName,
-    handleSubmit,
-    organizationLogo,
-    setOrganizationLogo,
-  } = useOrganizationModal();
+    handleOrganizationSubmit,
+  } = useModalManager();
 
   // Fallback logo if undefined
   const defaultLogo = GalleryVerticalEnd;
@@ -135,11 +133,6 @@ export function TeamSwitcher({
       <OrganizationModal
         isOpen={isOpen}
         onClose={closeModal}
-        handleSubmit={handleSubmit}
-        organizationName={organizationName}
-        setOrganizationName={setOrganizationName}
-        organizationLogo={organizationLogo}
-        setOrganizationLogo={setOrganizationLogo}
       />
     </>
   );

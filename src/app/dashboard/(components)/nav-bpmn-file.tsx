@@ -12,7 +12,8 @@ import {
     SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { FileText, ChevronRight, Loader } from "lucide-react"; // Import icons from lucide-react
+import { FileText, ChevronRight, Loader } from "lucide-react";
+import { API_PATHS } from '@/app/api/api-path/apiPath';
 
 interface BpmnFile {
     id: string;
@@ -33,7 +34,7 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
     useEffect(() => {
         const fetchBpmnFiles = async () => {
             try {
-                const response = await fetch(`/api/bpmn/get-bpmn-files?projectId=${projectId}`);
+                const response = await fetch(`${API_PATHS.GET_BPMN_FILES}?projectId=${projectId}`);
                 const data = await response.json();
                 setBpmnFiles(data.bpmnFiles || []);
                 setLoading(false);

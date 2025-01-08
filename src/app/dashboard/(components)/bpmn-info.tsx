@@ -1,6 +1,6 @@
 import React from 'react';
-import { useBpmnFileModal } from '@/hooks/use-bpmn-file-info-modal';
-import BpmnFileInfoModal from '../bpmn-info/(components)/bpmn-file-info-modal';
+import { useModalManager } from '@/hooks/useModalManager';
+import BpmnFileInfoModal from '../bpmn-info/(components)/bpmn-file-info-modal'; // Correct the import path
 
 export default function BpmnInfo() {
   const {
@@ -15,8 +15,8 @@ export default function BpmnInfo() {
     setIsFavorite,
     isShared,
     setIsShared,
-    handleFormSubmit, // Directly use the one from the hook
-  } = useBpmnFileModal();
+    handleBpmnFileSubmit, // Use the one from the hook
+  } = useModalManager();
 
   return (
     <div>
@@ -29,11 +29,11 @@ export default function BpmnInfo() {
       <BpmnFileInfoModal
         isOpen={isOpen}
         onClose={closeModal}
-        onSubmit={handleFormSubmit} // Directly pass it
+        onSubmit={handleBpmnFileSubmit} // Directly pass it
         initialData={{
           fileName: fileName || '',
           projectId: projectId || '',
-          ownerEmail: '', // Empty by default
+          createdBy: '', // Empty by default
           isFavorite: isFavorite || false,
           isShared: isShared || false,
         }}

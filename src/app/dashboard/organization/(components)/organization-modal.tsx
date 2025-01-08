@@ -1,25 +1,19 @@
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import React from 'react';
-import { useUser } from "@/providers/user-provider";
+import { useModalManager } from '@/hooks/useModalManager';
 
 interface OrganizationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  handleSubmit: (e: React.FormEvent) => void;
-  organizationName: string;
-  setOrganizationName: (name: string) => void;
-  organizationLogo: any;
-  setOrganizationLogo: any;
 }
 
-const OrganizationModal: React.FC<OrganizationModalProps> = ({
-  isOpen,
-  onClose,
-  handleSubmit,
-  organizationName,
-  setOrganizationName,
-}) => {
-  const user = useUser();
+const OrganizationModal: React.FC<OrganizationModalProps> = ({ isOpen, onClose }) => {
+  const {
+    organizationName,
+    setOrganizationName,
+    handleOrganizationSubmit,
+  } = useModalManager();
+
   if (!isOpen) return null;
 
   return (
@@ -29,7 +23,7 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
         <p className="text-sm text-gray-600 mt-2 mb-4 dark:text-gray-300">
           Fill out the details to create a new organization.
         </p>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleOrganizationSubmit}>
           <input
             type="text"
             placeholder="Organization Name"
@@ -37,13 +31,6 @@ const OrganizationModal: React.FC<OrganizationModalProps> = ({
             name="organizationName"
             value={organizationName}
             onChange={(e) => setOrganizationName(e.target.value)}
-          />
-
-          <input
-            type="hidden"
-            name="createdBy"
-            value={user?.id || ''}
-            readOnly
           />
 
           <RainbowButton

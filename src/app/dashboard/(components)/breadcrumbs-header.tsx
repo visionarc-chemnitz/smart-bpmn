@@ -14,7 +14,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useToggleButton } from "@/hooks/use-toggle-button";
 import { useUser } from "@/providers/user-provider";
 import ProjectModal from "@/app/dashboard/project/(components)/project-modal";
-import { PlusCircle, ChevronDown, Info } from "lucide-react"; // Import icons from lucide-react
+import { PlusCircle, ChevronDown, Info } from "lucide-react";
+import { API_PATHS } from '@/app/api/api-path/apiPath';
 
 interface BreadcrumbsHeaderProps {
   href: string;
@@ -43,8 +44,8 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
         try {
           // Fetch organization info and projects in parallel
           const [orgResponse, projectsResponse] = await Promise.all([
-            fetch(`/api/organization/check-organization?userId=${user.id}`),
-            fetch(`/api/project/get-projects?userId=${user.id}`),
+            fetch(`${API_PATHS.CHECK_ORGANIZATION}?userId=${user.id}`),
+            fetch(`${API_PATHS.GET_PROJECTS}?userId=${user.id}`),
           ]);
 
           const orgData = await orgResponse.json();
@@ -73,8 +74,7 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
 
   const handleProjectChange = (projectId: string) => {
     if (!hasOrganization) {
-      setIsInfoModalOpen(true); // Open info modal if no organization exists
-      return;
+      setIsInfoModalOpen(true);
     }
 
     if (projectId === "create-new") {
@@ -94,7 +94,7 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
   const handleProjectModalSubmit = async (e: React.FormEvent<HTMLFormElement>, data: { projectName: string; organizationId: string }) => {
     try {
       setIsProjectModalOpen(false);
-      const response = await fetch(`/api/project/get-projects?userId=${user.id}`);
+      const response = await fetch(`${API_PATHS.GET_PROJECTS}?userId=${user.id}`);
       const updatedProjects = await response.json();
       setProjects(updatedProjects.projects); // Refresh project list
       setSelectedProject(data.projectName);
