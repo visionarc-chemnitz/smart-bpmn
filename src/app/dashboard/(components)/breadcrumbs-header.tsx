@@ -16,11 +16,18 @@ import { useUser } from "@/providers/user-provider";
 import ProjectModal from "@/app/dashboard/project/(components)/project-modal";
 import { PlusCircle, ChevronDown, Info } from "lucide-react";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
+import { RainbowButton } from "@/components/ui/rainbow-button";
+import { FaShareAlt } from "react-icons/fa";
+import { LiaShareAltSolid } from "react-icons/lia";
+import { PiShareNetworkThin } from "react-icons/pi";
+import { MdIosShare } from "react-icons/md";
+import { IoShareSocialOutline } from "react-icons/io5";
 
 interface BreadcrumbsHeaderProps {
   href: string;
   current: string;
   parent: string;
+  onShareClick: () => void;
 }
 
 interface Project {
@@ -28,7 +35,7 @@ interface Project {
   name: string;
 }
 
-export default function BreadcrumbsHeader({ href, current, parent }: BreadcrumbsHeaderProps) {
+export default function BreadcrumbsHeader({ href, current, parent, onShareClick  }: BreadcrumbsHeaderProps) {
   const { toggleButton } = useToggleButton();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>("");
@@ -128,14 +135,18 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
         )}
       </div>
       <div className="flex-1" />
-      <div className="relative flex items-center gap-2 px-4">
+        <RainbowButton type="submit" className="ml-5 mr-2 py-0 text-sm h-8 px-3" onClick={onShareClick}>
+          Share
+          <IoShareSocialOutline className="ml-1"/>
+        </RainbowButton>
+        <div className="relative flex items-center gap-2">
         <label htmlFor="project-select" className="mr-2">Project:</label>
         <div className="relative">
           <button
             onClick={() => (hasOrganization ? setIsDropdownOpen(!isDropdownOpen) : setIsInfoModalOpen(true))}
             className="block w-full min-w-[200px] border border-gray-300 rounded-md p-2 dark:bg-gray-700 dark:border-gray-600 flex items-center justify-between"
           >
-            {projects.find(project => project.id === selectedProject)?.name || "Select Project"}
+            {projects?.find(project => project.id === selectedProject)?.name || "Select Project"}
             <ChevronDown className="ml-2" />
           </button>
           {isDropdownOpen && hasOrganization && (
