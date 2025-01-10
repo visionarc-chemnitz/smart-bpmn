@@ -115,7 +115,7 @@ export function TeamSwitcher({
                 <DropdownMenuItem asChild>
                   <div
                     className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-                    onClick={openModal} // Open modal
+                    onClick={openModal}
                   >
                     <Plus className="h-5 w-5 text-gray-500 dark:text-gray-300" />
                     <span className="text-gray-800 dark:text-gray-300">
