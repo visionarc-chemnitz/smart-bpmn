@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { useModalManager } from "@/hooks/useModalManager";
-import OrganizationModal from "@/app/dashboard/organization/(components)/organization-modal";
+import { OrganizationModal } from '@/app/dashboard/organization-project-bpmn-modal/(components)/organizationModal';
 
 export function TeamSwitcher({
   organization,

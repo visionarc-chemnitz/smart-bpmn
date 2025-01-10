@@ -1,6 +1,6 @@
 import React from 'react';
 import { useModalManager } from '@/hooks/useModalManager';
-import BpmnFileInfoModal from '../bpmn-info/(components)/bpmn-file-info-modal'; // Correct the import path
+import { BpmnFileInfoModal } from '@/app/dashboard/organization-project-bpmn-modal/(components)/bpmnInfoModal'; // Correct the import path
 
 export default function BpmnInfo() {
   const {

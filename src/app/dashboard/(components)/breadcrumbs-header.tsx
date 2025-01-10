@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useToggleButton } from "@/hooks/use-toggle-button";
 import { useUser } from "@/providers/user-provider";
-import ProjectModal from "@/app/dashboard/project/(components)/project-modal";
+import { ProjectModal } from "@/app/dashboard/organization-project-bpmn-modal/(components)/projectModal";
 import { PlusCircle, ChevronDown, Info } from "lucide-react";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
 
