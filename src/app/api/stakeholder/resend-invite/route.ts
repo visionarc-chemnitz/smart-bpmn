@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from "nodemailer";
 import jwt from 'jsonwebtoken';
+import nodemailer from "nodemailer";
 import prisma from '@/lib/prisma';
-import { Role } from '@prisma/client';
+import { InvitationStatus, Role } from '@prisma/client';
 
 export async function POST(req: NextRequest) {
   const { email, bpmnId } = await req.json();
@@ -11,11 +11,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Email and BPMN id is required' }, { status: 400 });
   }
 
-  // Generate an invitation token
+  const JWT_SECRET = process.env.JWT_SECRET;
+  if (!JWT_SECRET) {
+    return NextResponse.json({ error: 'JWT error'});
+  }
+
+  // Check if the invitation exists in the database
+  const invitation = await prisma.invitation.findFirst({ where: { email: email, bpmnId: bpmnId, status: InvitationStatus.PENDING } });
+
+  if (!invitation) {
+    return NextResponse.json({ error: 'Invalid' }, { status: 400 });
+  }
+
+  if (invitation.status !== InvitationStatus.ACCEPTED) {
+    return NextResponse.json({ error: 'Invitation has already been accepted' }, { status: 400 });
+  }
+
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
     throw new Error('JWT_SECRET is not defined');
   }
+
   const token = jwt.sign(
     {
       email,
@@ -45,14 +61,13 @@ export async function POST(req: NextRequest) {
   });
 
   try {
-     // Store invitation in the database
-     const invitation = await prisma.invitation.create({
+    // Store invitation in the database
+    await prisma.invitation.update({
         data: {
-            email: email,
             token: token, 
-            bpmnId: bpmnId,
             expiresAt: expiresAt,
         },
+        where: { id: invitation.id }
       });
   
     await transporter.sendMail({
@@ -66,7 +81,6 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ message: 'Invitation email sent successfully' });
     } catch (error) {
-    console.error('Error sending invitation email:', error);
     return NextResponse.json({ error: 'Failed to send invitation email' }, { status: 500 });
   }
 }

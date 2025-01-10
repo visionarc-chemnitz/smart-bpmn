@@ -1,5 +1,5 @@
 import { RainbowButton } from '@/components/ui/rainbow-button';
-import React, { useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useModalManager } from '@/hooks/useModalManager';
 import {
   Avatar,
@@ -8,16 +8,24 @@ import {
 } from "@/components/ui/avatar";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { TiDeleteOutline } from "react-icons/ti";
+import { API_PATHS } from '@/app/api/api-path/apiPath';
+import { User } from 'next-auth';
+import Image from 'next/image';
 
+interface Invitation {
+    id: string;
+    bpmnId: string;
+    email: string;
+}
 interface ManageStakeholderModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const bpmnStakeholders = [
-  { id: 1, name: "John Doe", email: "john.doe@example.com" },
-  { id: 3, name: "Alice Johnson", email: "alice.johnson@example.com" },
-];
+// const bpmnStakeholders = [
+//   { id: 1, name: "John Doe", email: "john.doe@example.com" },
+//   { id: 3, name: "Alice Johnson", email: "alice.johnson@example.com" },
+// ];
 
 const pendingStakeholders = [
   { id: 1, name: "", email: "john.doe@example.com" }
@@ -26,14 +34,58 @@ const pendingStakeholders = [
 const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen, onClose }) => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
+    const bpmnId = "5897ce34-fa5e-4c3d-ac26-58d92d8266f1";
+    const [bpmnStakeholders, setBpmnStakeholders] = useState<User[]>([]);
+    const [pendingStakeholders, setPendingStakeholders] = useState<Invitation[]>([]);
+
+
+    useEffect(() => {
+        if (isOpen) {
+          const fetchBpmnStakeholders = async () => {
+            try {
+              const response = await fetch(`${API_PATHS.GET_BPMN_STAKEHOLDERS}?bpmnId=${bpmnId}`);
+              if (!response.ok) {
+                throw new Error('Failed to fetch BPMN stakeholders');
+              }
+              const data = await response.json();
+              setBpmnStakeholders(data.stakeholders);
+            } catch (error) {
+              console.error('Error fetching BPMN stakeholders:', error);
+            }
+          };
+    
+          fetchBpmnStakeholders();
+
+          const fetchPendingBpmnStakeholders = async () => {
+            try {
+              const response = await fetch(`${API_PATHS.GET_PENDING_BPMN_STAKEHOLDERS}?bpmnId=${bpmnId}`);
+              if (!response.ok) {
+                throw new Error('Failed to fetch pending BPMN stakeholders');
+              }
+              const data = await response.json();
+              setPendingStakeholders(data.pendingStakeholders);
+            } catch (error) {
+              console.error('Error fetching pending BPMN stakeholders:', error);
+            }
+          };
+    
+          fetchPendingBpmnStakeholders();
+        }
+      }, [isOpen, bpmnId]);
+
     if (!isOpen) return null;
 
     const validateEmail = (email: string) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(String(email).toLowerCase());
     };
+
+    const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const email = event.target.value;
+        setEmail(email);
+    };
     
-    const handleInviteClick = () => {
+    const handleInviteClick = async () => {
         if (!email) {
             setError('Email is required');
             return;
@@ -42,24 +94,61 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
           setError('Please enter a valid email address');
           return;
         }
+
+        const requestBody = {
+            email: email,
+            bpmnId: bpmnId
+        };
         // Handle the invite logic here
+        const response = await fetch(API_PATHS.INVITE_STAKEHOLDER, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody),
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+
+            throw new Error('Error inviting user.');
+        }
+
+        const data = await response.json();
+        window.alert('User has been invited successfully!');
     };
 
     const handleEmailFocus = () => {
         setError('');
     };
 
+    const resendInvitation = async (email: string, bpmnId: string) => {
+        const requestBody = {
+            email: email,
+            bpmnId: bpmnId
+        };
+        // Handle the invite logic here
+        const response = await fetch(API_PATHS.RESEND_STAKEHOLDER_INVITATION, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody),
+        });
+        
+        if (!response.ok) {
+            throw new Error('Error inviting user.');
+        }
+
+        const data = await response.json();
+        window.alert('User has been reinvited successfully!');
+    };
+
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-lg transition-all duration-300">
         <div className="w-[600px] max-h-[650px] p-6 bg-white border rounded-lg shadow-lg transform transition-all duration-300 scale-100 hover:scale-105 dark:bg-gray-800 dark:border-gray-700 overflow-y-auto custom-scrollbar">
             <div className="flex flex-col items-center text-center">
-            <img
+            <Image
                 alt="empty"
-                loading="lazy"
                 width={150}
                 height={150}
-                decoding="async"
-                data-nimg="1"
                 src="/assets/img/stakeholders/stakeholders.png"
                 className='opacity-85'
                 style={{ color: 'transparent' }}
@@ -77,6 +166,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
                 type="text"
                 id="email"
                 placeholder="Enter email address"
+                onChange={handleEmailChange}
                 onFocus={handleEmailFocus}
                 className="w-full p-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:focus:ring-blue-300 shadow-md"
                 />
@@ -97,8 +187,8 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
                 {bpmnStakeholders.map((stakeholder) => (
                 <div key={stakeholder.id} className="flex items-center gap-2 mb-2 px-1 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 p-4 rounded">
                     <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src='' alt={stakeholder.name.charAt(0)} />
-                    <AvatarFallback className="rounded-lg text-gray-600 dark:text-gray-200">{stakeholder.email.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarImage src='' alt={stakeholder?.name?.charAt(0)} />
+                    <AvatarFallback className="rounded-lg text-gray-600 dark:text-gray-200">{stakeholder?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col justify-center text-left text-sm leading-tight flex-grow">
                     <span className="truncate text-sm font-medium">{stakeholder.name}</span>
@@ -122,17 +212,16 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
                 {pendingStakeholders.map((stakeholder) => (
                 <div key={stakeholder.id} className="flex items-center gap-2 mb-2 px-1 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 p-4 rounded">
                     <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src='' alt={stakeholder.name.charAt(0)} />
-                    <AvatarFallback className="rounded-lg text-gray-600 dark:text-gray-200">{stakeholder.email.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback className="rounded-lg text-gray-600 dark:text-gray-200">{stakeholder?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col justify-center text-left text-sm leading-tight flex-grow">
-                    <span className="truncate text-sm font-medium">{stakeholder.name}</span>
-                    <span className="truncate text-sm">{stakeholder.email}</span>
+                    <span className="truncate text-sm">{stakeholder?.email}</span>
                     </div>
                     <div className="flex items-center gap-2 mr-2">
                     <MdOutlineMailOutline
                         className="text-gray-500 cursor-pointer hover:text-blue-500"
                         title="Resend Invitation"
+                        onClick={() => resendInvitation(stakeholder.email, bpmnId)}
                     />
                     <TiDeleteOutline
                         className="text-gray-500 cursor-pointer hover:text-red-500"
