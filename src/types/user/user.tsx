@@ -1,11 +1,12 @@
 export interface User {
+  id: string;
   name: string;
   email: string;
   avatar: string;
 }
 
 export interface UserContextValue {
-  user: User; 
+  user: User;
 }
 
 export interface UserProviderProps {

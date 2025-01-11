@@ -8,6 +8,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Organization {
+  id          String   @id @default(uuid())
+  name        String                       
+  createdBy   String   @unique
+  user        User     @relation("OrganizationOwner", fields: [createdBy], references: [id], onDelete: Cascade) // Relates to User
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt 
+  projects    Project[] @relation("OrganizationProjects") // Add this line to establish the back relation
+}
+
+model Project {
+  id                String   @id @default(uuid())
+  name              String  
+  createdBy         String   // the foreign key should be required
+  user              User     @relation("ProjectOwner", fields: [createdBy], references: [id], onDelete: Cascade) // this line for the relation
+  organizationId    String   // the foreign key should be required
+  organization      Organization @relation("OrganizationProjects", fields: [organizationId], references: [id]) // this line for the relation
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  bpmn              Bpmn[] @relation("ProjectBpmn") // Add this line to establish the back relation
+}
+
+model Bpmn {
+  id                String   @id @default(uuid())
+  fileName          String
+  projectId         String?
+  createdBy         String
+  user              User     @relation("BpmnOwner", fields: [createdBy], references: [id], onDelete: Cascade) // this line for the relation
+  isFavorite        Boolean  @default(false)
+  isShared          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  project           Project? @relation("ProjectBpmn", fields: [projectId], references: [id]) // this line for the relation
+  invitations       Invitation[] // Add this line to establish the back relation
+}
+
+model Invitation {
+  id        String   @id @default(uuid())
+  email     String
+  token     String
+  bpmnId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  bpmn      Bpmn     @relation(fields: [bpmnId], references: [id]) // Add this line for the relation
+}
+
 model User {
   id            String          @id @default(cuid())
   name          String?
@@ -19,6 +65,11 @@ model User {
   accounts      Account[]
   Authenticator Authenticator[]
   sessions      Session[]
+
+  // Explicit relation for the reverse side
+  organization  Organization?   @relation("OrganizationOwner")
+  projects      Project[]       @relation("ProjectOwner")
+  bpmnFiles     Bpmn[]          @relation("BpmnOwner") 
 }
 
 model Account {
