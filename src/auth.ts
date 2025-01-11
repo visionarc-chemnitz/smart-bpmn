@@ -16,6 +16,28 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { sendMagicSignInLink } from "./emails/magicLink"
 
+const customPrismaAdapter = {
+  ...PrismaAdapter(prisma),
+  async deleteSession(sessionId: string) {
+    try {
+      const session = await prisma.session.findUnique({
+        where: { sessionToken: sessionId },
+      });
+
+      if (session) {
+        await prisma.session.delete({
+          where: { sessionToken: sessionId },
+        });
+        console.log('Session deleted:', sessionId);
+      } else {
+        console.log('No session found to delete:', sessionId);
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+    }
+  },
+};
+
 // config providers
 const providers: Provider[] = [
   Google({
@@ -57,7 +79,7 @@ export const providerMap = providers
   .filter((provider) => provider.id !== "credentials");
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: customPrismaAdapter,
   providers,
   pages: {
     signIn: "/signin",
