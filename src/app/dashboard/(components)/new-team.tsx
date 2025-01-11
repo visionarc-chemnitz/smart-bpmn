@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useModalManager } from "@/hooks/useModalManager";
-import OrganizationModal from "../organization/(components)/organization-modal";
+import { OrganizationModal } from "@/app/dashboard/organization-project-bpmn-modal/(components)/organizationModal";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import TeamSpacePage from './teamSpace';
 
