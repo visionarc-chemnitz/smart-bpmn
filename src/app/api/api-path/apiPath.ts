@@ -1,4 +1,5 @@
 export const API_PATHS = {
+    UPDATE_USER: '/api/user/update',
     CHECK_ORGANIZATION: '/api/organization/check-organization',
     GET_ORGANIZATION: '/api/organization/get-organizations',
     SAVE_ORGANIZATION: '/api/organization/save-organization',

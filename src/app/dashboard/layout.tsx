@@ -10,6 +10,7 @@ import { UserProvider } from "@/providers/user-provider";
 import UpdateNameModal from "./(components)/update-name-modal";
 import { useEffect, useState } from "react";
 import { getUserData, updateUserName } from "../services/user/user.service";
+import { API_PATHS } from "../api/api-path/apiPath";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -38,9 +39,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   }, []);
 
   const handleSaveName = async (name: string) => {
-    console.log('Saving name:', name);
-    const res = await updateUserName(user.id, name);
-    if (res) {
+    const res = await fetch(API_PATHS.UPDATE_USER, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: { id: user.id, name } }),
+    });
+    if (res){
       setUser((prevUser) => ({ ...prevUser, name }));
       setIsModalOpen(false);
     }
