@@ -22,32 +22,10 @@ export default function SignIn() {
   
 
   useEffect(() => {
-    const acceptInvitation = async () => {
-      if (invitationToken) {
-        // Handle the invitation token, e.g., validate it or pre-fill some data
-        console.log('Invitation Token:', invitationToken);
-        setisStakeholderLogin(true);
-        const requestBody = {
-          invitationToken: invitationToken,
-      };
-
-        // validate invitation token
-        const response = await fetch(API_PATHS.ACCEPT_STAKEHOLDER_INVITATION, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(requestBody),
-        });
-        console.log(response);
-        if (!response.ok) {
-          console.log(response);
-          setacceptInvitationSuccessful(false);
-        }
-        setacceptInvitationSuccessful(true);
-        window.alert("Invitation accepted successfully, Please login with your email now.");
-      }
-    };
-
-    acceptInvitation();
+    if (invitationToken) {  
+      localStorage.setItem('invitationToken', invitationToken);
+    }
+   
   }, [invitationToken]);
 
   return (
