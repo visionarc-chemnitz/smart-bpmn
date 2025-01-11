@@ -15,8 +15,6 @@ import SendGrid from "next-auth/providers/sendgrid"
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { sendMagicSignInLink } from "./emails/magicLink"
- 
-
 
 // config providers
 const providers: Provider[] = [
@@ -67,6 +65,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   // session strategy refer to https://authjs.dev/concepts/session-strategies#database
   session: {
     strategy: "database",
+  },
+  callbacks: {
+    async signIn({ user, account, profile, credentials }) {
+      // Before creating the session, check if there is an existing session
+      const existingSession = await prisma.session.findFirst({
+        where: { userId: user.id },
+      });
+  
+      if (!existingSession) {
+        console.log("No existing session found for user, proceeding with sign-in");
+      }
+  
+      return true; // Continue with sign-in
+    },
   },
 })
 

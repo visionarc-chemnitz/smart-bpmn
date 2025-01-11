@@ -13,8 +13,7 @@ import { API_PATHS } from "@/app/api/api-path/apiPath";
 export default function SignIn() {
   const { toggleButton } = useToggleButton()
   const handleSignIn = async (providerId: string) => {
-    const res = await signIn(providerId, { redirectTo: "/dashboard" });
-    console.log(res);
+    await signIn(providerId, { redirectTo: "/dashboard" });
   };
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get('invitationToken');
@@ -44,6 +43,7 @@ export default function SignIn() {
           setacceptInvitationSuccessful(false);
         }
         setacceptInvitationSuccessful(true);
+        window.alert("Invitation accepted successfully, Please login with your email now.");
       }
     };
 

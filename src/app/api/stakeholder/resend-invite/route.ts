@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid' }, { status: 400 });
   }
 
-  if (invitation.status !== InvitationStatus.ACCEPTED) {
+  if (invitation.status == InvitationStatus.ACCEPTED) {
     return NextResponse.json({ error: 'Invitation has already been accepted' }, { status: 400 });
   }
 
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         <a href="${inviteLink}">${inviteLink}</a>
       `,
     });
-    return NextResponse.json({ message: 'Invitation email sent successfully' });
+    return NextResponse.json({ message: 'Invitation email sent successfully', invitation });
     } catch (error) {
     return NextResponse.json({ error: 'Failed to send invitation email' }, { status: 500 });
   }

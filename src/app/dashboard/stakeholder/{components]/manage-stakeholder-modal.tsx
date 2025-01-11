@@ -13,7 +13,7 @@ import { User } from 'next-auth';
 import Image from 'next/image';
 
 interface Invitation {
-    id: string;
+    id?: string;
     bpmnId: string;
     email: string;
 }
@@ -27,9 +27,9 @@ interface ManageStakeholderModalProps {
 //   { id: 3, name: "Alice Johnson", email: "alice.johnson@example.com" },
 // ];
 
-const pendingStakeholders = [
-  { id: 1, name: "", email: "john.doe@example.com" }
-];
+// const pendingStakeholders = [
+//   { id: 1, name: "", email: "john.doe@example.com" }
+// ];
 
 const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen, onClose }) => {
     const [email, setEmail] = useState('');
@@ -38,37 +38,35 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
     const [bpmnStakeholders, setBpmnStakeholders] = useState<User[]>([]);
     const [pendingStakeholders, setPendingStakeholders] = useState<Invitation[]>([]);
 
+    const fetchBpmnStakeholders = async () => {
+      try {
+        const response = await fetch(`${API_PATHS.GET_BPMN_STAKEHOLDERS}?bpmnId=${bpmnId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch BPMN stakeholders');
+        }
+        const data = await response.json();
+        setBpmnStakeholders(data.stakeholders);
+      } catch (error) {
+        console.error('Error fetching BPMN stakeholders:', error);
+      }
+    };
+
+    const fetchPendingBpmnStakeholders = async () => {
+      try {
+        const response = await fetch(`${API_PATHS.GET_PENDING_BPMN_STAKEHOLDERS}?bpmnId=${bpmnId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch pending BPMN stakeholders');
+        }
+        const data = await response.json();
+        setPendingStakeholders(data.pendingStakeholders);
+      } catch (error) {
+        console.error('Error fetching pending BPMN stakeholders:', error);
+      }
+    };
 
     useEffect(() => {
         if (isOpen) {
-          const fetchBpmnStakeholders = async () => {
-            try {
-              const response = await fetch(`${API_PATHS.GET_BPMN_STAKEHOLDERS}?bpmnId=${bpmnId}`);
-              if (!response.ok) {
-                throw new Error('Failed to fetch BPMN stakeholders');
-              }
-              const data = await response.json();
-              setBpmnStakeholders(data.stakeholders);
-            } catch (error) {
-              console.error('Error fetching BPMN stakeholders:', error);
-            }
-          };
-    
           fetchBpmnStakeholders();
-
-          const fetchPendingBpmnStakeholders = async () => {
-            try {
-              const response = await fetch(`${API_PATHS.GET_PENDING_BPMN_STAKEHOLDERS}?bpmnId=${bpmnId}`);
-              if (!response.ok) {
-                throw new Error('Failed to fetch pending BPMN stakeholders');
-              }
-              const data = await response.json();
-              setPendingStakeholders(data.pendingStakeholders);
-            } catch (error) {
-              console.error('Error fetching pending BPMN stakeholders:', error);
-            }
-          };
-    
           fetchPendingBpmnStakeholders();
         }
       }, [isOpen, bpmnId]);
@@ -107,12 +105,12 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
         });
         
         if (!response.ok) {
-            const errorData = await response.json();
-
             throw new Error('Error inviting user.');
         }
 
         const data = await response.json();
+        setPendingStakeholders([...pendingStakeholders, {email: email, bpmnId: bpmnId}]);
+        setEmail('');
         window.alert('User has been invited successfully!');
     };
 
@@ -140,6 +138,29 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
         window.alert('User has been reinvited successfully!');
     };
 
+    const removeStakeholder = async (email: string, bpmnId: string) => {
+      revokeAccess(email, bpmnId);
+      setBpmnStakeholders(bpmnStakeholders.filter((stakeholder) => stakeholder.email !== email));
+    }
+
+    const removeInvitation = async (email: string, bpmnId: string) => {
+      revokeAccess(email, bpmnId);
+      setPendingStakeholders(pendingStakeholders.filter((stakeholder) => stakeholder.email !== email));
+    }
+
+    const revokeAccess = async (email: string, bpmnId: string) => {
+      const response = await fetch(`${API_PATHS.REVOKE_STAKEHOLDER_BPMN_ACCESS}?email=${email}&bpmnId=${bpmnId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      if (!response.ok) {
+          throw new Error('Error deleting user');
+      }
+
+      const data = await response.json();
+      window.alert(data.message);
+    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-lg transition-all duration-300">
@@ -165,6 +186,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
                 <input
                 type="text"
                 id="email"
+                value={email}
                 placeholder="Enter email address"
                 onChange={handleEmailChange}
                 onFocus={handleEmailFocus}
@@ -198,6 +220,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
                     <TiDeleteOutline
                         className="text-gray-500 cursor-pointer hover:text-red-500"
                         title="Revoke Access"
+                        onClick={() => stakeholder.email && removeStakeholder(stakeholder.email, bpmnId)}
                     />
                     </div>
                 </div>
@@ -226,6 +249,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
                     <TiDeleteOutline
                         className="text-gray-500 cursor-pointer hover:text-red-500"
                         title="Revoke Access"
+                        onClick={() => removeInvitation(stakeholder.email, bpmnId)}
                     />
                     </div>
                 </div>

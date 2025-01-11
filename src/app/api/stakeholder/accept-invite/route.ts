@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid or expired invitation' }, { status: 400 });
   }
 
-  if (invitation.status !== InvitationStatus.ACCEPTED) {
+  if (invitation.status === InvitationStatus.ACCEPTED) {
     return NextResponse.json({ error: 'Invitation has already been accepted' }, { status: 400 });
   }
 
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     // Create the new record
     await prisma.stakeholderBpmn.create({
       data: {
-        bpmnId: invitation.bpmnId,
+        bpmnId: bpmnId,
         userId: user.id,
       },
     });
@@ -85,5 +85,5 @@ export async function POST(req: NextRequest) {
     where: { token: invitationToken }
   })
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, email: email });
 }
