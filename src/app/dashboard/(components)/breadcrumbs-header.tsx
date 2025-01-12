@@ -22,6 +22,7 @@ import { LiaShareAltSolid } from "react-icons/lia";
 import { PiShareNetworkThin } from "react-icons/pi";
 import { MdIosShare } from "react-icons/md";
 import { IoShareSocialOutline } from "react-icons/io5";
+import { UserRole } from "@/types/user/user";
 
 interface BreadcrumbsHeaderProps {
   href: string;
@@ -43,6 +44,7 @@ export default function BreadcrumbsHeader({ href, current, parent, onShareClick 
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false); // New info modal state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hasOrganization, setHasOrganization] = useState<boolean>(false);
+  const selectedOrganizationId = localStorage.getItem("selectedOrganizationId");
   const user = useUser();
 
   useEffect(() => {
@@ -52,13 +54,14 @@ export default function BreadcrumbsHeader({ href, current, parent, onShareClick 
           // Fetch organization info and projects in parallel
           const [orgResponse, projectsResponse] = await Promise.all([
             fetch(`${API_PATHS.CHECK_ORGANIZATION}?userId=${user.id}`),
-            fetch(`${API_PATHS.GET_PROJECTS}?userId=${user.id}`),
+            fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${selectedOrganizationId}`),
           ]);
 
           const orgData = await orgResponse.json();
           const projectsData = await projectsResponse.json();
-
-          setHasOrganization(orgData.hasOrganization);
+          if (selectedOrganizationId) {
+            setHasOrganization(true);
+          }
           setProjects(projectsData.projects);
 
           // Set the selected project from localStorage or default to the first project
@@ -101,7 +104,7 @@ export default function BreadcrumbsHeader({ href, current, parent, onShareClick 
   const handleProjectModalSubmit = async (e: React.FormEvent<HTMLFormElement>, data: { projectName: string; organizationId: string }) => {
     try {
       setIsProjectModalOpen(false);
-      const response = await fetch(`${API_PATHS.GET_PROJECTS}?userId=${user.id}`);
+      const response = await fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${selectedOrganizationId}`);
       const updatedProjects = await response.json();
       setProjects(updatedProjects.projects); // Refresh project list
       setSelectedProject(data.projectName);
@@ -135,10 +138,12 @@ export default function BreadcrumbsHeader({ href, current, parent, onShareClick 
         )}
       </div>
       <div className="flex-1" />
-        <RainbowButton type="submit" className="ml-5 mr-2 py-0 text-sm h-8 px-3" onClick={onShareClick}>
-          Share
-          <IoShareSocialOutline className="ml-1"/>
-        </RainbowButton>
+        {user.role !== UserRole.STAKEHOLDER && (
+          <RainbowButton type="submit" className="ml-5 mr-2 py-0 text-sm h-8 px-3" onClick={onShareClick}>
+            Share
+            <IoShareSocialOutline className="ml-1" />
+          </RainbowButton>
+        )}
         <div className="relative flex items-center gap-2">
         <label htmlFor="project-select" className="mr-2">Project:</label>
         <div className="relative">
@@ -152,12 +157,14 @@ export default function BreadcrumbsHeader({ href, current, parent, onShareClick 
           {isDropdownOpen && hasOrganization && (
             <div className="absolute mt-1 w-full min-w-[200px] bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-10">
               <ul className="py-1">
-                <li
-                  onClick={() => handleProjectChange("create-new")}
-                  className="cursor-pointer px-4 py-2 text-green-500 font-bold hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  ➕ Create
-                </li>
+                {user.role !== UserRole.STAKEHOLDER && (
+                  <li
+                    onClick={() => handleProjectChange("create-new")}
+                    className="cursor-pointer px-4 py-2 text-green-500 font-bold hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    ➕ Create
+                  </li>
+                )}
                 {projects.map((project) => (
                   <li
                     key={project.id}

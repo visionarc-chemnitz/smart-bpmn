@@ -11,7 +11,7 @@ export const useModalManager = () => {
     const [projectId, setProjectId] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
     const [isShared, setIsShared] = useState(false);
-    const [organization, setOrganization] = useState<any | null>(null);
+    const [organizations, setOrganizations] = useState<any | null>(null);
     const [projects, setProjects] = useState<any[]>([]);
     const [bpmnFiles, setBpmnFiles] = useState<any[]>([]);
     const [selectedProject, setSelectedProject] = useState<any | null>(null);
@@ -30,7 +30,8 @@ export const useModalManager = () => {
             const response = await fetch(`${API_PATHS.GET_ORGANIZATION}?userId=${user.id}`);
 
             if (response.status === 404) {
-                setOrganization(null);
+                setOrganizations([]);
+                localStorage.setItem('selectedOrganizationId', '');
                 return null;
             }
             if (!response.ok) {
@@ -38,8 +39,10 @@ export const useModalManager = () => {
             }
 
             const data = await response.json();
-            setOrganization(data.organization);
-            return data.organization;
+            if (data.organizations.length > 0) {
+                setOrganizations(data.organizations);
+            }
+            return data.organizations;
         } catch (error) {
             return null;
         } finally {
@@ -49,16 +52,18 @@ export const useModalManager = () => {
 
     // Fetch projects
     const fetchProjects = async () => {
+        const selectedOrganizationId = localStorage.getItem('selectedOrganizationId');
         try {
             setIsLoading(true);
-            const response = await fetch(`${API_PATHS.GET_PROJECTS}?userId=${user.id}`);
+            const response = await fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${selectedOrganizationId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch projects.');
             }
             const data = await response.json();
+            console.log('Projects:', data.projects);
             setProjects(data.projects);
         } catch (error) {
-           // console.error('Error fetching projects:', error);
+           console.error('Error fetching projects:', error);
         } finally {
             setIsLoading(false);
         }
@@ -69,13 +74,11 @@ export const useModalManager = () => {
         e.preventDefault();
 
         if (!user || !user.id) {
-            //console.error('User is not logged in or user ID is missing');
             window.alert('User is not logged in or user ID is missing');
             return;
         }
 
         if (!organizationName) {
-            //console.error('Organization name is required');
             window.alert('Organization name is required');
             return;
         }
@@ -100,7 +103,7 @@ export const useModalManager = () => {
             }
 
             const data = await response.json();
-            setOrganization(data);
+            setOrganizations(data);
             closeModal();
             window.alert('Organization has been created successfully!');
             window.location.reload();
@@ -113,6 +116,7 @@ export const useModalManager = () => {
 
     // Handle project submission
     const handleProjectSubmit = async (e: React.FormEvent) => {
+        const selectedOrganizationId = localStorage.getItem('selectedOrganizationId');
         e.preventDefault();
 
         if (!user || !user.id) {
@@ -121,9 +125,7 @@ export const useModalManager = () => {
             return;
         }
 
-        const fetchedOrganization = await fetchOrganization();
-
-        if (!fetchedOrganization) {
+        if (!selectedOrganizationId) {
             console.error('Organization is not created');
             window.alert('Organization is not created');
             return;
@@ -131,7 +133,7 @@ export const useModalManager = () => {
 
         const requestBody = {
             projectName,
-            organizationId: fetchedOrganization.id,
+            organizationId: selectedOrganizationId,
             createdBy: user.id,
         };
 
@@ -242,7 +244,7 @@ export const useModalManager = () => {
         handleBpmnFileSubmit,
         fetchOrganization,
         fetchProjects,
-        organization,
+        organizations,
         projects,
         bpmnFiles,
         selectedProject,

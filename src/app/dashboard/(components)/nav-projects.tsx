@@ -20,6 +20,8 @@ import {
 
 import ProjectModal from "../project/(components)/project-modal"
 import { useState } from 'react';
+import { UserRole } from "@/types/user/user"
+import { useUser } from "@/providers/user-provider"
 
 export function NavProjects({
   projects,
@@ -43,6 +45,7 @@ export function NavProjects({
     console.log('Organization ID:', data.organizationId);
     closeProjectModal();
   };
+  const user = useUser();
 
   return (
     <SidebarGroup>
@@ -72,21 +75,23 @@ export function NavProjects({
                     </SidebarMenuAction>
                   </SidebarMenuSubItem>
                 ))}
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton
-                    size="sm"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground transition-all ease-in-out duration-200"
-                    onClick={openProjectModal}
-                  >
-                    <Plus className="mr-2 size-4" />
-                    <button
-                      className="font-medium text-muted-foreground dark:text-muted-foreground-dark cursor-pointer transition-all ease-in-out duration-200 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                {user.role !== UserRole.STAKEHOLDER && (
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton
+                      size="sm"
+                      className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground transition-all ease-in-out duration-200"
                       onClick={openProjectModal}
                     >
-                      Create Project
-                    </button>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+                      <Plus className="mr-2 size-4" />
+                      <button
+                        className="font-medium text-muted-foreground dark:text-muted-foreground-dark cursor-pointer transition-all ease-in-out duration-200 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                        onClick={openProjectModal}
+                      >
+                        Create Project
+                      </button>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                )}
               </SidebarMenuSub>
             </CollapsibleContent>
           </SidebarMenuItem>

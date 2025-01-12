@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma'; // Adjust the import path as needed
+import { Role } from '@prisma/client';
 
 export async function POST(req: NextRequest) {
   const { organizationName, createdBy } = await req.json();
@@ -14,6 +15,16 @@ export async function POST(req: NextRequest) {
       data: {
         name: organizationName,
         createdBy: createdBy, // Save the user ID who created the organization
+      },
+    });
+
+    await prisma.user.update({
+      where: {
+        id: createdBy,
+      },
+      data: {
+        role: Role.ADMIN,
+        organizationId: organization.id,
       },
     });
 

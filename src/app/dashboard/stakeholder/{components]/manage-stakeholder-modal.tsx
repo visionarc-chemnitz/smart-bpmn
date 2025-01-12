@@ -34,7 +34,8 @@ interface ManageStakeholderModalProps {
 const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen, onClose }) => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
-    const bpmnId = "5897ce34-fa5e-4c3d-ac26-58d92d8266f1";
+    const bpmnId = localStorage.getItem('selectedBpmnId');
+    
     const [bpmnStakeholders, setBpmnStakeholders] = useState<User[]>([]);
     const [pendingStakeholders, setPendingStakeholders] = useState<Invitation[]>([]);
 

@@ -50,6 +50,13 @@ export async function POST(req: NextRequest) {
   const authLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`;
 
   if (user) {
+    await prisma.stakeholderBpmn.create({
+      data: {
+        bpmnId: bpmnId,
+        userId: user.id,
+      },
+    });
+
     await transporter.sendMail({
       from: `"VisionArc" <${process.env.RESEND_FROM}>`,
       to: email, 
@@ -88,6 +95,7 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ message: 'Invitation email sent successfully' }, { status: 200 });
     } catch (error) {
+      console.log(error);
     return NextResponse.json({ error: 'Failed to send invitation email' }, { status: 500 });
   }
 }

@@ -1,30 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma'; // Adjust the import path as needed
+import { Project, Role } from '@prisma/client';
+import { auth } from '@/auth';
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get('userId');
-
-  if (!userId || typeof userId !== 'string') {
-    console.error('Invalid user ID:', userId);
-    return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
+  const session = await auth();
+  if (!session?.user?.id) {
+    console.error('User not authenticated');
+    return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
   }
 
+  const { searchParams } = new URL(req.url);
+  const organizationId = searchParams.get('organizationId');
+  if (!organizationId) {
+    console.error('User not authenticated');
+    return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+  }
+
+  let projects: Project[] = [];
+
   try {
-    console.log('Fetching projects for user ID:', userId);
-    const projects = await prisma.project.findMany({
+    const user = await prisma.user.findUnique({
       where: {
-        createdBy: userId,
+        id: session.user.id,
       },
     });
 
-    if (projects.length === 0) {
-      console.log('No projects found for user ID:', userId);
-    } else {
-      console.log('Projects found:', projects);
+    if (user === null) {
+      console.log('User not found for ID:', session.user.id);
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ projects });
+    if (user.role === Role.MEMBER || user.role === Role.ADMIN) {
+      projects = await prisma.project.findMany({
+        where: {
+          organizationId: organizationId,
+        },
+      });
+    }
+
+    if (user.role === Role.STAKEHOLDER) {
+      projects = await prisma.project.findMany({
+        where: {
+          organizationId: organizationId,
+          bpmn: {
+            some: {
+              StakeholderBpmn: {
+                some: {
+                  userId: user.id,
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    return NextResponse.json({ projects }, { status: 200 });
   } catch (error) {
     console.error('Error fetching projects:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

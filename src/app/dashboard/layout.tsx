@@ -9,30 +9,49 @@ import { auth } from "@/auth";
 import { UserProvider } from "@/providers/user-provider";
 import UpdateNameModal from "./(components)/update-name-modal";
 import { useEffect, useState } from "react";
-import { getUserData, updateUserName } from "../services/user/user.service";
+import { getUser, getUserData, updateUserName } from "../services/user/user.service";
 import { API_PATHS } from "../api/api-path/apiPath";
+import { User, UserRole } from "@/types/user/user";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+const defaultUser: User = {
+  id: '',
+  name: '',
+  email: '',
+  avatar: '',
+  role: UserRole.MEMBER, // or any default role you prefer
+  organizationId: '',
+};
+
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const [user, setUser] = useState<{ id: string, name: string, email: string, avatar: string }>({ id: "", name: "", email: "", avatar: "" });
+  const [user, setUser] = useState<User>(defaultUser);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Fetch user data and update state
     const fetchUserData = async () => {
       const user = await getUserData();
-      const userData = {
-        id: user?.id || "",
-        name: user?.name || "",
-        email: user?.email || "",
-        avatar: user?.image || "",
-      };
-
-      setUser(userData);
-      setIsModalOpen(!userData.name); // Open modal if the user name is missing
+      if (user?.id) {
+        const userData = await getUser(user.id);
+        if (userData) {
+          const updatedUser: User = {
+            id: userData.id,
+            name: userData.name || '',
+            email: userData.email,
+            avatar: userData.image || '',
+            role: userData.role as UserRole || UserRole.MEMBER,
+            organizationId: userData.organizationId || '',
+          };
+          setUser(updatedUser);
+          setIsModalOpen(!userData.name); // Open modal if the user name is missing
+          if (updatedUser.organizationId) {
+            localStorage.setItem('selectedOrganizationId', updatedUser.organizationId);
+          }
+        }
+      }
     };
 
     fetchUserData();

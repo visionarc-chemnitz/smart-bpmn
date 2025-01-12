@@ -7,8 +7,8 @@ import TeamSpacePage from './(components)/teamSpace';
 import { useUser } from "@/providers/user-provider";
 import Bpmn from './(components)/bpmn-info';
 import ManageStakeholderModal from './stakeholder/{components]/manage-stakeholder-modal';
-import { useModalManager } from '@/hooks/useModalManager';
 import { API_PATHS } from '../api/api-path/apiPath';
+import { UserRole } from '@/types/user/user';
 
 export default function DashBoardPage() {
   const user = useUser();  // Get user directly here
@@ -18,6 +18,7 @@ export default function DashBoardPage() {
   const handleShareClick = () => {
     setIsManageStakeholderModalOpen(true); 
   };
+  const breadcrumbTitle = user.role === UserRole.STAKEHOLDER ? '' : 'Playground';
  
   useEffect(() => {
     const invitationToken = localStorage.getItem('invitationToken');
@@ -44,10 +45,11 @@ export default function DashBoardPage() {
     if (user && user.email) {
       const checkUserOrganization = async () => {
         try {
-          const response = await fetch(`/api/organization/check-organization?userId=${user.id}`);
+          const response = await fetch(`${API_PATHS.GET_ORGANIZATION}?userId=${user.id}`);
           const data = await response.json();
-
-          setHasOrganization(data.hasOrganization);
+          if (data.organizations.length > 0) {
+            setHasOrganization(true);
+          }
         } catch (error) {
           console.error("Error checking organization:", error);
         } finally {
@@ -69,8 +71,9 @@ export default function DashBoardPage() {
 
 
   return (
-    <>
-      <BreadcrumbsHeader href='/dashboard' current='Playground' parent='/' onShareClick={handleShareClick} />
+    <div>
+      <BreadcrumbsHeader href='/dashboard' current={breadcrumbTitle} parent='/' onShareClick={handleShareClick} />
+      {user.role !== UserRole.STAKEHOLDER && (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {hasOrganization ? (
             <TeamSpacePage />
@@ -78,10 +81,11 @@ export default function DashBoardPage() {
             <NewTeam />
           )}
         </div>
-        <ManageStakeholderModal
-          isOpen={isManageStakeholderModalOpen}
-          onClose={() => setIsManageStakeholderModalOpen(false)}
-        />
-    </>
+      )}
+      <ManageStakeholderModal
+        isOpen={isManageStakeholderModalOpen}
+        onClose={() => setIsManageStakeholderModalOpen(false)}
+      />
+    </div>
   );
 }

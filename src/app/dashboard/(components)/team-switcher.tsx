@@ -17,20 +17,23 @@ import {
 import { useModalManager } from "@/hooks/useModalManager";
 import { OrganizationModal } from '@/app/dashboard/organization-project-bpmn-modal/(components)/organizationModal';
 
+export interface Organization {
+  id?: string;
+  name: string;
+  logo?: string; // Updated to string for image URL
+  projects?: { name: string; url: string; icon: React.ElementType }[];
+}
 export function TeamSwitcher({
-  organization,
+  organizations,
 }: {
-  organization: {
-    name: string;
-    logo?: string; // Updated to string for image URL
-    projects?: { name: string; url: string; icon: React.ElementType }[];
-  } | null;
+  organizations: Organization[];
 }) {
   const { isMobile } = useSidebar();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [activeOrganization, setActiveOrganization] = React.useState(
-    organization || { name: "No Organization", logo: "", projects: [] }
+    organizations[0] || { name: "No Organization", logo: "", projects: [] }
   );
+
 
   // Modal state management
   const {
@@ -45,11 +48,22 @@ export function TeamSwitcher({
   // Fallback logo if undefined
   const defaultLogo = GalleryVerticalEnd;
 
-  React.useEffect(() => {
-    if (organization) {
-      setActiveOrganization(organization);
+  const handleOrganizationChange = (organization: Organization) => {
+    setActiveOrganization(organization);
+    if (organization.id) {
+      localStorage.setItem("selectedOrganizationId", organization.id);
     }
-  }, [organization]);
+    window.location.reload();
+  };
+
+  React.useEffect(() => {
+    if (organizations.length > 0) {
+      setActiveOrganization(organizations[0]);
+      if (organizations[0].id) {
+        localStorage.setItem("selectedOrganizationId", organizations[0].id);
+      }
+    }
+  }, [organizations]);
 
   const getInitials = (name: string) => {
     const initials = name.split(" ").map(word => word[0]).join("");
@@ -93,9 +107,11 @@ export function TeamSwitcher({
               sideOffset={4}
             >
               <DropdownMenuLabel>Organizations</DropdownMenuLabel>
-              {organization ? (
+              {organizations && organizations.length > 0 ? (
+              organizations.map((organization) => (
                 <DropdownMenuItem
-                  onClick={() => setActiveOrganization(organization)}
+                  key={organization.id}
+                  onClick={() => handleOrganizationChange(organization)}
                   className="gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                 >
                   {organization.logo ? (
@@ -111,7 +127,8 @@ export function TeamSwitcher({
                   )}
                   <span>{organization.name}</span>
                 </DropdownMenuItem>
-              ) : (
+              ))
+            ) : (
                 <DropdownMenuItem asChild>
                   <div
                     className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"

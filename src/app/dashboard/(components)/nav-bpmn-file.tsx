@@ -14,6 +14,8 @@ import {
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { FileText, ChevronRight, Loader } from "lucide-react";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
+import { useUser } from "@/providers/user-provider";
+import { UserRole } from "@/types/user/user";
 
 interface BpmnFile {
     id: string;
@@ -30,6 +32,13 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
     const [selectedFileId, setSelectedFileId] = useState<string | null>(null); // Track selected file
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const user = useUser();
+    const bpmnFileListLabel = user.role === UserRole.STAKEHOLDER ? 'Shared with you' : 'History';
+
+    const setSelectedBpmnId = (id: string) => {
+        setSelectedFileId(id);
+        localStorage.setItem("selectedBpmnId", id);
+    }
 
     useEffect(() => {
         const fetchBpmnFiles = async () => {
@@ -41,7 +50,7 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
 
                 // Automatically select the first file if none is selected
                 if (data.bpmnFiles?.length > 0 && !selectedFileId) {
-                    setSelectedFileId(data.bpmnFiles[0].id);
+                    setSelectedBpmnId(data.bpmnFiles[0].id);
                 }
             } catch (error) {
                 setError("Error fetching BPMN files");
@@ -66,7 +75,7 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
 
     return (
         <SidebarGroup>
-            <SidebarGroupLabel>History</SidebarGroupLabel>
+            <SidebarGroupLabel>{bpmnFileListLabel}</SidebarGroupLabel>
             <SidebarMenu>
                 {bpmnFiles.length === 0 ? (
                     <SidebarMenuItem className="flex items-center p-2 rounded-md">
@@ -91,7 +100,7 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
                                             className={`hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md ${
                                                 selectedFileId === file.id ? "bg-blue-100 dark:bg-blue-800" : ""
                                             }`}
-                                            onClick={() => setSelectedFileId(file.id)}
+                                            onClick={() => setSelectedBpmnId(file.id)}
                                         >
                                             <SidebarMenuSubButton asChild>
                                                 <a
