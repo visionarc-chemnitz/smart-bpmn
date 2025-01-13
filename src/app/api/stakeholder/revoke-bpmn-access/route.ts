@@ -18,12 +18,9 @@ export async function DELETE(req: NextRequest) {
     // Check if the invitation exists in the database
     const invitation = await prisma.invitation.findFirst({ where: { email: email, bpmnId: bpmnId } });
 
-    if (!invitation) {
-        return NextResponse.json({ error: 'Invalid' }, { status: 400 });
+    if (invitation) {
+        await prisma.invitation.delete({ where: { id: invitation.id } });
     }
-
-    // delete invitation
-    await prisma.invitation.delete({ where: { id: invitation.id } });
 
     // find corresponding user
     const user = await prisma.user.findFirst({ where: { email: email } });
