@@ -11,37 +11,31 @@ import { TiDeleteOutline } from "react-icons/ti";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
 import { User } from 'next-auth';
 import Image from 'next/image';
+import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
 
 interface Invitation {
     id?: string;
-    bpmnId: string;
+    bpmnId: string | undefined;
     email: string;
 }
+
 interface ManageStakeholderModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-// const bpmnStakeholders = [
-//   { id: 1, name: "John Doe", email: "john.doe@example.com" },
-//   { id: 3, name: "Alice Johnson", email: "alice.johnson@example.com" },
-// ];
-
-// const pendingStakeholders = [
-//   { id: 1, name: "", email: "john.doe@example.com" }
-// ];
-
 const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen, onClose }) => {
-    const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
-    const bpmnId = localStorage.getItem('selectedBpmnId');
+    const [email, setEmail] = useState("");
+    const [error, setError] = React.useState('');
+    const { currentBpmn }  = useOrganizationWorkspaceContext();
+    const bpmnId = currentBpmn?.id;
     
     const [bpmnStakeholders, setBpmnStakeholders] = useState<User[]>([]);
     const [pendingStakeholders, setPendingStakeholders] = useState<Invitation[]>([]);
 
     const fetchBpmnStakeholders = async () => {
       try {
-        const response = await fetch(`${API_PATHS.GET_BPMN_STAKEHOLDERS}?bpmnId=${bpmnId}`);
+        const response = await fetch(`${API_PATHS.GET_BPMN_STAKEHOLDERS}?bpmnId=${currentBpmn?.id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch BPMN stakeholders');
         }
@@ -54,7 +48,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
 
     const fetchPendingBpmnStakeholders = async () => {
       try {
-        const response = await fetch(`${API_PATHS.GET_PENDING_BPMN_STAKEHOLDERS}?bpmnId=${bpmnId}`);
+        const response = await fetch(`${API_PATHS.GET_PENDING_BPMN_STAKEHOLDERS}?bpmnId=${currentBpmn?.id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch pending BPMN stakeholders');
         }
@@ -65,23 +59,9 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
       }
     };
 
-    useEffect(() => {
-        if (isOpen) {
-          fetchBpmnStakeholders();
-          fetchPendingBpmnStakeholders();
-        }
-      }, [isOpen, bpmnId]);
-
-    if (!isOpen) return null;
-
-    const validateEmail = (email: string) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(String(email).toLowerCase());
-    };
-
     const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const email = event.target.value;
-        setEmail(email);
+      const email = event.target.value;
+      setEmail(email);
     };
     
     const handleInviteClick = async () => {
@@ -94,6 +74,10 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
           return;
         }
 
+        if (!bpmnId) {
+            setError('BPMN ID is required');
+            return;
+        }
         const requestBody = {
             email: email,
             bpmnId: bpmnId
@@ -106,7 +90,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
         });
         
         if (!response.ok) {
-            throw new Error('Error inviting user.');
+        setPendingStakeholders([...pendingStakeholders, {email: email, bpmnId: bpmnId!}]);
         }
 
         const data = await response.json();
@@ -162,6 +146,16 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
       const data = await response.json();
       window.alert(data.message);
     }
+
+    useEffect(() => {
+      if (isOpen) {
+        fetchBpmnStakeholders();
+        fetchPendingBpmnStakeholders();
+      }
+    }, [isOpen, bpmnId]);
+
+    if (!isOpen) return null;
+    
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-lg transition-all duration-300">
@@ -221,7 +215,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
                     <TiDeleteOutline
                         className="text-gray-500 cursor-pointer hover:text-red-500"
                         title="Revoke Access"
-                        onClick={() => stakeholder.email && removeStakeholder(stakeholder.email, bpmnId)}
+                        onClick={() => stakeholder.email && bpmnId && removeStakeholder(stakeholder.email, bpmnId)}
                     />
                     </div>
                 </div>
@@ -245,12 +239,12 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
                     <MdOutlineMailOutline
                         className="text-gray-500 cursor-pointer hover:text-blue-500"
                         title="Resend Invitation"
-                        onClick={() => resendInvitation(stakeholder.email, bpmnId)}
+                        onClick={() => bpmnId && resendInvitation(stakeholder.email, bpmnId)}
                     />
                     <TiDeleteOutline
                         className="text-gray-500 cursor-pointer hover:text-red-500"
                         title="Revoke Access"
-                        onClick={() => removeInvitation(stakeholder.email, bpmnId)}
+                        onClick={() => bpmnId && removeInvitation(stakeholder.email, bpmnId)}
                     />
                     </div>
                 </div>
@@ -272,3 +266,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
 };
 
 export default ManageStakeholderModal;
+function validateEmail(email: string) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(String(email).toLowerCase());
+}

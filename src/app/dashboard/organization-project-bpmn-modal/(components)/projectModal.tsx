@@ -8,14 +8,8 @@ export const ProjectModal: React.FC<{
     isOpen: boolean;
     onClose: () => void;
 }> = ({ isOpen, onClose }) => {
-    const { projectName, setProjectName, fetchOrganization, handleProjectSubmit } = useModalManager();
+    const { projectName, setProjectName, handleProjectSubmit } = useModalManager();
     const user = useUser();
-
-    useEffect(() => {
-        if (user && user.id) {
-            fetchOrganization();
-        }
-    }, [user]);
 
     return (
         <ModalLayout isOpen={isOpen} onClose={onClose} title="Create New Project">

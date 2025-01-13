@@ -64,9 +64,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    if (!organizations || organizations.length === 0) {
-      return NextResponse.json({ error: 'No organization found' }, { status: 404 });
-    }
     return NextResponse.json({organizations}, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Error fetching organizations' }, { status: 500 });

@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { getUser, getUserData, updateUserName } from "../services/user/user.service";
 import { API_PATHS } from "../api/api-path/apiPath";
 import { User, UserRole } from "@/types/user/user";
+import { OrganizationWorkspaceProvider } from "@/providers/organization-workspace-provider";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -72,15 +73,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="h-screen w-full">
       <UserProvider user={user}>
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset>{children}</SidebarInset>
-        </SidebarProvider>
-        <UpdateNameModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleSaveName}
-        />
+        <OrganizationWorkspaceProvider>
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>{children}</SidebarInset>
+          </SidebarProvider>
+          <UpdateNameModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSave={handleSaveName}
+          />
+        </OrganizationWorkspaceProvider>
       </UserProvider>
     </div>
   );

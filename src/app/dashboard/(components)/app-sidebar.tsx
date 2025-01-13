@@ -20,7 +20,7 @@ import Bpmn from './bpmn-info';
 import { NavMain } from "./nav-main";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
-import { Organization, TeamSwitcher } from "./team-switcher";
+import { TeamSwitcher } from "./team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +31,8 @@ import {
 import { useUser } from "@/providers/user-provider";
 import { NavBpmnFile } from "./nav-bpmn-file";
 import { UserRole } from "@/types/user/user";
+import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
+import { Organization } from "@/types/organization/organization";
 
 const data = {
   user: {
@@ -65,18 +67,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [organizations, setOrganizations] = React.useState<Organization[]>([]);
   const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
 
+  const {currentOrganization, setCurrentOrganization, currentProject, setCurrentProject} = useOrganizationWorkspaceContext();
+
   React.useEffect(() => {
     console.log('test');
     if (user && user.id) {
       const fetchOrganizations = async () => {
         try {
-          console.log('test');
           const response = await fetch(`/api/organization/get-organizations?userId=${user.id}`);
           const data = await response.json();
           console.log(data);
           if (data.organizations.length > 0) {
             console.log(data.organizations);
             setOrganizations(data.organizations);
+            setCurrentOrganization(data.organizations[0]);
+          } else {
+            setOrganizations([]);
+            setCurrentOrganization
           }
         } catch (error) {
           console.error("Error fetching organizations:", error);
@@ -104,7 +111,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {user.role !== UserRole.STAKEHOLDER && (
           <NavMain items={data.navMain} />
         )}
-        {selectedProjectId && <NavBpmnFile projectId={selectedProjectId} />}
+        {currentProject && <NavBpmnFile projectId={currentProject.id} />}
         {user.role !== UserRole.STAKEHOLDER && (
           <div className="m-4">
             <Bpmn />

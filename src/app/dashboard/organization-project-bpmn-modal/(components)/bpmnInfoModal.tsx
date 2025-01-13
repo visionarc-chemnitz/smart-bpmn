@@ -4,6 +4,7 @@ import { useModalManager } from '@/hooks/useModalManager';
 import { FaStar, FaRegStar } from 'react-icons/fa';
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import { ModalLayout } from '../modalLayout';
+import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
 
 
 export const BpmnFileInfoModal: React.FC<{
@@ -26,15 +27,14 @@ export const BpmnFileInfoModal: React.FC<{
         setIsFavorite,
         isShared,
         setIsShared,
-        projects,
-        fetchProjects,
         handleBpmnFileSubmit,
     } = useModalManager();
     const user = useUser();
+    const {projectList, setProjectList} = useOrganizationWorkspaceContext();
 
     useEffect(() => {
         if (user && user.id) {
-            fetchProjects();
+            // fetchProjects();
         }
         setFileName(initialData.fileName);
         setProjectId(initialData.projectId);
@@ -71,7 +71,7 @@ export const BpmnFileInfoModal: React.FC<{
                         <option value="" disabled>
                             Select Project
                         </option>
-                        {projects.map((project) => (
+                        {projectList.map((project) => (
                             <option key={project.id} value={project.id}>
                                 {project.name}
                             </option>

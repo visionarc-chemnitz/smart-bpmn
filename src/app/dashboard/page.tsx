@@ -5,10 +5,10 @@ import BreadcrumbsHeader from './(components)/breadcrumbs-header';
 import NewTeam from './(components)/new-team';
 import TeamSpacePage from './(components)/teamSpace';
 import { useUser } from "@/providers/user-provider";
-import Bpmn from './(components)/bpmn-info';
 import ManageStakeholderModal from './stakeholder/{components]/manage-stakeholder-modal';
 import { API_PATHS } from '../api/api-path/apiPath';
 import { UserRole } from '@/types/user/user';
+import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
 
 export default function DashBoardPage() {
   const user = useUser();  // Get user directly here
@@ -18,6 +18,7 @@ export default function DashBoardPage() {
   const handleShareClick = () => {
     setIsManageStakeholderModalOpen(true); 
   };
+  const { setCurrentOrganization, setCurrentOrganizationId } = useOrganizationWorkspaceContext();
   const breadcrumbTitle = user.role === UserRole.STAKEHOLDER ? '' : 'Playground';
  
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function DashBoardPage() {
       acceptInvitation();
       localStorage.removeItem('invitationToken');
     }
+
     if (user && user.email) {
       const checkUserOrganization = async () => {
         try {
@@ -49,6 +51,7 @@ export default function DashBoardPage() {
           const data = await response.json();
           if (data.organizations.length > 0) {
             setHasOrganization(true);
+            setCurrentOrganization(data.organizations[0]);
           }
         } catch (error) {
           console.error("Error checking organization:", error);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from "@/providers/user-provider";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
+import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
 
 export const useModalManager = () => {
     // State variables
@@ -16,8 +17,8 @@ export const useModalManager = () => {
     const [bpmnFiles, setBpmnFiles] = useState<any[]>([]);
     const [selectedProject, setSelectedProject] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-
     const user = useUser();
+    const { currentProject, projectList, setCurrentOrganization, setCurrentProject, setCurrentBpmn} = useOrganizationWorkspaceContext();
 
     // Modal management
     const openModal = () => setIsOpen(true);
@@ -31,7 +32,7 @@ export const useModalManager = () => {
 
             if (response.status === 404) {
                 setOrganizations([]);
-                localStorage.setItem('selectedOrganizationId', '');
+                setCurrentOrganization(null);
                 return null;
             }
             if (!response.ok) {
@@ -41,6 +42,7 @@ export const useModalManager = () => {
             const data = await response.json();
             if (data.organizations.length > 0) {
                 setOrganizations(data.organizations);
+                setCurrentOrganization(data.organizations[0]);
             }
             return data.organizations;
         } catch (error) {
@@ -60,14 +62,40 @@ export const useModalManager = () => {
                 throw new Error('Failed to fetch projects.');
             }
             const data = await response.json();
-            console.log('Projects:', data.projects);
             setProjects(data.projects);
+            if (data.projects.length > 0) {
+                setCurrentProject(data.projects[0]);
+            } else {
+                setCurrentProject(null);
+            }
         } catch (error) {
            console.error('Error fetching projects:', error);
         } finally {
             setIsLoading(false);
         }
     };
+
+    const fetchBpmnFiles = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetch(`${API_PATHS.GET_BPMN_FILES}?projectId=${currentProject?.id}`);
+            const data = await response.json();
+            setBpmnFiles(data.bpmnFiles || []);
+
+            // Automatically select the first file if none is selected
+            if (data.bpmnFiles?.length > 0) {
+                setCurrentBpmn(data.bpmnFiles[0]);
+            } else {
+                setCurrentBpmn(null);
+            }
+            console.log('2')
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     // Handle organization submission
     const handleOrganizationSubmit = async (e: React.FormEvent) => {
@@ -104,6 +132,7 @@ export const useModalManager = () => {
 
             const data = await response.json();
             setOrganizations(data);
+            setCurrentOrganization(data);
             closeModal();
             window.alert('Organization has been created successfully!');
             window.location.reload();
@@ -155,7 +184,7 @@ export const useModalManager = () => {
             const data = await response.json();
             console.log('Project created:', data);
             setProjects((prevProjects) => [...prevProjects, data]);
-            setSelectedProject(data);
+            setCurrentProject(data);
             closeModal();
             window.alert('Project is created successfully!');
             window.location.reload();
@@ -202,13 +231,16 @@ export const useModalManager = () => {
 
             // Update state and close modal
             setBpmnFiles((prevFiles) => [...prevFiles, data]);
+            setCurrentBpmn(data);
+            fetchBpmnFiles();
+            // Set the new bpmn file's project as current project
+            const project = projectList.find((project) => project.id === projectId);
+            if (project) {
+                setCurrentProject(project);
+            }
+
             closeModal();
 
-            // Show success alert and reload the page
-            window.alert('BPMN file saved successfully!');
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
         } catch (error) {
         } finally {
             setIsLoading(false);
@@ -218,8 +250,8 @@ export const useModalManager = () => {
     // Fetch initial data on mount
     useEffect(() => {
         if (user && user.id) {
-            fetchOrganization();
-            fetchProjects();
+            // fetchOrganization();
+            // fetchProjects();
         }
     }, [user]);
 
@@ -242,7 +274,7 @@ export const useModalManager = () => {
         handleOrganizationSubmit,
         handleProjectSubmit,
         handleBpmnFileSubmit,
-        fetchOrganization,
+        // fetchOrganization,
         fetchProjects,
         organizations,
         projects,
