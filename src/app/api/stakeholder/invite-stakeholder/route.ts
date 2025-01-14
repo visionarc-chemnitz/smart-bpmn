@@ -1,14 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from "nodemailer";
 import jwt from 'jsonwebtoken';
 import prisma from '@/lib/prisma';
 import { InvitationStatus, Role } from '@prisma/client';
+import emailService from '@/app/services/email/email-service';
 
 export async function POST(req: NextRequest) {
   const { email, bpmnId } = await req.json();
 
   if (!bpmnId || !email) {
     return NextResponse.json({ error: 'Email and BPMN id is required' }, { status: 400 });
+  }
+
+  if (!email || typeof email !== 'string') {
+    console.error('Invalid email:', email);
+    return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
+  }
+
+  // Check if existing stakeholder
+  const user = await prisma.user.findUnique({
+    where: { email, role: Role.STAKEHOLDER},
+  });
+
+  if (user) {
+    await prisma.stakeholderBpmn.create({
+      data: {
+        bpmnId: bpmnId,
+        userId: user.id,
+      },
+    });
+
+    await emailService.sendEmail({
+      to: email,
+      subject: "New BPMN file shared with you",
+      emailHeaderContent: "BPMN file shared with you",
+      emailContent: "You've been shared a new BPMN file. Please login to view",
+      buttonText: "LOGIN NOW",
+      buttonLink: `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`,
+    });
+    return NextResponse.json({ message: 'File shared successfully' }, { status: 200 });
   }
 
   // Generate an invitation token
@@ -26,55 +55,11 @@ export async function POST(req: NextRequest) {
     jwtSecret
   );
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-  if (!email || typeof email !== 'string') {
-    console.error('Invalid email:', email);
-    return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
-  }
-
-  const transporter = nodemailer.createTransport({
-    host: "smtp.sendgrid.net", 
-    port: 587, 
-    secure: false, 
-    auth: {
-      user: "apikey", 
-      pass: process.env.SENDGRID_API_KEY, 
-    },
-  });
-
-  // Check if existing stakeholder
-  const user = await prisma.user.findUnique({
-    where: { email, role: Role.STAKEHOLDER},
-  });
-
-  const authLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`;
-
-  if (user) {
-    await prisma.stakeholderBpmn.create({
-      data: {
-        bpmnId: bpmnId,
-        userId: user.id,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"VisionArc" <${process.env.RESEND_FROM}>`,
-      to: email, 
-      subject: "New BPMN file shared with you", 
-      html: `
-      <p>You've been shared a new BPMN file. Please login to view</p>
-      <a href="${authLink}">${authLink}</a>
-    `,
-    });
-    return NextResponse.json({ message: 'File shared successfully' }, { status: 200 });
-  }
   const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?invitationToken=${token}`;
-
-
 
   try {
      // Store invitation in the database
-     const invitation = await prisma.invitation.create({
+     await prisma.invitation.create({
         data: {
             email: email,
             token: token, 
@@ -83,19 +68,18 @@ export async function POST(req: NextRequest) {
             status: InvitationStatus.PENDING,
         },
       });
-  
-    await transporter.sendMail({
-        from: `"VisionArc" <${process.env.RESEND_FROM}>`,
-        to: email, 
-        subject: "You're Invited!", 
-        html: `
-        <p>You've been invited to join the platform. Click the link below to sign in:</p>
-        <a href="${inviteLink}">${inviteLink}</a>
-      `,
+
+    await emailService.sendEmail({
+      to: email,
+      subject: "You're Invited!",
+      emailHeaderContent: "You're Invited",
+      emailContent: `You've been invited to join our smart BPMN platform. Click the button below to get started.`,
+      buttonText: "ACCEPT INVITE",
+      buttonLink: inviteLink,
     });
-    return NextResponse.json({ message: 'Invitation email sent successfully' }, { status: 200 });
+  
+    return NextResponse.json({ message: 'Invitation email sent successfully'  }, { status: 200 });
     } catch (error) {
-      console.log(error);
-    return NextResponse.json({ error: 'Failed to send invitation email' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to send invitation email' }, { status: 500 });
   }
 }

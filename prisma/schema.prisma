@@ -9,15 +9,15 @@ datasource db {
 }
 
 model Organization {
-  id             String      @id @default(uuid())
-  name           String
-  createdBy      String      @unique
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  ownedUser      User        @relation("OrganizationOwner", fields: [createdBy], references: [id], onDelete: Cascade)
-  projects       Project[]   @relation("OrganizationProjects")
-  invitations    Invitation[]
-  users          User[]      @relation("OrganizationUser") // Relation to users in User table
+  id          String       @id @default(uuid())
+  name        String
+  createdBy   String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  invitations Invitation[]
+  ownedUser   User         @relation("OrganizationOwner", fields: [createdBy], references: [id], onDelete: Cascade)
+  projects    Project[]    @relation("OrganizationProjects")
+  users       User[]       @relation("OrganizationUser")
 }
 
 model Project {
@@ -48,36 +48,36 @@ model Bpmn {
 }
 
 model Invitation {
-  id             String           @id @default(uuid())
+  id             String            @id @default(uuid())
   email          String
-  token          String           @unique
-  bpmnId         String
-  organizationId String?
-  createdAt      DateTime         @default(now())
+  token          String            @unique
+  bpmnId         String?
+  createdAt      DateTime          @default(now())
   expiresAt      DateTime
   status         InvitationStatus?
-  bpmn           Bpmn             @relation(fields: [bpmnId], references: [id])
-  organization   Organization?    @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  bpmn           Bpmn?             @relation(fields: [bpmnId], references: [id])
+  organization   Organization?     @relation(fields: [organizationId], references: [id])
 }
 
 model User {
-  id               String            @id @default(cuid())
-  name             String?
-  email            String            @unique
-  emailVerified    DateTime?
-  image            String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  role             Role?             @default(MEMBER)
-  accounts         Account[]
-  Authenticator    Authenticator[]
-  organizationId   String?           // FK for the user's organization
-  organization     Organization?     @relation("OrganizationUser", fields: [organizationId], references: [id])
-  bpmnFiles        Bpmn[]            @relation("BpmnOwner")
-  ownedOrganization Organization?   @relation("OrganizationOwner")
-  projects         Project[]         @relation("ProjectOwner")
-  sessions         Session[]
-  StakeholderBpmn  StakeholderBpmn[]
+  id                String            @id @default(cuid())
+  name              String?
+  email             String            @unique
+  emailVerified     DateTime?
+  image             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  role              Role?             @default(MEMBER)
+  organizationId    String?
+  accounts          Account[]
+  Authenticator     Authenticator[]
+  bpmnFiles         Bpmn[]            @relation("BpmnOwner")
+  ownedOrganization Organization?     @relation("OrganizationOwner")
+  projects          Project[]         @relation("ProjectOwner")
+  sessions          Session[]
+  StakeholderBpmn   StakeholderBpmn[]
+  organization      Organization?     @relation("OrganizationUser", fields: [organizationId], references: [id])
 }
 
 model Account {
@@ -92,9 +92,9 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
 }

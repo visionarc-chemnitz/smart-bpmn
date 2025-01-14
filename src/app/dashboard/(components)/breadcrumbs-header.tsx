@@ -25,6 +25,7 @@ import { IoShareSocialOutline } from "react-icons/io5";
 import { UserRole } from "@/types/user/user";
 import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
 import { Project } from "@/types/project/project";
+import { ManageUsersModal } from "../shared/manage-users-modal";
 
 interface BreadcrumbsHeaderProps {
   href: string;
@@ -35,17 +36,20 @@ interface BreadcrumbsHeaderProps {
 
 
 
-export default function BreadcrumbsHeader({ href, current, parent, onShareClick  }: BreadcrumbsHeaderProps) {
+export default function BreadcrumbsHeader({ href, current, parent  }: BreadcrumbsHeaderProps) {
   const { toggleButton } = useToggleButton();
   // const [selectedProject, setSelectedProject] = useState<string>("");
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false); // New info modal state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hasOrganization, setHasOrganization] = useState<boolean>(false);
-  const selectedOrganizationId = localStorage.getItem("selectedOrganizationId");
   const user = useUser();
   const { currentOrganization, currentProject, currentBpmn, setCurrentProject, projectList, setProjectList } = useOrganizationWorkspaceContext();
+  const [isManageStakeholderModalOpen, setIsManageStakeholderModalOpen] = useState(false);
 
+  const onShareClick = () => {
+    setIsManageStakeholderModalOpen(true);
+  };
   useEffect(() => {
     if (user?.id) {
       const fetchData = async () => {
@@ -98,7 +102,7 @@ export default function BreadcrumbsHeader({ href, current, parent, onShareClick 
   const handleProjectModalSubmit = async (e: React.FormEvent<HTMLFormElement>, data: { projectName: string; organizationId: string }) => {
     try {
       setIsProjectModalOpen(false);
-      const response = await fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${selectedOrganizationId}`);
+      const response = await fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${currentOrganization?.id}`);
       const data = await response.json();
       const projects = data.projects;
       if (projects.length > 0) {
@@ -201,6 +205,13 @@ export default function BreadcrumbsHeader({ href, current, parent, onShareClick 
           </div>
         </div>
       )}
+      <ManageUsersModal
+        isOpen={isManageStakeholderModalOpen}
+        onClose={() => setIsManageStakeholderModalOpen(false)}
+        type="stakeholder" 
+        title="Manage who can view this BPMN" 
+        subTitle="Your BPMN is live! Choose who can view it." 
+      />
     </header>
   );
 }

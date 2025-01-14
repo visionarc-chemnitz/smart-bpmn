@@ -7,8 +7,6 @@ import { providerMap } from "@/auth";
 import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { API_PATHS } from "@/app/api/api-path/apiPath";
-
 
 export default function SignIn() {
   const { toggleButton } = useToggleButton()
@@ -17,7 +15,6 @@ export default function SignIn() {
   };
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get('invitationToken');
-  const [isStakeholderLogin, setisStakeholderLogin] = useState(false);
   const [acceptInvitationSuccessful, setacceptInvitationSuccessful] = useState(false);
   
 

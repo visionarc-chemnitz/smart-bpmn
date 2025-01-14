@@ -20,21 +20,17 @@ export async function POST(req: NextRequest) {
   }
   const decoded = jwt.verify(invitationToken, JWT_SECRET);
 
-  const { email, role, bpmnId, exp } = decoded as { email: string, role: string, bpmnId: string, exp: number };
+  const { email, role, bpmnId, organizationId, exp } = decoded as { email: string, role: string, bpmnId: string, organizationId: string, exp: number };
 
   // Check if the invitation exists in the database
   const invitation = await prisma.invitation.findUnique({ where: { token: invitationToken } });
 
-  if (!invitation) {
+  if (!invitation || (Date.now() > exp * 1000)) {
     return NextResponse.json({ error: 'Invalid or expired invitation' }, { status: 400 });
   }
 
   if (invitation.status === InvitationStatus.ACCEPTED) {
     return NextResponse.json({ error: 'Invitation has already been accepted' }, { status: 400 });
-  }
-
-  if (Date.now() > exp * 1000) {
-    return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
   }
 
   // Check if the user already exists
@@ -60,12 +56,16 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  if (invitation.email !== email) {
+    return NextResponse.json({ error: 'Email mismatch' }, { status: 400 });
+  }
+
   // If role is stakeholder, create a new stakeholder record
-  if (role === Role.STAKEHOLDER) {
+  if (role === Role.STAKEHOLDER ) {
     // Check if the bpmn stakeholder record already exists
     const bpmnStakeholder = await prisma.stakeholderBpmn.findFirst({
         where: {
-          bpmnId: invitation.bpmnId,
+          bpmnId: invitation.bpmnId!,
           userId: user.id,
         },
     })
@@ -82,13 +82,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
-
   // If role is member, assign the user to the organization
-  if (role === Role.MEMBER && invitation.organizationId) {
+  if (role === Role.MEMBER && organizationId) {
     // Check if the organization exists
     const organization = await prisma.organization.findFirst({
       where: {
-        id: invitation.organizationId,
+        id: organizationId,
       },
     });
 
@@ -97,7 +96,7 @@ export async function POST(req: NextRequest) {
       await prisma.user.update({
         where: { id: user.id },
         data: {
-          organizationId: organization.id,
+          organizationId: organizationId,
         },
       });
     }

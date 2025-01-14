@@ -30,21 +30,24 @@ class EmailService {
 
   async sendEmail(options: EmailOptions): Promise<void> {
     try {
-      const baseTemplatePath = path.join(__dirname, "email-template", "base-template.html");
+      const baseTemplatePath = path.join(process.cwd(), "src", "app", "email-template", "base-template.html");
       const baseTemplate = fs.readFileSync(baseTemplatePath, "utf8");
 
       const populatedHtml = this.replaceTemplateVariables(baseTemplate, {
+        emailHeaderContent: options.emailHeaderContent,
         emailContent: options.emailContent,
         buttonText: options.buttonText || "signIn",
         buttonLink: options.buttonLink || `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`,
       });
 
-      await this.transporter.sendMail({
+      const res = await this.transporter.sendMail({
         from: this.defaultFrom,
         to: options.to,
         subject: options.subject,
         html: populatedHtml,
       });
+
+      return res;
 
       console.log("Email sent successfully");
     } catch (error) {

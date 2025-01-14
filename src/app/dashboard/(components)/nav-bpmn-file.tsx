@@ -26,12 +26,11 @@ interface NavBpmnFileProps {
 
 export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
     const [bpmnFiles, setBpmnFiles] = useState<Bpmn[]>([]);
-    const [selectedFileId, setSelectedFileId] = useState<string | null>(null); // Track selected file
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const user = useUser();
     const bpmnFileListLabel = user.role === UserRole.STAKEHOLDER ? 'Shared with you' : 'History';
-    const { currentProject, currentBpmn, setCurrentBpmn } = useOrganizationWorkspaceContext();
+    const { currentProject, currentBpmn, setCurrentBpmn, selectionChanged } = useOrganizationWorkspaceContext();
 
     useEffect(() => {
         const fetchBpmnFiles = async () => {
@@ -41,10 +40,9 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
                 setBpmnFiles(data.bpmnFiles || []);
                 setLoading(false);
 
-                // Automatically select the first file if none is selected
+                // Automatically select the last file (most recently created)
                 if (data.bpmnFiles?.length > 0) {
-                    setCurrentBpmn(data.bpmnFiles[0]);
-                    setSelectedFileId(data.bpmnFiles[0].id);
+                    setCurrentBpmn(data.bpmnFiles[data.bpmnFiles.length - 1]);
                 } else {
                     setCurrentBpmn(null);
                 }
@@ -55,7 +53,7 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
         };
         fetchBpmnFiles();
 
-    }, [currentProject, selectedFileId]);
+    }, [currentProject, selectionChanged]);
 
     if (loading) {
         return (

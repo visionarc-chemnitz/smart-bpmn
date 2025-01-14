@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma'; // Adjust the import path as needed
+import { Role } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -10,13 +11,14 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const members = await prisma.user.findMany({
+        const users = await prisma.user.findMany({
             where: {
               organizationId: organizationId,
+              role: Role.MEMBER,
             },
           });
 
-        return NextResponse.json({ members }, { status: 200 });
+        return NextResponse.json({ users }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }

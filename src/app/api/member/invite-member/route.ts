@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const token = jwt.sign(
     {
       email,
-      role: Role.STAKEHOLDER,
+      role: Role.MEMBER,
       organizationId: organizationId,
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, 
     },
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   // Check if existing stakeholder
   const user = await prisma.user.findUnique({
-    where: { email, role: Role.STAKEHOLDER},
+    where: { email, role: Role.MEMBER},
   });
 
   const organization = await prisma.organization.findUnique({
@@ -49,7 +49,6 @@ export async function POST(req: NextRequest) {
             organizationId: organizationId,
             expiresAt: expiresAt,
             status: InvitationStatus.PENDING,
-            bpmnId: '', // Not required for organization invitation
         },
       });
   

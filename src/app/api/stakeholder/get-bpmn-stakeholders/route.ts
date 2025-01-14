@@ -11,24 +11,20 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const stakeholders = await prisma.user.findMany({
-            where: {
-              StakeholderBpmn: {
-                some: {
-                  bpmnId: bpmnId,
-                },
+      const users = await prisma.user.findMany({
+          where: {
+            StakeholderBpmn: {
+              some: {
+                bpmnId: bpmnId,
               },
             },
-            include: {
-              StakeholderBpmn: true,
-            },
-          });
+          },
+          include: {
+            StakeholderBpmn: true,
+          },
+        });
 
-        if (!stakeholders) {
-            return NextResponse.json({ error: 'No stakeholders' }, { status: 404 });
-        }
-
-        return NextResponse.json({ stakeholders });
+      return NextResponse.json({ users }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }

@@ -25,6 +25,8 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
@@ -33,6 +35,7 @@ import { NavBpmnFile } from "./nav-bpmn-file";
 import { UserRole } from "@/types/user/user";
 import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
 import { Organization } from "@/types/organization/organization";
+import { Settings } from "./settings";
 
 const data = {
   user: {
@@ -65,8 +68,6 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useUser();
   const [organizations, setOrganizations] = React.useState<Organization[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
-
   const {currentOrganization, setCurrentOrganization, currentProject, setCurrentProject} = useOrganizationWorkspaceContext();
 
   React.useEffect(() => {
@@ -76,14 +77,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         try {
           const response = await fetch(`/api/organization/get-organizations?userId=${user.id}`);
           const data = await response.json();
-          console.log(data);
           if (data.organizations.length > 0) {
             console.log(data.organizations);
             setOrganizations(data.organizations);
             setCurrentOrganization(data.organizations[0]);
           } else {
             setOrganizations([]);
-            setCurrentOrganization
+            setCurrentOrganization(null);
           }
         } catch (error) {
           console.error("Error fetching organizations:", error);
@@ -93,14 +93,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       fetchOrganizations();
     }
   }, [user]);
-
-  React.useEffect(() => {
-    const storedProjectId = localStorage.getItem("selectedProjectId");
-    if (storedProjectId) {
-      setSelectedProjectId(storedProjectId);
-    }
-  }, []);
-
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -116,6 +108,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <div className="m-4">
             <Bpmn />
           </div>
+        )}
+        {user.role === UserRole.ADMIN && (
+          <Settings/>
         )}
       </SidebarContent>
       <SidebarFooter>

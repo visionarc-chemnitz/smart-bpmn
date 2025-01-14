@@ -27,10 +27,6 @@ export function TeamSwitcher({
 }) {
   const { isMobile } = useSidebar();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [activeOrganization, setActiveOrganization] = React.useState(
-    organizations[0] || { name: "No Organization", logo: "", projects: [] }
-  );
-
 
   // Modal state management
   const {
@@ -65,7 +61,7 @@ export function TeamSwitcher({
                 <div className="grid flex-1 text-left text-sm leading-tight space-y-1">
                   <div className="flex items-center gap-2">
                       <div className="h-8 w-8 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded text-white">
-                        {currentOrganization ? getInitials(currentOrganization.name) : ""}
+                        {currentOrganization ? getInitials(currentOrganization.name) : 'O'}
                       </div>
                     {!isCollapsed && (
                       <span className="truncate font-semibold text-gray-800 dark:text-white">

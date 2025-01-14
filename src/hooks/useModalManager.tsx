@@ -18,7 +18,7 @@ export const useModalManager = () => {
     const [selectedProject, setSelectedProject] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const user = useUser();
-    const { currentProject, projectList, setCurrentOrganization, setCurrentProject, setCurrentBpmn} = useOrganizationWorkspaceContext();
+    const { currentProject, projectList, setCurrentOrganization, setCurrentProject, setCurrentBpmn, setSelectionChanged} = useOrganizationWorkspaceContext();
 
     // Modal management
     const openModal = () => setIsOpen(true);
@@ -88,7 +88,7 @@ export const useModalManager = () => {
             } else {
                 setCurrentBpmn(null);
             }
-            console.log('2')
+            setSelectionChanged(true);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching projects:', error);
@@ -246,14 +246,6 @@ export const useModalManager = () => {
             setIsLoading(false);
         }
     };
-
-    // Fetch initial data on mount
-    useEffect(() => {
-        if (user && user.id) {
-            // fetchOrganization();
-            // fetchProjects();
-        }
-    }, [user]);
 
     return {
         isOpen,

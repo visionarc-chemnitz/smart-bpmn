@@ -11,13 +11,13 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const pendingMembers = await prisma.invitation.findMany({
+        const invitations = await prisma.invitation.findMany({
             where: {
                 organizationId: organizationId,
                 status: InvitationStatus.PENDING
             }
         });
-        return NextResponse.json({ pendingMembers }, { status: 200 });
+        return NextResponse.json({ invitations }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }

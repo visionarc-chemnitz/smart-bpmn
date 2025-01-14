@@ -5,13 +5,6 @@ import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 // Define the context type
 interface OrganizationWorkspaceContextType {
-  // currentOrganizationId: string;
-  // setCurrentOrganizationId: (id: string) => void;
-  // currentProjectId: string;
-  // setCurrentProjectId: (id: string) => void;
-  // currentBpmnId: string;
-  // setCurrentBpmnId: (id: string) => void;
-
   currentOrganization: Organization | null;
   setCurrentOrganization: (organization: Organization | null) => void;
   currentProject: Project | null;
@@ -20,6 +13,8 @@ interface OrganizationWorkspaceContextType {
   setCurrentBpmn: (bpmn: Bpmn | null) => void;
   projectList: Project[];
   setProjectList: (projects: Project[]) => void;
+  selectionChanged: boolean;
+  setSelectionChanged: (changed: boolean) => void;
 }
 
 const OrganizationWorkspaceContext = createContext<OrganizationWorkspaceContextType | null>(null);
@@ -30,24 +25,13 @@ interface OrganizationWorkspaceProviderProps {
 
 // Provider component
 export const OrganizationWorkspaceProvider = ({ children }: OrganizationWorkspaceProviderProps) => {
-  // const [currentOrganizationId, setCurrentOrganizationId] = useState('');
-  // const [currentProjectId, setCurrentProjectId] = useState('');
-  // const [currentBpmnId, setCurrentBpmnId] = useState('');
-
   const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [currentBpmn, setCurrentBpmn] = useState<Bpmn | null>(null);
   const [projectList, setProjectList] = useState<Project[] | []>([]);
-
+  const [selectionChanged, setSelectionChanged] = useState<boolean>(false);
 
   const value: OrganizationWorkspaceContextType = {
-    // currentOrganizationId,
-    // setCurrentOrganizationId,
-    // currentProjectId,
-    // setCurrentProjectId,
-    // currentBpmnId,
-    // setCurrentBpmnId,
-
     currentOrganization,
     setCurrentOrganization,
     currentProject: currentProject,
@@ -56,6 +40,8 @@ export const OrganizationWorkspaceProvider = ({ children }: OrganizationWorkspac
     setCurrentBpmn,
     projectList,
     setProjectList,
+    selectionChanged,
+    setSelectionChanged,
   };
 
   return (

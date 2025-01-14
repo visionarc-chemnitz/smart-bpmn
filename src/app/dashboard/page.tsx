@@ -18,7 +18,7 @@ export default function DashBoardPage() {
   const handleShareClick = () => {
     setIsManageStakeholderModalOpen(true); 
   };
-  const { setCurrentOrganization, setCurrentOrganizationId } = useOrganizationWorkspaceContext();
+  const { setCurrentOrganization } = useOrganizationWorkspaceContext();
   const breadcrumbTitle = user.role === UserRole.STAKEHOLDER ? '' : 'Playground';
  
   useEffect(() => {
@@ -85,10 +85,8 @@ export default function DashBoardPage() {
           )}
         </div>
       )}
-      <ManageStakeholderModal
-        isOpen={isManageStakeholderModalOpen}
-        onClose={() => setIsManageStakeholderModalOpen(false)}
-      />
+      
+
     </div>
   );
 }

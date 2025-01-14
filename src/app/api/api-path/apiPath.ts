@@ -14,4 +14,9 @@ export const API_PATHS = {
     GET_BPMN_STAKEHOLDERS: '/api/stakeholder/get-bpmn-stakeholders',
     GET_PENDING_BPMN_STAKEHOLDERS: '/api/invitation/get-pending-bpmn-stakeholders',
     REVOKE_STAKEHOLDER_BPMN_ACCESS: '/api/stakeholder/revoke-bpmn-access',
+    INVITE_MEMBER: '/api/member/invite-member',
+    RESEND_MEMBER_INVITATION: '/api/member/resend-invite',
+    GET_MEMBERS: '/api/member/get-members',
+    GET_PENDING_MEMBERS: '/api/invitation/get-pending-members',
+    REVOKE_MEMBER_ACCESS: '/api/member/revoke-access',
 };
