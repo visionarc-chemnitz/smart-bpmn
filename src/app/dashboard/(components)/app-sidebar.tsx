@@ -66,10 +66,10 @@ const data = {
           title: "Image2BPMN",
           url: "/dashboard/image2bpmn",
         },
-        // {
-        //   title: "Settings",
-        //   url: "#",
-        // },
+        {
+          title: "Diff Checker",
+          url: "/dashboard/diff-checker",
+        },
       ],
     },
     // {

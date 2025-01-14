@@ -6,6 +6,26 @@ import {
 } from 'bpmn-js-properties-panel';
 import { BpmnModelerProps, BpmnModelerHookResult } from '@/types/board/board-types';
 import { useBpmnTheme } from './use-bpmn-theme';
+import { layoutProcess } from "bpmn-auto-layout"
+// Add overlay import
+import Overlays from 'diagram-js/lib/features/overlays';
+
+type OverlaysType = typeof Overlays;
+
+interface IOverlays {
+  add: (elementId: string, options: {
+    position: {
+      top?: number;
+      right?: number;
+      bottom?: number;
+      left?: number;
+    };
+    html: string | HTMLElement;
+  }) => string;
+  remove: (filter: { element?: string }) => void;
+  get: (filter: { element?: string }) => any[];
+  clear: () => void;  // Add this method
+}
 
 export const useBpmnModeler = ({
   containerId,
@@ -21,6 +41,36 @@ export const useBpmnModeler = ({
   const propertiesPanelRef = useRef<HTMLElement | null>(null);
 
   useBpmnTheme(modeler);
+
+  // Add overlay methods
+  const addOverlay = (elementId: string, html: string | HTMLElement) => {
+    if (!modeler) return;
+    const overlays = modeler.get<IOverlays>('overlays');
+    overlays.add(elementId, {
+      position: {
+        bottom: -5,
+        left: 0
+      },
+      html: html
+    });
+  };
+
+  const removeOverlay = (elementId: string) => {
+    if (!modeler) return;
+    const overlays = modeler.get<IOverlays>('overlays');
+    overlays.remove({ element: elementId });
+  };
+
+  // Update clearOverlays function
+  const clearOverlay = () => {
+    if (!modeler) return;
+    try {
+      const overlays = modeler.get<IOverlays>('overlays');
+      overlays.clear();
+    } catch (error) {
+      console.error('Error clearing overlays:', error);
+    }
+  };
 
   useEffect(() => {
     const container = document.getElementById(containerId);
@@ -39,7 +89,7 @@ export const useBpmnModeler = ({
       },
       additionalModules: [
         BpmnPropertiesPanelModule,
-        BpmnPropertiesProviderModule,
+        BpmnPropertiesProviderModule
       ],
       palette: {
         open: true
@@ -87,6 +137,12 @@ export const useBpmnModeler = ({
     if (!modeler) return;
 
     try {
+      // Apply auto layout to the XML
+      // const layoutedXml = await layoutProcess(xml);
+      
+      // Import the layouted XML
+      // await modeler.importXML(layoutedXml);
+      console.log(xml)
       await modeler.importXML(xml);
       const canvas = modeler.get('canvas') as { zoom: (type: string) => void };
       canvas.zoom('fit-viewport');
@@ -122,10 +178,16 @@ export const useBpmnModeler = ({
     }
   };
 
+  // Update return type to include overlay methods
   return {
     modeler,
     importXML,
     exportXML,
     exportSVG,
+    addOverlay,
+    removeOverlay,
+    clearOverlay,     // Add this
+    containerRef,
+    propertiesPanelRef
   };
 };

@@ -31,8 +31,12 @@ export interface BpmnModelerHookResult {
   importXML: (xml: string) => Promise<void>;
   exportXML: () => Promise<string>;
   exportSVG: () => Promise<string>;
+  addOverlay: (elementId: string, html: string | HTMLElement) => void;
+  removeOverlay: (elementId: string) => void;
+  clearOverlay: () => void;
+  containerRef: React.RefObject<HTMLElement | null>;
+  propertiesPanelRef: React.RefObject<HTMLElement | null>;
 }
-
 
 // Types for Upload Section
 export interface UploadSectionProps {
@@ -40,4 +44,11 @@ export interface UploadSectionProps {
   onDrop: (e: React.DragEvent) => void;
   selectedFile: File | null;
   isLoading: boolean;
+}
+
+export interface BpmnModelerRef {
+  exportXML: () => Promise<string>;
+  addOverlay: (elementId: string, html: string | HTMLElement) => void;
+  removeOverlay: (elementId: string) => void;
+  clearOverlay: () => void;
 }
