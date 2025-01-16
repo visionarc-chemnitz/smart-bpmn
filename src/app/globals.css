@@ -131,4 +131,36 @@ body {
   .bjs-powered-by {
     display: none !important;
   }
+
+  .marker-container {
+    pointer-events: none;
+  }
+  
+  .marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+  }
+  
+  .marker-removed {
+    background-color: #F44336;
+  }
+  
+  .marker-added {
+    background-color: #4CAF50;
+  }
+  
+  .marker-layout-changed {
+    background-color: #2196F3;
+  }
+
+  .marker-changed {
+    background-color: #CD8318;
+  }
 }

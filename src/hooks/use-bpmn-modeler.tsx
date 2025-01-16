@@ -8,9 +8,6 @@ import { BpmnModelerProps, BpmnModelerHookResult } from '@/types/board/board-typ
 import { useBpmnTheme } from './use-bpmn-theme';
 import { layoutProcess } from "bpmn-auto-layout"
 // Add overlay import
-import Overlays from 'diagram-js/lib/features/overlays';
-
-type OverlaysType = typeof Overlays;
 
 interface IOverlays {
   add: (elementId: string, options: {
@@ -23,7 +20,6 @@ interface IOverlays {
     html: string | HTMLElement;
   }) => string;
   remove: (filter: { element?: string }) => void;
-  get: (filter: { element?: string }) => any[];
   clear: () => void;  // Add this method
 }
 
@@ -41,36 +37,6 @@ export const useBpmnModeler = ({
   const propertiesPanelRef = useRef<HTMLElement | null>(null);
 
   useBpmnTheme(modeler);
-
-  // Add overlay methods
-  const addOverlay = (elementId: string, html: string | HTMLElement) => {
-    if (!modeler) return;
-    const overlays = modeler.get<IOverlays>('overlays');
-    overlays.add(elementId, {
-      position: {
-        bottom: -5,
-        left: 0
-      },
-      html: html
-    });
-  };
-
-  const removeOverlay = (elementId: string) => {
-    if (!modeler) return;
-    const overlays = modeler.get<IOverlays>('overlays');
-    overlays.remove({ element: elementId });
-  };
-
-  // Update clearOverlays function
-  const clearOverlay = () => {
-    if (!modeler) return;
-    try {
-      const overlays = modeler.get<IOverlays>('overlays');
-      overlays.clear();
-    } catch (error) {
-      console.error('Error clearing overlays:', error);
-    }
-  };
 
   useEffect(() => {
     const container = document.getElementById(containerId);
@@ -175,6 +141,36 @@ export const useBpmnModeler = ({
     } catch (err) {
       onError?.(err as Error);
       return '';
+    }
+  };
+
+  // Add overlay methods
+  const addOverlay = (elementId: string, html: string | HTMLElement) => {
+    if (!modeler) return;
+    const overlays = modeler.get<IOverlays>('overlays');
+    overlays.add(elementId, {
+      position: {
+        bottom: -5,
+        left: 0
+      },
+      html: html
+    });
+  };
+
+  const removeOverlay = (elementId: string) => {
+    if (!modeler) return;
+    const overlays = modeler.get<IOverlays>('overlays');
+    overlays.remove({ element: elementId });
+  };
+
+  // Update clearOverlays function
+  const clearOverlay = () => {
+    if (!modeler) return;
+    try {
+      const overlays = modeler.get<IOverlays>('overlays');
+      overlays.clear();
+    } catch (error) {
+      console.error('Error clearing overlays:', error);
     }
   };
 

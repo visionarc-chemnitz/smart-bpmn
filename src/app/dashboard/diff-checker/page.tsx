@@ -6,7 +6,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import BpmnModelerComponent from '../text2bpmn/(components)/bpmn-modeler-component';
+import { BpmnViewerComponent } from '../text2bpmn/(components)/bpmn-viewer-component';
 import BreadcrumbsHeader from '../(components)/breadcrumbs-header';
 import {
   Drawer,
@@ -14,8 +14,15 @@ import {
   DrawerContent,
 } from "@/components/ui/drawer";
 import { diff } from 'bpmn-js-differ';
-import BpmnModeler from 'bpmn-js/lib/Modeler';
-import type { BpmnModelerRef } from '@/types/board/board-types';
+import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
+import type { BpmnViewerRef } from '@/types/board/board-types';
+
+interface ProcessedDiff {
+  type: string;
+  elementId: string;
+  elementType: string;
+  changes?: any;
+}
 
 interface BpmnDiff {
   _changed: {
@@ -33,8 +40,8 @@ export default function DiffCheckerPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [difference, setDiff] = useState(null);
 
-  const modeler1Ref = useRef<BpmnModelerRef>(null);
-  const modeler2Ref = useRef<BpmnModelerRef>(null);
+  const modeler1Ref = useRef<BpmnViewerRef>(null);
+  const modeler2Ref = useRef<BpmnViewerRef>(null);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -46,8 +53,8 @@ export default function DiffCheckerPage() {
     }
 
     try {
-      const viewer1 = new BpmnModeler();
-      const viewer2 = new BpmnModeler();
+      const viewer1 = new BpmnViewer();
+      const viewer2 = new BpmnViewer();
 
       // Import XMLs and wait for both to complete
       const [importResult1, importResult2] = await Promise.all([
@@ -197,36 +204,99 @@ export default function DiffCheckerPage() {
     return result;
   };
   
-  const addOverlays = (differences: BpmnDiff) => {
+  const generateOverlayHtml = (diff: ProcessedDiff) => {
+    const markerDiv = document.createElement('div');
+    markerDiv.className = 'marker-container';
+  
+    const getMarkerContent = (type: string) => {
+      switch (type) {
+        case 'element-removed':
+          return '<span class="marker marker-removed">&minus;</span>';
+        case 'element-added':
+          return '<span class="marker marker-added">&#43;</span>';
+        case 'layout-changed':
+          return '<span class="marker marker-layout-changed">&#8680;</span>';
+        default:
+          return '<span class="marker marker-changed">&#9998;</span>';
+      }
+    };
+  
+    markerDiv.innerHTML = getMarkerContent(diff.type);
+    markerDiv.style.position = 'absolute';
+    markerDiv.style.top = '-10px';
+    markerDiv.style.right = '-10px';
+    markerDiv.style.zIndex = '100';
+    
+    return markerDiv;
+  };
+
+  const addOverlays = async (differences: BpmnDiff) => {
     if (!modeler1Ref.current || !modeler2Ref.current) return;
     clearOverlays();
     const processedDiffs = processDifferences(differences);
   
-    processedDiffs.forEach((diff) => {
-      const overlayHtml = `
-        <div style="
-          background-color: ${
-            diff.type === 'element-added' ? '#4CAF50' : 
-            diff.type === 'element-removed' ? '#F44336' : 
-            diff.type === 'layout-changed' ? '#2196F3' : '#FFC107'
-          };
-          color: white;
-          padding: 5px;
-          border-radius: 3px;
-          font-size: 12px;
-        ">${diff.type}</div>
-      `;
+    // Create temporary containers
+    const container1 = document.createElement('div');
+    const container2 = document.createElement('div');
+    document.body.appendChild(container1);
+    document.body.appendChild(container2);
   
-      if (diff.type === 'element-added') {
-        modeler2Ref.current?.addOverlay(diff.elementId, overlayHtml);
-      } else if (diff.type === 'element-removed') {
-        modeler1Ref.current?.addOverlay(diff.elementId, overlayHtml);
-      } else if (diff.type === 'layout-changed') {
-        modeler1Ref.current?.addOverlay(diff.elementId, overlayHtml);
-      }else {
-        modeler2Ref.current?.addOverlay(diff.elementId, overlayHtml);
-      }
-    });
+    // Initialize viewers with containers
+    const viewer1 = new BpmnViewer({ container: container1 });
+    const viewer2 = new BpmnViewer({ container: container2 });
+  
+    try {
+      const xml1 = await modeler1Ref.current.exportXML();
+      const xml2 = await modeler2Ref.current.exportXML();
+  
+      // Import XMLs and wait for completion
+      await Promise.all([
+        viewer1.importXML(xml1),
+        viewer2.importXML(xml2)
+      ]);
+  
+      const registry1 = viewer1.get('elementRegistry') as any;
+      const registry2 = viewer2.get('elementRegistry') as any;
+  
+      processedDiffs.forEach((diff) => {
+        let shape;
+        let overlayHtml;
+        
+        if (diff.type === 'element-added') {
+          shape = registry2.get(diff.elementId);
+          if (shape) {
+            overlayHtml = generateOverlayHtml(diff);
+            modeler2Ref.current?.addOverlay(diff.elementId, overlayHtml);
+          }
+        } else if (diff.type === 'element-removed') {
+          shape = registry1.get(diff.elementId);
+          if (shape) {
+            overlayHtml = generateOverlayHtml(diff);
+            modeler1Ref.current?.addOverlay(diff.elementId, overlayHtml);
+          }
+        } else if (diff.type === 'layout-changed') {
+          shape = registry1.get(diff.elementId);
+          if (shape) {
+            overlayHtml = generateOverlayHtml(diff);
+            modeler1Ref.current?.addOverlay(diff.elementId, overlayHtml);
+          }
+        } else {
+          shape = registry1.get(diff.elementId);
+          if (shape) {
+            overlayHtml = generateOverlayHtml(diff);
+            modeler2Ref.current?.addOverlay(diff.elementId, overlayHtml);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error processing overlays:', error);
+    } finally {
+      // Cleanup
+      viewer1.destroy();
+      viewer2.destroy();
+      container1.remove();
+      container2.remove();
+    }
   };
 
   const clearOverlays = () => {
@@ -245,10 +315,9 @@ export default function DiffCheckerPage() {
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={50}>
             <div className="flex-1 rounded-xl bg-muted/50" style={{ height: '100%' }}>
-              <BpmnModelerComponent
+              <BpmnViewerComponent
                 ref={modeler1Ref}
                 containerId="bpmn-container-1"
-                propertiesPanelId="bpmn-properties-1"
                 diagramXML=""
                 onError={(err) => console.error(err)}
                 onImport={() => console.log('Imported successfully')}
@@ -260,10 +329,9 @@ export default function DiffCheckerPage() {
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50}>
             <div className="flex-1 rounded-xl bg-muted/50" style={{ height: '100%' }}>
-              <BpmnModelerComponent
+              <BpmnViewerComponent
                 ref={modeler2Ref}
                 containerId="bpmn-container-2"
-                propertiesPanelId="bpmn-properties-2"
                 diagramXML=""
                 onError={(err) => console.error(err)}
                 onImport={() => console.log('Imported successfully')}
