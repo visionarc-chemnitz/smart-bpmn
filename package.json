@@ -22,6 +22,7 @@
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
+    "@tanstack/react-table": "^8.20.6",
     "bpmn-auto-layout": "^1.0.0",
     "bpmn-js": "^18.1.1",
     "bpmn-js-differ": "^3.0.2",

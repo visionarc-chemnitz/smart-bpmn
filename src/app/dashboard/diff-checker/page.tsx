@@ -8,14 +8,10 @@ import {
 } from '@/components/ui/resizable';
 import { BpmnViewerComponent } from '../text2bpmn/(components)/bpmn-viewer-component';
 import BreadcrumbsHeader from '../(components)/breadcrumbs-header';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-} from "@/components/ui/drawer";
 import { diff } from 'bpmn-js-differ';
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
 import type { BpmnViewerRef } from '@/types/board/board-types';
+import DifferencesTable from './(components)/differences-table';
 
 interface ProcessedDiff {
   type: string;
@@ -37,15 +33,12 @@ interface BpmnDiff {
 }
 
 export default function DiffCheckerPage() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
-  const [difference, setDiff] = useState(null);
+  const [difference, setDifference] = useState(null);
+  const [xml1, setXml1] = useState('');
+  const [xml2, setXml2] = useState('');
 
   const modeler1Ref = useRef<BpmnViewerRef>(null);
   const modeler2Ref = useRef<BpmnViewerRef>(null);
-
-  const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen);
-  };
 
   const compareDiagrams = async (originalXml: string, changedXml: string) => {
     if (!originalXml || !changedXml) {
@@ -87,25 +80,32 @@ export default function DiffCheckerPage() {
     }
   };
 
-  const handleCompareDiagrams = async () => {
+  const handleImport1 = async () => {
+    if (!modeler1Ref.current) {
+      throw new Error('Modeler1 is not initialized');
+    }
+    const xml = await modeler1Ref.current.exportXML();
+    setXml1(xml);
+    handleCompareDiagrams(xml, xml2);
+  };
+
+  const handleImport2 = async () => {
+    if (!modeler2Ref.current) {
+      throw new Error('Modeler2 is not initialized');
+    }
+    const xml = await modeler2Ref.current.exportXML();
+    setXml2(xml);
+    handleCompareDiagrams(xml1, xml);
+  };
+
+  const handleCompareDiagrams = async (xml1: string, xml2: string) => {
     try {
-      if (!modeler1Ref.current || !modeler2Ref.current) {
-        console.error('Both modeler references are required for comparison');
-        return;
+      if (xml1 && xml2) {
+        const differences = await compareDiagrams(xml1, xml2);
+        setDifference(differences);
+        console.table(extractChanges(differences));
+        addOverlays(differences);
       }
-
-      const xml1 = await modeler1Ref.current.exportXML();
-      const xml2 = await modeler2Ref.current.exportXML();
-
-      if (!xml1 || !xml2) {
-        console.error('Both XML1 and XML2 are required for comparison');
-        return;
-      }
-
-      const differences = await compareDiagrams(xml1, xml2);
-      setDiff(differences);
-      console.table(extractChanges(differences));
-      addOverlays(differences);
     } catch (error) {
       console.error('Error comparing diagrams:', error);
     }
@@ -309,18 +309,23 @@ export default function DiffCheckerPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <BreadcrumbsHeader href='/dashboard' current='Diff-Checker' parent='Playground' />
-      <div className="flex flex-1">
+    <div style={{ height: '100vh' }}>
+      <BreadcrumbsHeader 
+        href='/dashboard' 
+        current='Diff-Checker' 
+        parent='Playground' 
+        onShareClick={() => console.log('Share clicked')} 
+      />
+      <div style={{ height: '85%', width: '100%' }}>
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={50}>
-            <div className="flex-1 rounded-xl bg-muted/50" style={{ height: '100%' }}>
+            <div style={{ width: '100%', height: '100%' }}>
               <BpmnViewerComponent
                 ref={modeler1Ref}
                 containerId="bpmn-container-1"
                 diagramXML=""
                 onError={(err) => console.error(err)}
-                onImport={() => console.log('Imported successfully')}
+                onImport={handleImport1}
                 height="100%"
                 width="100%"
               />
@@ -328,13 +333,13 @@ export default function DiffCheckerPage() {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50}>
-            <div className="flex-1 rounded-xl bg-muted/50" style={{ height: '100%' }}>
+            <div style={{ width: '100%', height: '100%' }}>
               <BpmnViewerComponent
                 ref={modeler2Ref}
                 containerId="bpmn-container-2"
                 diagramXML=""
                 onError={(err) => console.error(err)}
-                onImport={() => console.log('Imported successfully')}
+                onImport={handleImport2}
                 height="100%"
                 width="100%"
               />
@@ -342,19 +347,13 @@ export default function DiffCheckerPage() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+      {difference && (
+        <div className="p-4">
+          <h3 className="text-md font-semibold">Differences:</h3>
+          <DifferencesTable differences={extractChanges(difference)} />
+        </div>
+      )}
       <footer className="p-2 bg-gray-100 dark:bg-gray-800" style={{ maxWidth: 'var(--sidebar-footer-width)' }}>
-        <button
-          onClick={toggleDrawer}
-          className="m-2 p-1 bg-primary text-white rounded-md text-sm"
-        >
-          {isDrawerOpen ? 'Close Panel' : 'Open Panel'}
-        </button>
-        <button
-          onClick={handleCompareDiagrams}
-          className="m-2 p-1 bg-secondary text-white rounded-md text-sm"
-        >
-          Compare Changes
-        </button>
         <button
           onClick={clearOverlays}
           className="m-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm"
@@ -362,21 +361,6 @@ export default function DiffCheckerPage() {
           Clear Overlays
         </button>
       </footer>
-      <Drawer open={isDrawerOpen} onClose={toggleDrawer}>
-        <DrawerContent className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 p-4 overflow-y-auto" style={{ maxHeight: '50vh', maxWidth: 'calc(100% - var(--sidebar-width))' }}>
-          <h2 className="text-lg font-semibold">Expandable Panel</h2>
-          <p>This is the content of the expandable panel.</p>
-          <DrawerClose onClick={toggleDrawer} className="mt-4 p-2 bg-primary text-white rounded-md">
-            Close
-          </DrawerClose>
-          {difference && (
-            <div>
-              <h3 className="text-md font-semibold">Differences:</h3>
-              <pre>{JSON.stringify(extractChanges(difference), null, 2)}</pre>
-            </div>
-          )}
-        </DrawerContent>
-      </Drawer>
     </div>
   );
 }
