@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from "@/providers/user-provider";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
+import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
 
 export const useModalManager = () => {
     // State variables
@@ -11,13 +12,13 @@ export const useModalManager = () => {
     const [projectId, setProjectId] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
     const [isShared, setIsShared] = useState(false);
-    const [organization, setOrganization] = useState<any | null>(null);
+    const [organizations, setOrganizations] = useState<any | null>(null);
     const [projects, setProjects] = useState<any[]>([]);
     const [bpmnFiles, setBpmnFiles] = useState<any[]>([]);
     const [selectedProject, setSelectedProject] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-
     const user = useUser();
+    const { currentProject, projectList, setCurrentOrganization, setCurrentProject, setCurrentBpmn, setSelectionChanged} = useOrganizationWorkspaceContext();
 
     // Modal management
     const openModal = () => setIsOpen(true);
@@ -30,7 +31,8 @@ export const useModalManager = () => {
             const response = await fetch(`${API_PATHS.GET_ORGANIZATION}?userId=${user.id}`);
 
             if (response.status === 404) {
-                setOrganization(null);
+                setOrganizations([]);
+                setCurrentOrganization(null);
                 return null;
             }
             if (!response.ok) {
@@ -38,8 +40,11 @@ export const useModalManager = () => {
             }
 
             const data = await response.json();
-            setOrganization(data.organization);
-            return data.organization;
+            if (data.organizations.length > 0) {
+                setOrganizations(data.organizations);
+                setCurrentOrganization(data.organizations[0]);
+            }
+            return data.organizations;
         } catch (error) {
             return null;
         } finally {
@@ -49,33 +54,59 @@ export const useModalManager = () => {
 
     // Fetch projects
     const fetchProjects = async () => {
+        const selectedOrganizationId = localStorage.getItem('selectedOrganizationId');
         try {
             setIsLoading(true);
-            const response = await fetch(`${API_PATHS.GET_PROJECTS}?userId=${user.id}`);
+            const response = await fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${selectedOrganizationId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch projects.');
             }
             const data = await response.json();
             setProjects(data.projects);
+            if (data.projects.length > 0) {
+                setCurrentProject(data.projects[0]);
+            } else {
+                setCurrentProject(null);
+            }
         } catch (error) {
-           // console.error('Error fetching projects:', error);
+           console.error('Error fetching projects:', error);
         } finally {
             setIsLoading(false);
         }
     };
+
+    const fetchBpmnFiles = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetch(`${API_PATHS.GET_BPMN_FILES}?projectId=${currentProject?.id}`);
+            const data = await response.json();
+            setBpmnFiles(data.bpmnFiles || []);
+
+            // Automatically select the first file if none is selected
+            if (data.bpmnFiles?.length > 0) {
+                setCurrentBpmn(data.bpmnFiles[0]);
+            } else {
+                setCurrentBpmn(null);
+            }
+            setSelectionChanged(true);
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     // Handle organization submission
     const handleOrganizationSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!user || !user.id) {
-            //console.error('User is not logged in or user ID is missing');
             window.alert('User is not logged in or user ID is missing');
             return;
         }
 
         if (!organizationName) {
-            //console.error('Organization name is required');
             window.alert('Organization name is required');
             return;
         }
@@ -100,7 +131,8 @@ export const useModalManager = () => {
             }
 
             const data = await response.json();
-            setOrganization(data);
+            setOrganizations(data);
+            setCurrentOrganization(data);
             closeModal();
             window.alert('Organization has been created successfully!');
             window.location.reload();
@@ -113,6 +145,7 @@ export const useModalManager = () => {
 
     // Handle project submission
     const handleProjectSubmit = async (e: React.FormEvent) => {
+        const selectedOrganizationId = localStorage.getItem('selectedOrganizationId');
         e.preventDefault();
 
         if (!user || !user.id) {
@@ -121,9 +154,7 @@ export const useModalManager = () => {
             return;
         }
 
-        const fetchedOrganization = await fetchOrganization();
-
-        if (!fetchedOrganization) {
+        if (!selectedOrganizationId) {
             console.error('Organization is not created');
             window.alert('Organization is not created');
             return;
@@ -131,7 +162,7 @@ export const useModalManager = () => {
 
         const requestBody = {
             projectName,
-            organizationId: fetchedOrganization.id,
+            organizationId: selectedOrganizationId,
             createdBy: user.id,
         };
 
@@ -153,7 +184,7 @@ export const useModalManager = () => {
             const data = await response.json();
             console.log('Project created:', data);
             setProjects((prevProjects) => [...prevProjects, data]);
-            setSelectedProject(data);
+            setCurrentProject(data);
             closeModal();
             window.alert('Project is created successfully!');
             window.location.reload();
@@ -166,7 +197,7 @@ export const useModalManager = () => {
     };
 
     // Handle BPMN file submission
-    const handleBpmnFileSubmit = async (e: React.FormEvent<HTMLFormElement>, formPayload: { fileName: string; projectId: string; createdBy: string; isFavorite: boolean; isShared: boolean; }) => {
+    const handleBpmnFileSubmit = async (e: React.FormEvent<HTMLFormElement>, formPayload: { fileName: string; projectId: string; createdBy: string; }) => {
         e.preventDefault();
         // Prevent multiple submissions
         if (isLoading) return;
@@ -175,8 +206,6 @@ export const useModalManager = () => {
             fileName,
             projectId,
             createdBy: user.id,
-            isFavorite,
-            isShared,
         };
 
         try {
@@ -200,26 +229,21 @@ export const useModalManager = () => {
 
             // Update state and close modal
             setBpmnFiles((prevFiles) => [...prevFiles, data]);
+            setCurrentBpmn(data);
+            fetchBpmnFiles();
+            // Set the new bpmn file's project as current project
+            const project = projectList.find((project) => project.id === projectId);
+            if (project) {
+                setCurrentProject(project);
+            }
+
             closeModal();
 
-            // Show success alert and reload the page
-            window.alert('BPMN file saved successfully!');
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
         } catch (error) {
         } finally {
             setIsLoading(false);
         }
     };
-
-    // Fetch initial data on mount
-    useEffect(() => {
-        if (user && user.id) {
-            fetchOrganization();
-            fetchProjects();
-        }
-    }, [user]);
 
     return {
         isOpen,
@@ -240,9 +264,9 @@ export const useModalManager = () => {
         handleOrganizationSubmit,
         handleProjectSubmit,
         handleBpmnFileSubmit,
-        fetchOrganization,
+        // fetchOrganization,
         fetchProjects,
-        organization,
+        organizations,
         projects,
         bpmnFiles,
         selectedProject,

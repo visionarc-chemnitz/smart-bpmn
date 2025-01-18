@@ -1,16 +1,28 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { socialAccount } from "@/app/services/account";
+import { useSearchParams } from "next/navigation";
 
 const ClientMagicLinkForm = () => {
   const [email, setEmail] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // "success" or "error"
+  const searchParams = useSearchParams();
+  const invitationToken = searchParams.get('invitationToken');
+  const [isStakeholderLogin, setisStakeholderLogin] = useState(false);
+  
+
+  useEffect(() => {
+    if (invitationToken) {
+      console.log('Invitation Token:', invitationToken);
+      setisStakeholderLogin(true);
+    }
+  }, [invitationToken])
 
   const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const email = event.target.value;

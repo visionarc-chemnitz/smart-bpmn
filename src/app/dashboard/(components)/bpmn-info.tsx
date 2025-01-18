@@ -8,15 +8,13 @@ export default function BpmnInfo() {
     openModal,
     closeModal,
     fileName,
-    setFileName,
     projectId,
-    setProjectId,
     isFavorite,
-    setIsFavorite,
     isShared,
-    setIsShared,
     handleBpmnFileSubmit, // Use the one from the hook
   } = useModalManager();
+
+  
 
   return (
     <div>

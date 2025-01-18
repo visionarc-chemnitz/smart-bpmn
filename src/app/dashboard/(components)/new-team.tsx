@@ -13,9 +13,6 @@ const NewTeam = () => {
     isOpen,
     openModal,
     closeModal,
-    organizationName,
-    setOrganizationName,
-    handleOrganizationSubmit,
   } = useModalManager();
 
   if (showTeamSpace) {
@@ -55,7 +52,7 @@ const NewTeam = () => {
             </RainbowButton>
 
             <p className="text-muted-foreground text-sm mt-2">
-              Don't want to create an organization? Explore our features!
+              Don&apos;t want to create an organization? Explore our features!
             </p>
 
             <button

@@ -1,8 +1,16 @@
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER',
+  STAKEHOLDER = 'STAKEHOLDER',
+}
+
 export interface User {
   id: string;
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   avatar: string;
+  role?: UserRole;
+  organizationId: string;
 }
 
 export interface UserContextValue {

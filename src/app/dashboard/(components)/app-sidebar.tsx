@@ -12,6 +12,7 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
+  User,
 } from "lucide-react";
 
 import Bpmn from './bpmn-info';
@@ -24,17 +25,25 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useUser } from "@/providers/user-provider";
 import { NavBpmnFile } from "./nav-bpmn-file";
+import { UserRole } from "@/types/user/user";
+import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
+import { Organization } from "@/types/organization/organization";
+import { Settings } from "./settings";
 
 const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
+    role: UserRole.MEMBER,
+    organizationId: "",
   },
   navMain: [
     {
@@ -58,16 +67,23 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useUser();
-  const [organization, setOrganization] = React.useState(null);
-  const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
+  const [organizations, setOrganizations] = React.useState<Organization[]>([]);
+  const {setCurrentOrganization, currentProject} = useOrganizationWorkspaceContext();
 
   React.useEffect(() => {
-    if (user && user.email) {
+    if (user && user.id) {
       const fetchOrganizations = async () => {
         try {
           const response = await fetch(`/api/organization/get-organizations?userId=${user.id}`);
           const data = await response.json();
-          setOrganization(data.organization);
+          if (data.organizations.length > 0) {
+            console.log(data.organizations);
+            setOrganizations(data.organizations);
+            setCurrentOrganization(data.organizations[0]);
+          } else {
+            setOrganizations([]);
+            setCurrentOrganization(null);
+          }
         } catch (error) {
           console.error("Error fetching organizations:", error);
         }
@@ -77,25 +93,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }, [user]);
 
-  React.useEffect(() => {
-    const storedProjectId = localStorage.getItem("selectedProjectId");
-    if (storedProjectId) {
-      setSelectedProjectId(storedProjectId);
-    }
-  }, []);
-
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher organization={organization} />
+        <TeamSwitcher organizations={organizations} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        {selectedProjectId && <NavBpmnFile projectId={selectedProjectId} />}
-        <div className="m-4">
-          <Bpmn />
-        </div>
+        {user.role !== UserRole.STAKEHOLDER && (
+          <NavMain items={data.navMain} />
+        )}
+        {currentProject && <NavBpmnFile projectId={currentProject.id} />}
+        {user.role !== UserRole.STAKEHOLDER && (
+          <div className="m-4">
+            <Bpmn />
+          </div>
+        )}
+        {user.role === UserRole.ADMIN && (
+          <Settings/>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

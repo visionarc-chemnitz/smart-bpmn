@@ -16,40 +16,35 @@ import {
 
 import { useModalManager } from "@/hooks/useModalManager";
 import { OrganizationModal } from '@/app/dashboard/organization-project-bpmn-modal/(components)/organizationModal';
+import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
+import { Organization } from "@/types/organization/organization";
+
 
 export function TeamSwitcher({
-  organization,
+  organizations,
 }: {
-  organization: {
-    name: string;
-    logo?: string; // Updated to string for image URL
-    projects?: { name: string; url: string; icon: React.ElementType }[];
-  } | null;
+  organizations: Organization[];
 }) {
   const { isMobile } = useSidebar();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [activeOrganization, setActiveOrganization] = React.useState(
-    organization || { name: "No Organization", logo: "", projects: [] }
-  );
 
   // Modal state management
   const {
     isOpen,
     openModal,
     closeModal,
-    organizationName,
-    setOrganizationName,
-    handleOrganizationSubmit,
   } = useModalManager();
+
+  const { currentOrganization, setCurrentOrganization } = useOrganizationWorkspaceContext();
 
   // Fallback logo if undefined
   const defaultLogo = GalleryVerticalEnd;
 
   React.useEffect(() => {
-    if (organization) {
-      setActiveOrganization(organization);
+    if (organizations.length > 0) {
+      setCurrentOrganization(organizations[0]);
     }
-  }, [organization]);
+  }, [organizations, setCurrentOrganization]);
 
   const getInitials = (name: string) => {
     const initials = name.split(" ").map(word => word[0]).join("");
@@ -65,20 +60,12 @@ export function TeamSwitcher({
               <SidebarMenuButton size="lg">
                 <div className="grid flex-1 text-left text-sm leading-tight space-y-1">
                   <div className="flex items-center gap-2">
-                    {activeOrganization.logo ? (
-                      <img
-                        src={activeOrganization.logo}
-                        alt="Organization Logo"
-                        className="h-8 w-8 rounded-full"
-                      />
-                    ) : (
                       <div className="h-8 w-8 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded text-white">
-                        {getInitials(activeOrganization.name)}
+                        {currentOrganization ? getInitials(currentOrganization.name) : 'O'}
                       </div>
-                    )}
                     {!isCollapsed && (
                       <span className="truncate font-semibold text-gray-800 dark:text-white">
-                        {activeOrganization?.name}
+                        {currentOrganization?.name || "No Organization"}
                       </span>
                     )}
                   </div>
@@ -93,25 +80,20 @@ export function TeamSwitcher({
               sideOffset={4}
             >
               <DropdownMenuLabel>Organizations</DropdownMenuLabel>
-              {organization ? (
+              {organizations && organizations.length > 0 ? (
+              organizations.map((organization) => (
                 <DropdownMenuItem
-                  onClick={() => setActiveOrganization(organization)}
+                  key={organization.id}
+                  onClick={() => organization.id && setCurrentOrganization(organization)}
                   className="gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                 >
-                  {organization.logo ? (
-                    <img
-                      src={organization.logo}
-                      alt="Organization Logo"
-                      className="h-8 w-8 rounded-full"
-                    />
-                  ) : (
-                    <div className="h-8 w-8 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded text-white">
-                      {getInitials(organization.name)}
-                    </div>
-                  )}
+                  <div className="h-8 w-8 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded text-white">
+                    {getInitials(organization.name)}
+                  </div>
                   <span>{organization.name}</span>
                 </DropdownMenuItem>
-              ) : (
+              ))
+            ) : (
                 <DropdownMenuItem asChild>
                   <div
                     className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"

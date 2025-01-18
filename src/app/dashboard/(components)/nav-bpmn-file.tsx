@@ -14,43 +14,46 @@ import {
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { FileText, ChevronRight, Loader } from "lucide-react";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
-
-interface BpmnFile {
-    id: string;
-    fileName: string;
-    url: string;
-}
+import { useUser } from "@/providers/user-provider";
+import { UserRole } from "@/types/user/user";
+import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
+import { Bpmn } from "@/types/bpmn/bpmn";
+import { useModalManager } from "@/hooks/useModalManager";
 
 interface NavBpmnFileProps {
     projectId: string;
 }
 
 export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
-    const [bpmnFiles, setBpmnFiles] = useState<BpmnFile[]>([]);
-    const [selectedFileId, setSelectedFileId] = useState<string | null>(null); // Track selected file
+    const [bpmnFiles, setBpmnFiles] = useState<Bpmn[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const user = useUser();
+    const bpmnFileListLabel = user.role === UserRole.STAKEHOLDER ? 'Shared with you' : 'History';
+    const { currentProject, currentBpmn, setCurrentBpmn, selectionChanged } = useOrganizationWorkspaceContext();
 
     useEffect(() => {
         const fetchBpmnFiles = async () => {
             try {
-                const response = await fetch(`${API_PATHS.GET_BPMN_FILES}?projectId=${projectId}`);
+                const response = await fetch(`${API_PATHS.GET_BPMN_FILES}?projectId=${currentProject?.id}`);
                 const data = await response.json();
                 setBpmnFiles(data.bpmnFiles || []);
                 setLoading(false);
 
-                // Automatically select the first file if none is selected
-                if (data.bpmnFiles?.length > 0 && !selectedFileId) {
-                    setSelectedFileId(data.bpmnFiles[0].id);
+                // Automatically select the last file (most recently created)
+                if (data.bpmnFiles?.length > 0) {
+                    setCurrentBpmn(data.bpmnFiles[data.bpmnFiles.length - 1]);
+                } else {
+                    setCurrentBpmn(null);
                 }
             } catch (error) {
                 setError("Error fetching BPMN files");
                 setLoading(false);
             }
         };
-
         fetchBpmnFiles();
-    }, [projectId, selectedFileId]);
+
+    }, [currentProject, selectionChanged]);
 
     if (loading) {
         return (
@@ -66,7 +69,7 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
 
     return (
         <SidebarGroup>
-            <SidebarGroupLabel>History</SidebarGroupLabel>
+            <SidebarGroupLabel>{bpmnFileListLabel}</SidebarGroupLabel>
             <SidebarMenu>
                 {bpmnFiles.length === 0 ? (
                     <SidebarMenuItem className="flex items-center p-2 rounded-md">
@@ -89,15 +92,15 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
                                         <SidebarMenuSubItem
                                             key={file.id}
                                             className={`hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md ${
-                                                selectedFileId === file.id ? "bg-blue-100 dark:bg-blue-800" : ""
+                                                currentBpmn?.id === file.id ? "bg-blue-100 dark:bg-blue-800" : ""
                                             }`}
-                                            onClick={() => setSelectedFileId(file.id)}
+                                            onClick={() => setCurrentBpmn(file)}
                                         >
                                             <SidebarMenuSubButton asChild>
                                                 <a
                                                     href={file.url}
                                                     className="flex-1 text-blue-500 hover:no-underline cursor-pointer"
-                                                    aria-current={selectedFileId === file.id ? "true" : "false"}
+                                                    aria-current={currentBpmn?.id === file.id ? "true" : "false"}
                                                 >
                                                     {file.fileName}
                                                 </a>

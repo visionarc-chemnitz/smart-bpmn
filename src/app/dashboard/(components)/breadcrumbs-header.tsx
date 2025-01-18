@@ -16,53 +16,64 @@ import { useUser } from "@/providers/user-provider";
 import { ProjectModal } from "@/app/dashboard/organization-project-bpmn-modal/(components)/projectModal";
 import { PlusCircle, ChevronDown, Info } from "lucide-react";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
+import { RainbowButton } from "@/components/ui/rainbow-button";
+import { FaShareAlt } from "react-icons/fa";
+import { LiaShareAltSolid } from "react-icons/lia";
+import { PiShareNetworkThin } from "react-icons/pi";
+import { MdIosShare } from "react-icons/md";
+import { IoShareSocialOutline } from "react-icons/io5";
+import { UserRole } from "@/types/user/user";
+import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
+import { Project } from "@/types/project/project";
+import { ManageUsersModal } from "../shared/manage-users-modal";
 
 interface BreadcrumbsHeaderProps {
   href: string;
   current: string;
   parent: string;
+  onShareClick: () => void;
 }
 
-interface Project {
-  id: string;
-  name: string;
-}
 
-export default function BreadcrumbsHeader({ href, current, parent }: BreadcrumbsHeaderProps) {
+
+export default function BreadcrumbsHeader({ href, current, parent  }: BreadcrumbsHeaderProps) {
   const { toggleButton } = useToggleButton();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>("");
+  // const [selectedProject, setSelectedProject] = useState<string>("");
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false); // New info modal state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hasOrganization, setHasOrganization] = useState<boolean>(false);
   const user = useUser();
+  const { currentOrganization, currentProject, currentBpmn, setCurrentProject, projectList, setProjectList } = useOrganizationWorkspaceContext();
+  const [isManageStakeholderModalOpen, setIsManageStakeholderModalOpen] = useState(false);
 
+  const onShareClick = () => {
+    setIsManageStakeholderModalOpen(true);
+  };
   useEffect(() => {
     if (user?.id) {
       const fetchData = async () => {
         try {
-          // Fetch organization info and projects in parallel
-          const [orgResponse, projectsResponse] = await Promise.all([
-            fetch(`${API_PATHS.CHECK_ORGANIZATION}?userId=${user.id}`),
-            fetch(`${API_PATHS.GET_PROJECTS}?userId=${user.id}`),
-          ]);
+          if (currentOrganization) {
+            const projectsResponse = await fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${currentOrganization.id}`);
 
-          const orgData = await orgResponse.json();
-          const projectsData = await projectsResponse.json();
+            // const orgData = await orgResponse.json();
+            if (!projectsResponse) {
+              throw new Error("Failed to fetch projects");
+            }
+            const projectsData = await projectsResponse.json();
+            if (currentOrganization) {
+              setHasOrganization(true);
+            }
 
-          setHasOrganization(orgData.hasOrganization);
-          setProjects(projectsData.projects);
-
-          // Set the selected project from localStorage or default to the first project
-          const storedProjectId = localStorage.getItem("selectedProjectId");
-          if (storedProjectId) {
-            setSelectedProject(storedProjectId);
-          } else if (projectsData.projects.length > 0) {
-            const firstProject = projectsData.projects[0];
-            setSelectedProject(firstProject.id);
-            localStorage.setItem("selectedProjectId", firstProject.id);
+            // Set the selected project and project list in context
+            if (projectsData.projects.length > 0) {
+              const firstProject = projectsData.projects[0];
+              setCurrentProject(firstProject);
+              setProjectList(projectsData.projects);
+            }
           }
+          
         } catch (error) {
           console.error("Error fetching data:", error);
         }
@@ -70,20 +81,17 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
 
       fetchData();
     }
-  }, [user]);
+  }, [currentOrganization]);
 
-  const handleProjectChange = (projectId: string) => {
+  const openCreateProjectModal = () => {
+    setIsProjectModalOpen(true);
+  }
+
+  const handleProjectChange = (project: Project) => {
     if (!hasOrganization) {
       setIsInfoModalOpen(true);
     }
-
-    if (projectId === "create-new") {
-      setIsProjectModalOpen(true);
-    } else {
-      setSelectedProject(projectId);
-      localStorage.setItem("selectedProjectId", projectId);
-      window.location.reload();
-    }
+    setCurrentProject(project);
     setIsDropdownOpen(false);
   };
 
@@ -94,11 +102,14 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
   const handleProjectModalSubmit = async (e: React.FormEvent<HTMLFormElement>, data: { projectName: string; organizationId: string }) => {
     try {
       setIsProjectModalOpen(false);
-      const response = await fetch(`${API_PATHS.GET_PROJECTS}?userId=${user.id}`);
-      const updatedProjects = await response.json();
-      setProjects(updatedProjects.projects); // Refresh project list
-      setSelectedProject(data.projectName);
-      localStorage.setItem("selectedProjectId", data.projectName);
+      const response = await fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${currentOrganization?.id}`);
+      const data = await response.json();
+      const projects = data.projects;
+      if (projects.length > 0) {
+        setProjectList(projects); 
+        setCurrentProject(projects[projects.length - 1]);
+      }
+     
     } catch (error) {
       console.error("Error updating projects:", error);
     }
@@ -128,29 +139,37 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
         )}
       </div>
       <div className="flex-1" />
-      <div className="relative flex items-center gap-2 px-4">
+        {user.role !== UserRole.STAKEHOLDER && (currentBpmn !== null) && (
+          <RainbowButton type="submit" className="ml-5 mr-2 py-0 text-sm h-8 px-3" onClick={onShareClick}>
+            Share
+            <IoShareSocialOutline className="ml-1" />
+          </RainbowButton>
+        )}
+        <div className="relative flex items-center gap-2">
         <label htmlFor="project-select" className="mr-2">Project:</label>
         <div className="relative">
           <button
             onClick={() => (hasOrganization ? setIsDropdownOpen(!isDropdownOpen) : setIsInfoModalOpen(true))}
             className="block w-full min-w-[200px] border border-gray-300 rounded-md p-2 dark:bg-gray-700 dark:border-gray-600 flex items-center justify-between"
           >
-            {projects.find(project => project.id === selectedProject)?.name || "Select Project"}
+            {currentProject?.name || "Select Project"}
             <ChevronDown className="ml-2" />
           </button>
           {isDropdownOpen && hasOrganization && (
             <div className="absolute mt-1 w-full min-w-[200px] bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-10">
               <ul className="py-1">
-                <li
-                  onClick={() => handleProjectChange("create-new")}
-                  className="cursor-pointer px-4 py-2 text-green-500 font-bold hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  ➕ Create
-                </li>
-                {projects.map((project) => (
+                {user.role !== UserRole.STAKEHOLDER && (
+                  <li
+                    onClick={() => openCreateProjectModal()}
+                    className="cursor-pointer px-4 py-2 text-green-500 font-bold hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    ➕ Create
+                  </li>
+                )}
+                {projectList.map((project) => (
                   <li
                     key={project.id}
-                    onClick={() => handleProjectChange(project.id)}
+                    onClick={() => handleProjectChange(project)}
                     className="cursor-pointer px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     {project.name}
@@ -186,6 +205,13 @@ export default function BreadcrumbsHeader({ href, current, parent }: Breadcrumbs
           </div>
         </div>
       )}
+      <ManageUsersModal
+        isOpen={isManageStakeholderModalOpen}
+        onClose={() => setIsManageStakeholderModalOpen(false)}
+        type="stakeholder" 
+        title="Manage who can view this BPMN" 
+        subTitle="Your BPMN is live! Choose who can view it." 
+      />
     </header>
   );
 }

@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
@@ -9,67 +9,75 @@ datasource db {
 }
 
 model Organization {
-  id          String   @id @default(uuid())
-  name        String                       
-  createdBy   String   @unique
-  user        User     @relation("OrganizationOwner", fields: [createdBy], references: [id], onDelete: Cascade) // Relates to User
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt 
-  projects    Project[] @relation("OrganizationProjects") // Add this line to establish the back relation
+  id          String       @id @default(uuid())
+  name        String
+  createdBy   String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  invitations Invitation[]
+  ownedUser   User         @relation("OrganizationOwner", fields: [createdBy], references: [id], onDelete: Cascade)
+  projects    Project[]    @relation("OrganizationProjects")
+  users       User[]       @relation("OrganizationUser")
 }
 
 model Project {
-  id                String   @id @default(uuid())
-  name              String  
-  createdBy         String   // the foreign key should be required
-  user              User     @relation("ProjectOwner", fields: [createdBy], references: [id], onDelete: Cascade) // this line for the relation
-  organizationId    String   // the foreign key should be required
-  organization      Organization @relation("OrganizationProjects", fields: [organizationId], references: [id]) // this line for the relation
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  bpmn              Bpmn[] @relation("ProjectBpmn") // Add this line to establish the back relation
+  id             String       @id @default(uuid())
+  name           String
+  createdBy      String
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  bpmn           Bpmn[]       @relation("ProjectBpmn")
+  user           User         @relation("ProjectOwner", fields: [createdBy], references: [id], onDelete: Cascade)
+  organization   Organization @relation("OrganizationProjects", fields: [organizationId], references: [id])
 }
 
 model Bpmn {
-  id                String   @id @default(uuid())
-  fileName          String
-  projectId         String?
-  createdBy         String
-  user              User     @relation("BpmnOwner", fields: [createdBy], references: [id], onDelete: Cascade) // this line for the relation
-  isFavorite        Boolean  @default(false)
-  isShared          Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @default(now())
-  project           Project? @relation("ProjectBpmn", fields: [projectId], references: [id]) // this line for the relation
-  invitations       Invitation[] // Add this line to establish the back relation
+  id              String            @id @default(uuid())
+  fileName        String
+  projectId       String?
+  createdBy       String
+  isFavorite      Boolean           @default(false)
+  isShared        Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now())
+  user            User              @relation("BpmnOwner", fields: [createdBy], references: [id], onDelete: Cascade)
+  project         Project?          @relation("ProjectBpmn", fields: [projectId], references: [id])
+  invitations     Invitation[]
+  StakeholderBpmn StakeholderBpmn[]
 }
 
 model Invitation {
-  id        String   @id @default(uuid())
-  email     String
-  token     String
-  bpmnId    String
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-  bpmn      Bpmn     @relation(fields: [bpmnId], references: [id]) // Add this line for the relation
+  id             String            @id @default(uuid())
+  email          String
+  token          String            @unique
+  bpmnId         String?
+  createdAt      DateTime          @default(now())
+  expiresAt      DateTime
+  status         InvitationStatus?
+  organizationId String?
+  bpmn           Bpmn?             @relation(fields: [bpmnId], references: [id])
+  organization   Organization?     @relation(fields: [organizationId], references: [id])
 }
 
 model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String          @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  accounts      Account[]
-  Authenticator Authenticator[]
-  sessions      Session[]
-
-  // Explicit relation for the reverse side
-  organization  Organization?   @relation("OrganizationOwner")
-  projects      Project[]       @relation("ProjectOwner")
-  bpmnFiles     Bpmn[]          @relation("BpmnOwner") 
+  id                String            @id @default(cuid())
+  name              String?
+  email             String            @unique
+  emailVerified     DateTime?
+  image             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  role              Role?             @default(MEMBER)
+  organizationId    String?
+  accounts          Account[]
+  Authenticator     Authenticator[]
+  bpmnFiles         Bpmn[]            @relation("BpmnOwner")
+  ownedOrganization Organization?     @relation("OrganizationOwner")
+  projects          Project[]         @relation("ProjectOwner")
+  sessions          Session[]
+  StakeholderBpmn   StakeholderBpmn[]
+  organization      Organization?     @relation("OrganizationUser", fields: [organizationId], references: [id])
 }
 
 model Account {
@@ -120,4 +128,24 @@ model Authenticator {
   user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, credentialID])
+}
+
+model StakeholderBpmn {
+  userId String
+  bpmnId String
+  bpmn   Bpmn   @relation(fields: [bpmnId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@id([userId, bpmnId])
+}
+
+enum Role {
+  MEMBER
+  STAKEHOLDER
+  ADMIN
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
 }
