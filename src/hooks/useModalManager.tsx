@@ -197,7 +197,7 @@ export const useModalManager = () => {
     };
 
     // Handle BPMN file submission
-    const handleBpmnFileSubmit = async (e: React.FormEvent<HTMLFormElement>, formPayload: { fileName: string; projectId: string; createdBy: string; isFavorite: boolean; isShared: boolean; }) => {
+    const handleBpmnFileSubmit = async (e: React.FormEvent<HTMLFormElement>, formPayload: { fileName: string; projectId: string; createdBy: string; }) => {
         e.preventDefault();
         // Prevent multiple submissions
         if (isLoading) return;
@@ -206,8 +206,6 @@ export const useModalManager = () => {
             fileName,
             projectId,
             createdBy: user.id,
-            isFavorite,
-            isShared,
         };
 
         try {

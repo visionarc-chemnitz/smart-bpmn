@@ -68,10 +68,9 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useUser();
   const [organizations, setOrganizations] = React.useState<Organization[]>([]);
-  const {currentOrganization, setCurrentOrganization, currentProject, setCurrentProject} = useOrganizationWorkspaceContext();
+  const {setCurrentOrganization, currentProject} = useOrganizationWorkspaceContext();
 
   React.useEffect(() => {
-    console.log('test');
     if (user && user.id) {
       const fetchOrganizations = async () => {
         try {
