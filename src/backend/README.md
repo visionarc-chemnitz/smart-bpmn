@@ -41,6 +41,39 @@ A FastAPI application that generates BPMN process flows using Groq AI and Proces
 3. Access the application at:
   - [http://localhost:7860](http://localhost:7860)
 
+
+## Running Locally with Virtual Environment
+
+1. Create a virtual environment:
+    ```sh
+    python3 -m venv .venv
+    ```
+
+2. Navigate to the backend folder:
+    ```sh
+    cd path_to_backend_folder
+    ```
+
+3. Activate the virtual environment:
+    - Windows:
+      ```sh
+      .venv\Scripts\activate
+      ```
+    - macOS/Linux:
+      ```sh
+      source .venv/bin/activate
+      ```
+
+4. To run the app use :
+    ```sh
+    uvicorn app:app --reload 
+    ```
+
+5. To deactivate the virtual environment when finished:
+    ```sh
+    deactivate
+    ```
+
 ## Project Structure
 
 ```

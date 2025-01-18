@@ -60,6 +60,14 @@ const data = {
           title: "Image2BPMN",
           url: "/dashboard/image2bpmn",
         },
+        {
+          title: "Chat",
+          url: "/dashboard/chat",
+        },
+        // {
+        //   title: "Settings",
+        //   url: "#",
+        // },
       ],
     },
   ],
