@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   AudioWaveform,
   BookOpen,
@@ -12,45 +12,39 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
-} from "lucide-react"
+  User,
+} from "lucide-react";
 
-import { NavMain } from "./nav-main"
-import { NavProjects } from "./nav-projects"
-import { NavUser } from "./nav-user"
-import { TeamSwitcher } from "./team-switcher"
+import Bpmn from './bpmn-info';
+
+import { NavMain } from "./nav-main";
+import { NavProjects } from "./nav-projects";
+import { NavUser } from "./nav-user";
+import { TeamSwitcher } from "./team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { useUser } from "@/providers/user-provider"
+} from "@/components/ui/sidebar";
+import { useUser } from "@/providers/user-provider";
+import { NavBpmnFile } from "./nav-bpmn-file";
+import { UserRole } from "@/types/user/user";
+import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
+import { Organization } from "@/types/organization/organization";
+import { Settings } from "./settings";
 
-// This is sample data.
 const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
+    role: UserRole.MEMBER,
+    organizationId: "",
   },
-  teams: [
-    {
-      name: "VisionArc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    // {
-    //   name: "Acme Corp.",
-    //   logo: AudioWaveform,
-    //   plan: "Startup",
-    // },
-    // {
-    //   name: "Evil Corp.",
-    //   logo: Command,
-    //   plan: "Free",
-    // },
-  ],
   navMain: [
     {
       title: "Playground",
@@ -72,106 +66,60 @@ const data = {
         },
       ],
     },
-    // {
-    //   title: "Models",
-    //   url: "#",
-    //   icon: Bot,
-    //   items: [
-    //     {
-    //       title: "Genesis",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Explorer",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Quantum",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
-    // {
-    //   title: "Documentation",
-    //   url: "#",
-    //   icon: BookOpen,
-    //   items: [
-    //     {
-    //       title: "Introduction",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Get Started",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Tutorials",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Changelog",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
-    // {
-    //   title: "Settings",
-    //   url: "#",
-    //   icon: Settings2,
-    //   items: [
-    //     {
-    //       title: "General",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Team",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Billing",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Limits",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
   ],
-  // projects: [
-  //   {
-  //     name: "Design Engineering",
-  //     url: "#",
-  //     icon: Frame,
-  //   },
-  //   {
-  //     name: "Sales & Marketing",
-  //     url: "#",
-  //     icon: PieChart,
-  //   },
-  //   {
-  //     name: "Travel",
-  //     url: "#",
-  //     icon: Map,
-  //   },
-  // ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useUser();
+  const [organizations, setOrganizations] = React.useState<Organization[]>([]);
+  const {setCurrentOrganization, currentProject} = useOrganizationWorkspaceContext();
+
+  React.useEffect(() => {
+    if (user && user.id) {
+      const fetchOrganizations = async () => {
+        try {
+          const response = await fetch(`/api/organization/get-organizations?userId=${user.id}`);
+          const data = await response.json();
+          if (data.organizations.length > 0) {
+            console.log(data.organizations);
+            setOrganizations(data.organizations);
+            setCurrentOrganization(data.organizations[0]);
+          } else {
+            setOrganizations([]);
+            setCurrentOrganization(null);
+          }
+        } catch (error) {
+          console.error("Error fetching organizations:", error);
+        }
+      };
+
+      fetchOrganizations();
+    }
+  }, [user]);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher organizations={organizations} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
+        {user.role !== UserRole.STAKEHOLDER && (
+          <NavMain items={data.navMain} />
+        )}
+        {currentProject && <NavBpmnFile projectId={currentProject.id} />}
+        {user.role !== UserRole.STAKEHOLDER && (
+          <div className="m-4">
+            <Bpmn />
+          </div>
+        )}
+        {user.role === UserRole.ADMIN && (
+          <Settings/>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

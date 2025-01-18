@@ -1,89 +1,121 @@
-"use client"
-
-import * as React from "react"
-import { ChevronsUpDown, Plus } from "lucide-react"
-
+import * as React from "react";
+import { ChevronsUpDown, Plus, GalleryVerticalEnd } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+
+import { useModalManager } from "@/hooks/useModalManager";
+import { OrganizationModal } from '@/app/dashboard/organization-project-bpmn-modal/(components)/organizationModal';
+import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
+import { Organization } from "@/types/organization/organization";
+
 
 export function TeamSwitcher({
-  teams,
+  organizations,
 }: {
-  teams: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
+  organizations: Organization[];
 }) {
-  const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const { isMobile } = useSidebar();
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+
+  // Modal state management
+  const {
+    isOpen,
+    openModal,
+    closeModal,
+  } = useModalManager();
+
+  const { currentOrganization, setCurrentOrganization } = useOrganizationWorkspaceContext();
+
+  // Fallback logo if undefined
+  const defaultLogo = GalleryVerticalEnd;
+
+  React.useEffect(() => {
+    if (organizations.length > 0) {
+      setCurrentOrganization(organizations[0]);
+    }
+  }, [organizations, setCurrentOrganization]);
+
+  const getInitials = (name: string) => {
+    const initials = name.split(" ").map(word => word[0]).join("");
+    return initials.toUpperCase();
+  };
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <activeTeam.logo className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {activeTeam.name}
-                </span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            align="start"
-            side={isMobile ? "bottom" : "right"}
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Teams
-            </DropdownMenuLabel>
-            {teams.map((team, index) => (
-              <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
-                className="gap-2 p-2"
-              >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
-                  <team.logo className="size-4 shrink-0" />
+    <>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton size="lg">
+                <div className="grid flex-1 text-left text-sm leading-tight space-y-1">
+                  <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded text-white">
+                        {currentOrganization ? getInitials(currentOrganization.name) : 'O'}
+                      </div>
+                    {!isCollapsed && (
+                      <span className="truncate font-semibold text-gray-800 dark:text-white">
+                        {currentOrganization?.name || "No Organization"}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                <Plus className="size-4" />
-              </div>
-              <div className="font-medium text-muted-foreground">Add team</div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
-  )
+                <ChevronsUpDown className="ml-auto text-gray-500 dark:text-gray-400 transition-all duration-200" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg bg-white dark:bg-gray-800 shadow-xl"
+              align="start"
+              side={isMobile ? "bottom" : "right"}
+              sideOffset={4}
+            >
+              <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+              {organizations && organizations.length > 0 ? (
+              organizations.map((organization) => (
+                <DropdownMenuItem
+                  key={organization.id}
+                  onClick={() => organization.id && setCurrentOrganization(organization)}
+                  className="gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                >
+                  <div className="h-8 w-8 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded text-white">
+                    {getInitials(organization.name)}
+                  </div>
+                  <span>{organization.name}</span>
+                </DropdownMenuItem>
+              ))
+            ) : (
+                <DropdownMenuItem asChild>
+                  <div
+                    className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                    onClick={openModal}
+                  >
+                    <Plus className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+                    <span className="text-gray-800 dark:text-gray-300">
+                      Add Your Organization
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+
+      {/* Organization Modal */}
+      <OrganizationModal
+        isOpen={isOpen}
+        onClose={closeModal}
+      />
+    </>
+  );
 }

@@ -15,8 +15,28 @@ import SendGrid from "next-auth/providers/sendgrid"
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { sendMagicSignInLink } from "./emails/magicLink"
- 
 
+const customPrismaAdapter = {
+  ...PrismaAdapter(prisma),
+  async deleteSession(sessionId: string) {
+    try {
+      const session = await prisma.session.findUnique({
+        where: { sessionToken: sessionId },
+      });
+
+      if (session) {
+        await prisma.session.delete({
+          where: { sessionToken: sessionId },
+        });
+        console.log('Session deleted:', sessionId);
+      } else {
+        console.log('No session found to delete:', sessionId);
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+    }
+  },
+};
 
 // config providers
 const providers: Provider[] = [
@@ -59,7 +79,7 @@ export const providerMap = providers
   .filter((provider) => provider.id !== "credentials");
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: customPrismaAdapter,
   providers,
   pages: {
     signIn: "/signin",
@@ -67,6 +87,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   // session strategy refer to https://authjs.dev/concepts/session-strategies#database
   session: {
     strategy: "database",
+  },
+  callbacks: {
+    async signIn({ user, account, profile, credentials }) {
+      // Before creating the session, check if there is an existing session
+      const existingSession = await prisma.session.findFirst({
+        where: { userId: user.id },
+      });
+  
+      if (!existingSession) {
+        console.log("No existing session found for user, proceeding with sign-in");
+      }
+  
+      return true; // Continue with sign-in
+    },
   },
 })
 
