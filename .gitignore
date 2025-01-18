@@ -40,7 +40,10 @@ next-env.d.ts
 # prisma
 prisma/migrations/
 
-# python cache
-src/backend/__pycache__/app.cpython-311.pyc
-
 .idea
+
+# Python virtual environment
+src/backend/.venv/*
+
+# Python cache
+__pycache__
