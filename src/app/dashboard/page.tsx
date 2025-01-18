@@ -75,7 +75,7 @@ export default function DashBoardPage() {
 
   return (
     <div>
-      <BreadcrumbsHeader href='/dashboard' current={breadcrumbTitle} parent='/' onShareClick={handleShareClick} />
+      <BreadcrumbsHeader href='/dashboard' current={breadcrumbTitle} parent='/'/>
       {user.role !== UserRole.STAKEHOLDER && (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {hasOrganization ? (
