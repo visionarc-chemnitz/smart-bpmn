@@ -27,7 +27,6 @@ export default function BpmnInfo() {
       <BpmnFileInfoModal
         isOpen={isOpen}
         onClose={closeModal}
-        onSubmit={handleBpmnFileSubmit} // Directly pass it
         initialData={{
           fileName: fileName || '',
           projectId: projectId || '',

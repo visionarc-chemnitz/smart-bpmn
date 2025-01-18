@@ -31,7 +31,6 @@ interface BreadcrumbsHeaderProps {
   href: string;
   current: string;
   parent: string;
-  onShareClick: () => void;
 }
 
 
@@ -186,7 +185,6 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
       <ProjectModal
         isOpen={isProjectModalOpen}
         onClose={handleProjectModalClose}
-        onSubmit={handleProjectModalSubmit}
       />
       {isInfoModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-lg">
