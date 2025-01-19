@@ -1,4 +1,5 @@
 import { API_PATHS } from '@/app/api/api-path/apiPath';
+import { toastService } from '@/app/services/toast.service';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
 import { User } from '@/types/user/user';
@@ -49,6 +50,8 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
   const getPendingStakeholdersLink = API_PATHS.GET_PENDING_BPMN_STAKEHOLDERS;
   const getStakeholdersLink = API_PATHS.GET_BPMN_STAKEHOLDERS;
 
+  const isInviteDisabled = !email || !validateEmail(email);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -95,7 +98,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
     const data = await response.json();
     setPendingInvitations([...pendingInvitations, {email: email}]);
     setEmail('');
-    window.alert('User has been invited successfully!');
+    toastService.showDefault('User has been invited.');
   };
 
   const handleEmailFocus = () => {
@@ -113,7 +116,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
       const data = await response.json();
       setExistingUsers(data.users);
     } catch (error) {
-      console.error('Error fetching BPMN stakeholders:', error);
+      toastService.showDestructive('Error fetching users.');
     }
   };
 
@@ -128,7 +131,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
       const data = await response.json();
       setPendingInvitations(data.invitations);
     } catch (error) {
-      console.error('Error fetching pending invitations:', error);
+      toastService.showDestructive('Error fetching pending invitations.');
     }
   };
 
@@ -146,7 +149,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
     if (!response.ok) {
       throw new Error('Error inviting user.');
     }
-    window.alert('User has been reinvited successfully!');
+    toastService.showDefault('User has been reinvited.');
   };
 
   const removeUser = async (email: string) => {
@@ -172,8 +175,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
         throw new Error('Error deleting user');
     }
 
-    const data = await response.json();
-    window.alert(data.message);
+    toastService.showDefault("Access has been revoked successfully.");
   }
 
   return (
