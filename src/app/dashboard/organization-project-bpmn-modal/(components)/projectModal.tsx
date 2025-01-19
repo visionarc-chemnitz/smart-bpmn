@@ -11,9 +11,15 @@ export const ProjectModal: React.FC<{
     const { projectName, setProjectName, handleProjectSubmit } = useModalManager();
     const user = useUser();
 
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        handleProjectSubmit(e);
+        onClose();
+    };
+
     return (
         <ModalLayout isOpen={isOpen} onClose={onClose} title="Create New Project">
-            <form className="space-y-4" onSubmit={handleProjectSubmit}>
+            <form className="space-y-4" onSubmit={handleSubmit}>
                 <div>
                     <input
                         type="text"
