@@ -83,6 +83,12 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
     }
   }, [currentOrganization]);
 
+  useEffect(() => {
+    if (currentProject) {
+      setIsDropdownOpen(false);
+    }
+  }, [currentProject]);
+
   const openCreateProjectModal = () => {
     setIsProjectModalOpen(true);
   }
