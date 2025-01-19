@@ -55,7 +55,6 @@ export async function GET(req: NextRequest) {
         },
       });
     }
-
     return NextResponse.json({ projects }, { status: 200 });
   } catch (error) {
     console.error('Error fetching projects:', error);

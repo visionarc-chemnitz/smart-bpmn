@@ -44,7 +44,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
         const data = await response.json();
         setBpmnStakeholders(data.stakeholders);
       } catch (error) {
-        console.error('Error fetching BPMN stakeholders:', error);
+        toastService.showDestructive('Error fetching BPMN stakeholders');
       }
     };
 
@@ -57,7 +57,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
         const data = await response.json();
         setPendingStakeholders(data.pendingStakeholders);
       } catch (error) {
-        console.error('Error fetching pending BPMN stakeholders:', error);
+        toastService.showDestructive('Error fetching pending BPMN stakeholders');
       }
     };
 

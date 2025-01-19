@@ -19,6 +19,7 @@ import { UserRole } from "@/types/user/user";
 import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
 import { Bpmn } from "@/types/bpmn/bpmn";
 import { useModalManager } from "@/hooks/useModalManager";
+import { toastService } from "@/app/services/toast.service";
 
 interface NavBpmnFileProps {
     projectId: string;
@@ -49,6 +50,7 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
             } catch (error) {
                 setError("Error fetching BPMN files");
                 setLoading(false);
+                toastService.showDestructive("Error fetching BPMN files");
             }
         };
         fetchBpmnFiles();

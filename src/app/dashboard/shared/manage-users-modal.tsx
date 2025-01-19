@@ -116,7 +116,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
       const data = await response.json();
       setExistingUsers(data.users);
     } catch (error) {
-      console.error('Error fetching BPMN stakeholders:', error);
+      toastService.showDestructive('Error fetching users.');
     }
   };
 
@@ -131,7 +131,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
       const data = await response.json();
       setPendingInvitations(data.invitations);
     } catch (error) {
-      console.error('Error fetching pending invitations:', error);
+      toastService.showDestructive('Error fetching pending invitations.');
     }
   };
 
