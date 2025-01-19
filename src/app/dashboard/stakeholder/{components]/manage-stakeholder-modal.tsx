@@ -12,6 +12,7 @@ import { API_PATHS } from '@/app/api/api-path/apiPath';
 import { User } from 'next-auth';
 import Image from 'next/image';
 import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
+import { toastService } from '@/app/services/toast.service';
 
 interface Invitation {
     id?: string;
@@ -32,6 +33,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
     
     const [bpmnStakeholders, setBpmnStakeholders] = useState<User[]>([]);
     const [pendingStakeholders, setPendingStakeholders] = useState<Invitation[]>([]);
+    const [isInviting, setIsInviting] = useState(false);
 
     const fetchBpmnStakeholders = async () => {
       try {
@@ -78,6 +80,8 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
             setError('BPMN ID is required');
             return;
         }
+
+        setIsInviting(true);
         const requestBody = {
             email: email,
             bpmnId: bpmnId
@@ -90,13 +94,13 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
         });
         
         if (!response.ok) {
-        setPendingStakeholders([...pendingStakeholders, {email: email, bpmnId: bpmnId!}]);
+          setPendingStakeholders([...pendingStakeholders, {email: email, bpmnId: bpmnId!}]);
         }
 
-        const data = await response.json();
         setPendingStakeholders([...pendingStakeholders, {email: email, bpmnId: bpmnId}]);
         setEmail('');
-        window.alert('User has been invited successfully!');
+        setIsInviting(false);
+        toastService.showDefault('User has been invited.');
     };
 
     const handleEmailFocus = () => {
@@ -119,8 +123,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
             throw new Error('Error inviting user.');
         }
 
-        const data = await response.json();
-        window.alert('User has been reinvited successfully!');
+        toastService.showDefault('User has been reinvited.');
     };
 
     const removeStakeholder = async (email: string, bpmnId: string) => {
@@ -143,8 +146,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
           throw new Error('Error deleting user');
       }
 
-      const data = await response.json();
-      window.alert(data.message);
+      toastService.showDefault("Access has been revoked successfully.");
     }
 
     useEffect(() => {
@@ -189,6 +191,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
                 />
                 <button
                 onClick={handleInviteClick}
+                disabled={isInviting}
                 className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                 >
                 Invite
