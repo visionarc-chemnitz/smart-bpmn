@@ -15,7 +15,7 @@ class StateService(MessagesState):
   def validate_bpmn(xml: str) -> str:
     if not xml or not xml.strip():
       return xml
-    if "<?xml" not in xml or "bpmn2:" not in xml:
+    if "<?xml" not in xml or "bpmn:" not in xml:
       raise ValueError("Invalid BPMN 2.0 XML")
     return xml
 
@@ -35,6 +35,9 @@ class StateService(MessagesState):
   context: str = None
   scenario: str = None
 
+  # functional_requirements: List[str] = []
+  # nonfunctional_requirements: List[str] = []
+  functional_and_nonfunctional_requirements: str = None
 
 
 # Define the schema for the input

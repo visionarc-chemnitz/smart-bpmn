@@ -17,7 +17,7 @@ from psycopg_pool import AsyncConnectionPool
 from psycopg.rows import dict_row
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
-from .prompts import CATEGORIZED_PROMPT, GREETING_PROMPT, OFFTOPIC_PROMPT, QUESTION_PROMPT, SCENARIO_UNDERSTANDING_PROMPT, SCENARIO_REVISION_WITH_ANSWER_PROMPT, SCENARIO_SUMMARY_PROMPT, GATHER_FUNC_NON_FUNC_PROMPT
+from .prompts import CATEGORIZED_PROMPT, GREETING_PROMPT, OFFTOPIC_PROMPT, QUESTION_PROMPT, SCENARIO_UNDERSTANDING_PROMPT, SCENARIO_REVISION_WITH_ANSWER_PROMPT, SCENARIO_SUMMARY_PROMPT, GATHER_FUNC_NON_FUNC_PROMPT, BPMN_PROMPT
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -25,7 +25,8 @@ load_dotenv()
 from IPython.display import Image, display
 from langchain_core.runnables.graph import CurveStyle, MermaidDrawMethod, NodeStyles
 import nest_asyncio
-
+import json
+import re
 
 class ChatConfig(TypedDict):
   thread_id: str
@@ -38,7 +39,7 @@ class ChatConfigWrapper(TypedDict):
 
 class ChatService:
   def __init__(self, groq_api_key: str, graph_service: GraphService):
-      self.llm = ChatGroq(groq_api_key=groq_api_key, streaming=True)
+      self.llm = ChatGroq(groq_api_key=groq_api_key, streaming=True,model="mixtral-8x7b-32768")
       self.graph = graph_service
       self.pool = None
       self.pool_context = None
@@ -192,6 +193,7 @@ class ChatService:
     workflow.add_node("agent", self.call_agent)
     workflow.add_node("human", self.human_input)
     workflow.add_node("gather", self.gather)
+    workflow.add_node("generate", self.generate_bpmn)
     
 
     # Add edges
@@ -216,7 +218,8 @@ class ChatService:
     workflow.add_edge("agent", "human") # go to human if there are questions to ask 
     workflow.add_edge("human", "gather") # go to gather for funtional and non-funitonal requirements
     
-    workflow.add_edge("gather", END)  # development purposes only
+    workflow.add_edge("gather", "generate") # go to generate for generating the bpmn diagram
+    workflow.add_edge("generate", END) # end the conversation after generating the bpmn diagram
 
     # Yet to be implemented
     # workflow.add_edge("gather", "plan") # go to plan for generating detailed instruction on the bpmn diagram adhering to the requirements 
@@ -526,12 +529,69 @@ class ChatService:
 
     # Get functional and non-functional requirements
     system_prompt = SystemMessage(content=GATHER_FUNC_NON_FUNC_PROMPT.format(scenario=scenario, context=context, summary=summary))
-    response = self.llm.invoke(system_prompt.content)
+    response = self.llm.invoke(system_prompt.content, model="llama3-70b-8192")
 
     print(f"Functional and non-functional requirements: {response.content}")
 
-    return 
-    
+    # Extract JSON content from the response string
+    # json_match = re.search(r'```json\n(.*?)\n```', response, re.DOTALL)
+    # if json_match:
+    #     json_content = json_match.group(1)
+    #     try:
+    #         data = json.loads(json_content)
+    #     except json.JSONDecodeError as e:
+    #         print(f"Error decoding JSON: {e}")
+    #         return None
+
+        # # Extract functional and non-functional requirements, decisions, and knowledge graph nodes
+        # functional_requirements = data.get("functional_requirements", [])
+        # print(f"Functional requirements: {functional_requirements}")
+        # non_functional_requirements = data.get("non_functional_requirements", [])
+        # decisions = data.get("decisions", [])
+        # knowledge_graph_nodes = data.get("knowledge_graph_nodes", [])
+
+    #     # Return a Command to update the state
+    #     return Command(
+    #         update={
+    #             "functional_requirements": functional_requirements,
+    #             "nonfunctional_requirements": non_functional_requirements,
+    #             # "context": context,
+    #             # "scenario": scenario,
+    #             # "summary": summary
+    #         }
+    #     )
+    # else:
+    #     print("JSON content not found in the response")
+    return Command(
+      update={
+        "functional_and_nonfunctional_requirements": response.content
+      }
+    )
+
+  def generate_bpmn(self, state: StateService):
+    # Retrieve context and state information
+    context = state.get('context', '')
+    scenario = state.get('scenario', '')
+    summary = state.get('summary', '')
+    functional_and_nonfunctional_requirements = state.get('functional_and_nonfunctional_requirements', '')
+
+    # Generate BPMN diagram using the LLM
+    bpmn_prompt = BPMN_PROMPT.format(context=context, scenario=scenario, summary=summary, functional_and_nonfunctional_requirements=functional_and_nonfunctional_requirements)
+    system_prompt = SystemMessage(content=bpmn_prompt)
+    bpmn_xml = self.llm.invoke(system_prompt.content, model="llama-3.3-70b-versatile")
+    bpmn_xml = bpmn_xml.content
+
+    # Print the generated BPMN diagram
+    xml_start = bpmn_xml.find('<?xml')
+    xml_end = bpmn_xml.find('</bpmn:definitions>') + len('</bpmn:definitions>')
+    if xml_start >= 0 and xml_end >= 0:
+        bpmn_xml = bpmn_xml[xml_start:xml_end]
+    print(f"BPMN XML: {bpmn_xml}")
+    return Command(
+      update={
+        "bpmn_xml": bpmn_xml
+      }
+    )
   
   async def get_thread_history(self, config: ChatConfigWrapper, value: str):
     """Get message history with connection management."""
@@ -725,6 +785,9 @@ class ChatService:
               summary=None,
               scenario=None,
               can_proceed=False,
+              # functional_requirements=[],
+              # nonfunctional_requirements=[],
+              functional_and_nonfunctional_requirements=None,
               bpmn_xml=None
             )
     
@@ -796,6 +859,12 @@ class ChatService:
       rich.print("")  
       rich.print("==========================================================")
       return question
+    
+    
+    # Handle BPMN XML case
+    if isinstance(step[parent_key], dict) and 'bpmn_xml' in step[parent_key]:
+        bpmn_xml = step[parent_key]['bpmn_xml']
+        return bpmn_xml
 
     # Handle messages case
     if isinstance(step[parent_key], dict) and 'messages' in step[parent_key]:

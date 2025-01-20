@@ -37,19 +37,50 @@ Add 'VALIDATED' if requirements are complete and ready for BPMN generation.
 
 BPMN_PROMPT = """Generate a BPMN 2.0 XML diagram based on:
 1. Process Flow: {context}
-2. Participants: {participants}
-3. Activities: {activities}
-4. Rules: {rules}
-
-Generate valid BPMN 2.0 XML that includes:
-- Pool/Lanes for participants
-- Start/End events
-- Activities and tasks
-- Gateways for decisions
-- Message flows
-- Sequence flows
-
-Response must be valid BPMN 2.0 XML starting with <?xml version="1.0"?>
+2. functional_and_nonfunctional_requirements: {functional_and_nonfunctional_requirements}
+3. Rules
+   - Do a crawl of the site <https://www.omg.org/spec/BPMN/2.0/> and underlying documents and then load how to write valid BPMN2.0 xml into your memory
+   - Generate unique IDs as: elementType_[random7chars] (e.g., Gateway_0jsoxba)
+   - Provide descriptive names for elements
+   - Try to create collaborative process with multiple pools and lanes wherever possible.
+   - Take special care of the visual representation of the process 'bpmndi:BPMNDiagram' and how big the pools are and how far apart the elements are spread out and how the connections are made, adjust the layout and positioning of the elements accordingly.
+   - Include precise coordinates in BPMNDI section for each element.
+   - Start the document with the XML declaration: <?xml version="1.0" encoding="UTF-8"?>
+   - Follow this with the <bpmn:definitions> root element. Include the required namespaces for BPMN and BPMN Diagram Interchange (DI):<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+   - Use any of the below elements as required based on scenario, or any other elements as required:
+      - **Events**: Represent something that happens during the process flow.
+         - **Start Event**: Begin the process flow. Specify event types such as None, Message, Timer, Conditional, Signal, or Multiple.
+         - **Intermediate Events**: Represent events that occur between the start and end events. Specify event types such as Message, Timer, Conditional, Signal, or Multiple.
+         - **End Event**: End the process flow. Specify event types such as None, Message, Error, Cancel, Compensation, Signal, or Multiple.
+      - **Gateways**: Represent decision points in the process flow.
+         - **Exclusive Gateway**: Determine the flow based on conditions.
+         - **Parallel Gateway**: Split the flow into multiple paths.
+         - **Inclusive Gateway**: Merge multiple paths into one.
+         - **Complex Gateway**: Model complex decision logic.
+         - **Event-Based Gateway**: Wait for events to occur.
+      - **Tasks**: Represent work that needs to be done.
+         - **Service Task**: Represents automation or interactions with external systems. Specify implementation to define the external service or API being used.
+         - **User Task**: Represents a task is being performed by human.
+         - **Manual Task**: Represents requirement of manual work.
+         - **Business Rule Task**: Represents specific types of services maintained by a business group, rather than an IT group.
+         - **Send Task**: Represents sending a message to another process or lane.
+         - **Receive Task**: Represents relying on an incoming message from a third party.
+         - **Script Task**: Represents execution of a script.
+      - **Connections**: Represent the flow of the process.
+         - **Sequence Flow**: Connect two flow objects.
+         - **Message Flow**: Connect two pools or participants.
+         - **Association**: Connect artifacts to flow objects.
+      - **Artifacts**: Represent data or supporting information.
+      - **Data Objects**: Represent data consumed or produced by activities.
+      - **Swimlanes**: Represent pools and participants.
+         - **Pool**: Represents whole organizations and contain lanes.
+         - **lane**: Represents who is responsible for executing which tasks.
+      - **BPMNDI**: Define the visual representation of the process.
+         - **BPMN Plane**: Define the visual representation of the process.
+         - **BPMN Shape**: Define the visual representation of flow objects.
+         - **BPMN Edge**: Define the visual representation of connections.
+      - **BPMN Labels**: Define the text labels for flow objects.
+   - Do not use placeholders, take special care to generate COMPLETE BPMN XML.
 """
 
 CONFIRMATION_PROMPT = """Based on our conversation, I understand:
@@ -562,6 +593,15 @@ Requirements Analysis Framework:
    - Data Retention
    - Audit Requirements
 
+Generate requirements that are:
+- Specific and measurable
+- Aligned with business goals
+- Technologically feasible
+- Industry-standard compliant
+- Future-proof and scalable"""
+
+removed_part = """
+
 3. Domain Research Insights
    - Industry Standards
    - Common Patterns
@@ -579,10 +619,10 @@ Requirements Analysis Framework:
    - Future Considerations
 
 Output Structure (JSON):
-{
+{{
     "process_id": "string",
     "domain": "string",
-    "functional_requirements": [{
+    "functional_requirements": [{{
         "id": "FR_ID",
         "category": "string",
         "description": "string",
@@ -590,16 +630,16 @@ Output Structure (JSON):
         "rationale": "string",
         "dependencies": ["FR_ID"],
         "domain_insights": ["string"]
-    }],
-    "non_functional_requirements": [{
+    }}],
+    "non_functional_requirements": [{{
         "id": "NFR_ID",
         "category": "string",
         "description": "string",
         "metrics": "string",
         "rationale": "string",
         "industry_standards": ["string"]
-    }],
-    "decisions": [{
+    }}],
+    "decisions": [{{
         "id": "D_ID",
         "topic": "string",
         "decision": "string",
@@ -607,22 +647,16 @@ Output Structure (JSON):
         "rationale": "string",
         "impact": "string",
         "references": ["string"]
-    }],
-    "knowledge_graph_nodes": [{
+    }}],
+    "knowledge_graph_nodes": [{{
         "id": "string",
         "type": "requirement|decision|insight",
-        "attributes": {},
-        "relationships": [{
+        "attributes": {{}},
+        "relationships": [{{
             "type": "string",
             "target_id": "string",
             "weight": float
-        }]
-    }]
-}
-
-Generate requirements that are:
-- Specific and measurable
-- Aligned with business goals
-- Technologically feasible
-- Industry-standard compliant
-- Future-proof and scalable"""
+        }}]
+    }}]
+}}
+"""

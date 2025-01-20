@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import BreadcrumbsHeader from '../(components)/breadcrumbs-header'
 import BpmnModelerComponent from '../text2bpmn/(components)/bpmn-modeler-component';
 import { apiWrapper } from '@/lib/utils';
@@ -155,18 +155,22 @@ export default function ChatPage() {
               }
 
               if (data.response) {
-                assistantMessage += data.response;
-                setMessages(prev => {
-                  const newMessages = [...prev];
-                  const lastMessage = newMessages[newMessages.length - 1];
-                  
-                  if (lastMessage?.role === 'assistant') {
-                    lastMessage.content = assistantMessage;
-                  } else {
-                    newMessages.push({ role: 'assistant', content: assistantMessage });
-                  }
-                  return newMessages;
-                });
+                if (data.response.includes('<?xml')) {
+                  setXml(data.response);
+                } else {
+                  assistantMessage += data.response;
+                  setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastMessage = newMessages[newMessages.length - 1];
+                    
+                    if (lastMessage?.role === 'assistant') {
+                      lastMessage.content = assistantMessage;
+                    } else {
+                      newMessages.push({ role: 'assistant', content: assistantMessage });
+                    }
+                    return newMessages;
+                  });
+                }
               }
             } catch (error) {
               console.error('Error parsing SSE data:', error);
