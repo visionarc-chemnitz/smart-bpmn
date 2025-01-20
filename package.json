@@ -26,6 +26,7 @@
     "bpmn-auto-layout": "^1.0.0",
     "bpmn-js": "^18.1.1",
     "bpmn-js-differ": "^3.0.2",
+    "bpmn-js-embedded-comments": "^0.7.0",
     "bpmn-js-properties-panel": "^5.28.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

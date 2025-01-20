@@ -1,8 +1,9 @@
+
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
 import { useEffect, useRef, useState } from 'react';
 import {BpmnViewerProps, BpmnViewerHookResult} from '@/types/board/board-types';
 import { useBpmnTheme } from './use-bpmn-theme';
-//import EmbeddedComments from 'bpmn-js-embedded-comments';
+import EmbeddedComments from 'bpmn-js-embedded-comments';
 
 interface IOverlays {
   add: (elementId: string, options: {
@@ -12,7 +13,7 @@ interface IOverlays {
   clear: () => void;
 }
 
-export function useBpmnViewer({ 
+export function useBpmnComment({ 
   containerId,
   diagramXML,
   onError,
@@ -35,6 +36,9 @@ export function useBpmnViewer({
 
     const bpmnViewer = new BpmnViewer({
       container,
+      additionalModules: [
+        EmbeddedComments
+      ],
     });
 
     setViewer(bpmnViewer);
