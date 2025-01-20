@@ -6,7 +6,7 @@ import {
 } from 'bpmn-js-properties-panel';
 import { BpmnModelerProps, BpmnModelerHookResult } from '@/types/board/board-types';
 import { useBpmnTheme } from './use-bpmn-theme';
-import { layoutProcess } from "bpmn-auto-layout"
+// import { layoutProcess } from "bpmn-auto-layout"
 // Add overlay import
 
 interface IOverlays {
