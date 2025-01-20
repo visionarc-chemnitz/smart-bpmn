@@ -21,6 +21,7 @@ const DifferencesTable: React.FC<DifferencesTableProps> = ({ differences }) => {
           <TableHead>Type</TableHead>
           <TableHead>Name</TableHead>
           <TableHead>Change</TableHead>
+          <TableHead>Marker</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -30,6 +31,11 @@ const DifferencesTable: React.FC<DifferencesTableProps> = ({ differences }) => {
             <TableCell>{diff.type}</TableCell>
             <TableCell>{diff.name || 'N/A'}</TableCell>
             <TableCell>{diff.change}</TableCell>
+            <TableCell>
+              <div className={`marker marker-${diff.markerType}`}>
+                {diff.marker}
+              </div>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

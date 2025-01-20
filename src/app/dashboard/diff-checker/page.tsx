@@ -104,7 +104,7 @@ export default function DiffCheckerPage() {
         const differences = await compareDiagrams(xml1, xml2);
         setDifference(differences);
         console.table(extractChanges(differences));
-        addOverlays(differences);
+        addOverlays(differences, modeler1Ref, modeler2Ref);
       }
     } catch (error) {
       console.error('Error comparing diagrams:', error);
@@ -112,7 +112,13 @@ export default function DiffCheckerPage() {
   };
 
   const extractChanges = (differences: any) => {
-    const result: { id: string; type: string; name?: string; change: string }[] = [];
+    const markerSymbols = {
+      'element-removed': '−',
+      'element-added': '+',
+      'layout-changed': '⇨',
+      'element-modified': '✎'
+    };
+    const result: { id: string; type: string; name?: string; change: string; markerType: string; marker: string}[] = [];
   
     // Handle _changed
     for (const key in differences._changed) {
@@ -121,7 +127,9 @@ export default function DiffCheckerPage() {
         id: key,
         type: model.$type,
         name: attrs.name ? attrs.name.newValue : undefined,
-        change: 'changed',
+        change: 'Element Modified',
+        markerType: 'element-modified',
+        marker: markerSymbols['element-modified']
       });
     }
   
@@ -132,7 +140,9 @@ export default function DiffCheckerPage() {
         id: key,
         type: $type,
         name: undefined,
-        change: 'removed',
+        change: 'Element Removed',
+        markerType: 'element-removed',
+        marker: markerSymbols['element-removed']
       });
     }
   
@@ -143,7 +153,9 @@ export default function DiffCheckerPage() {
         id: key,
         type: $type,
         name: undefined,
-        change: 'layoutChanged',
+        change: 'Layout Changed',
+        markerType: 'layout-changed',
+        marker: markerSymbols['layout-changed']
       });
     }
   
@@ -154,7 +166,9 @@ export default function DiffCheckerPage() {
         id: key,
         type: $type,
         name: undefined,
-        change: 'added',
+        change: 'Element Added',
+        markerType: 'element-added',
+        marker: markerSymbols['element-added']
       });
     }
   
@@ -204,99 +218,51 @@ export default function DiffCheckerPage() {
     return result;
   };
   
+  // Helper function to generate overlay HTML
   const generateOverlayHtml = (diff: ProcessedDiff) => {
     const markerDiv = document.createElement('div');
     markerDiv.className = 'marker-container';
-  
-    const getMarkerContent = (type: string) => {
-      switch (type) {
-        case 'element-removed':
-          return '<span class="marker marker-removed">&minus;</span>';
-        case 'element-added':
-          return '<span class="marker marker-added">&#43;</span>';
-        case 'layout-changed':
-          return '<span class="marker marker-layout-changed">&#8680;</span>';
-        default:
-          return '<span class="marker marker-changed">&#9998;</span>';
-      }
-    };
-  
-    markerDiv.innerHTML = getMarkerContent(diff.type);
-    markerDiv.style.position = 'absolute';
-    markerDiv.style.top = '-10px';
-    markerDiv.style.right = '-10px';
-    markerDiv.style.zIndex = '100';
     
+    const markers = {
+      'element-removed': '&minus;',
+      'element-added': '&#43;',
+      'layout-changed': '&#8680;',
+      'element-modified': '&#9998;'
+    };
+
+    const marker = markers[diff.type as keyof typeof markers] || '&#9998;';
+    markerDiv.innerHTML = `<div class="marker marker-${diff.type}">${marker}</div>`;
+  
     return markerDiv;
   };
 
-  const addOverlays = async (differences: BpmnDiff) => {
+  const addOverlays = (
+    differences: BpmnDiff, 
+    modeler1Ref: React.RefObject<BpmnViewerRef>,
+    modeler2Ref: React.RefObject<BpmnViewerRef>
+  ) => {
     if (!modeler1Ref.current || !modeler2Ref.current) return;
     clearOverlays();
     const processedDiffs = processDifferences(differences);
-  
-    // Create temporary containers
-    const container1 = document.createElement('div');
-    const container2 = document.createElement('div');
-    document.body.appendChild(container1);
-    document.body.appendChild(container2);
-  
-    // Initialize viewers with containers
-    const viewer1 = new BpmnViewer({ container: container1 });
-    const viewer2 = new BpmnViewer({ container: container2 });
-  
-    try {
-      const xml1 = await modeler1Ref.current.exportXML();
-      const xml2 = await modeler2Ref.current.exportXML();
-  
-      // Import XMLs and wait for completion
-      await Promise.all([
-        viewer1.importXML(xml1),
-        viewer2.importXML(xml2)
-      ]);
-  
-      const registry1 = viewer1.get('elementRegistry') as any;
-      const registry2 = viewer2.get('elementRegistry') as any;
-  
-      processedDiffs.forEach((diff) => {
-        let shape;
-        let overlayHtml;
-        
-        if (diff.type === 'element-added') {
-          shape = registry2.get(diff.elementId);
-          if (shape) {
-            overlayHtml = generateOverlayHtml(diff);
-            modeler2Ref.current?.addOverlay(diff.elementId, overlayHtml);
-          }
-        } else if (diff.type === 'element-removed') {
-          shape = registry1.get(diff.elementId);
-          if (shape) {
-            overlayHtml = generateOverlayHtml(diff);
-            modeler1Ref.current?.addOverlay(diff.elementId, overlayHtml);
-          }
-        } else if (diff.type === 'layout-changed') {
-          shape = registry1.get(diff.elementId);
-          if (shape) {
-            overlayHtml = generateOverlayHtml(diff);
-            modeler1Ref.current?.addOverlay(diff.elementId, overlayHtml);
-          }
-        } else {
-          shape = registry1.get(diff.elementId);
-          if (shape) {
-            overlayHtml = generateOverlayHtml(diff);
-            modeler2Ref.current?.addOverlay(diff.elementId, overlayHtml);
-          }
-        }
-      });
-    } catch (error) {
-      console.error('Error processing overlays:', error);
-    } finally {
-      // Cleanup
-      viewer1.destroy();
-      viewer2.destroy();
-      container1.remove();
-      container2.remove();
-    }
+    
+    processedDiffs.forEach((diff) => {
+      const overlayHtml1 = generateOverlayHtml(diff);
+      const overlayHtml2 = generateOverlayHtml(diff);
+      
+      switch (diff.type) {
+        case 'element-added':
+          modeler2Ref.current?.addOverlay(diff.elementId, overlayHtml2);
+          break;
+        case 'element-removed':
+          modeler1Ref.current?.addOverlay(diff.elementId, overlayHtml1);
+          break;
+        case 'layout-changed':
+        case 'element-modified':
+          modeler1Ref.current?.addOverlay(diff.elementId, overlayHtml1);
+          modeler2Ref.current?.addOverlay(diff.elementId, overlayHtml2);
+          break;
+      }
+    });
   };
 
   const clearOverlays = () => {
@@ -353,14 +319,14 @@ export default function DiffCheckerPage() {
           <DifferencesTable differences={extractChanges(difference)} />
         </div>
       )}
-      <footer className="p-2 bg-gray-100 dark:bg-gray-800" style={{ maxWidth: 'var(--sidebar-footer-width)' }}>
+      {/* <footer className="p-2 bg-gray-100 dark:bg-gray-800" style={{ maxWidth: 'var(--sidebar-footer-width)' }}>
         <button
           onClick={clearOverlays}
           className="m-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm"
         >
           Clear Overlays
         </button>
-      </footer>
+      </footer> */}
     </div>
   );
 }
