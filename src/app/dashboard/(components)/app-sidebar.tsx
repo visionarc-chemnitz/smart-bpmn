@@ -61,6 +61,10 @@ const data = {
           url: "/dashboard/image2bpmn",
         },
         {
+          title: "Chat",
+          url: "/dashboard/chat",
+        },
+        {
           title: "Diff Checker",
           url: "/dashboard/diff-checker",
         },

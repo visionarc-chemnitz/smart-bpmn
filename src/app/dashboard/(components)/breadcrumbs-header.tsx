@@ -26,12 +26,12 @@ import { UserRole } from "@/types/user/user";
 import { useOrganizationWorkspaceContext } from "@/providers/organization-workspace-provider";
 import { Project } from "@/types/project/project";
 import { ManageUsersModal } from "../shared/manage-users-modal";
+import { toastService } from "@/app/services/toast.service";
 
 interface BreadcrumbsHeaderProps {
   href: string;
   current: string;
   parent: string;
-  onShareClick: () => void;
 }
 
 
@@ -75,13 +75,19 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
           }
           
         } catch (error) {
-          console.error("Error fetching data:", error);
+          toastService.showDestructive("Error fetching projects.");
         }
       };
 
       fetchData();
     }
   }, [currentOrganization]);
+
+  useEffect(() => {
+    if (currentProject) {
+      setIsDropdownOpen(false);
+    }
+  }, [currentProject]);
 
   const openCreateProjectModal = () => {
     setIsProjectModalOpen(true);
@@ -97,22 +103,6 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
 
   const handleProjectModalClose = () => {
     setIsProjectModalOpen(false);
-  };
-
-  const handleProjectModalSubmit = async (e: React.FormEvent<HTMLFormElement>, data: { projectName: string; organizationId: string }) => {
-    try {
-      setIsProjectModalOpen(false);
-      const response = await fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${currentOrganization?.id}`);
-      const data = await response.json();
-      const projects = data.projects;
-      if (projects.length > 0) {
-        setProjectList(projects); 
-        setCurrentProject(projects[projects.length - 1]);
-      }
-     
-    } catch (error) {
-      console.error("Error updating projects:", error);
-    }
   };
 
   const handleInfoModalClose = () => {
@@ -186,7 +176,6 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
       <ProjectModal
         isOpen={isProjectModalOpen}
         onClose={handleProjectModalClose}
-        onSubmit={handleProjectModalSubmit}
       />
       {isInfoModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-lg">

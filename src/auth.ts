@@ -88,6 +88,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "database",
   },
+  trustHost: true,  
   callbacks: {
     async signIn({ user, account, profile, credentials }) {
       // Before creating the session, check if there is an existing session

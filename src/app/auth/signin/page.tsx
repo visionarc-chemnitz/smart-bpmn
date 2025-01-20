@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import SignIn from "../(components)/sign-in";
+import Loading from "@/app/loading";
  
 export default async function SignInPage() {
   
@@ -6,6 +8,8 @@ export default async function SignInPage() {
 
     // TODO: redirect to dashboard if user is already signed in
     // TODO: Revamp the sign-in page
-    <SignIn/>
+    <Suspense fallback={<Loading/>}>
+      <SignIn/>
+    </Suspense>
   );
 }

@@ -18,10 +18,10 @@ import {
   SidebarMenuAction,
 } from "@/components/ui/sidebar"
 
-import ProjectModal from "../project/(components)/project-modal"
 import { useState } from 'react';
 import { UserRole } from "@/types/user/user"
 import { useUser } from "@/providers/user-provider"
+import { ProjectModal } from "../organization-project-bpmn-modal/(components)/projectModal";
 
 export function NavProjects({
   projects,
@@ -100,7 +100,6 @@ export function NavProjects({
       <ProjectModal
         isOpen={isProjectModalOpen}
         onClose={closeProjectModal}
-        onSubmit={handleProjectSubmit}
       />
     </SidebarGroup>
   )

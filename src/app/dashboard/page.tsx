@@ -5,19 +5,15 @@ import BreadcrumbsHeader from './(components)/breadcrumbs-header';
 import NewTeam from './(components)/new-team';
 import TeamSpacePage from './(components)/teamSpace';
 import { useUser } from "@/providers/user-provider";
-import ManageStakeholderModal from './stakeholder/{components]/manage-stakeholder-modal';
 import { API_PATHS } from '../api/api-path/apiPath';
 import { UserRole } from '@/types/user/user';
 import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
+import { toastService } from '../services/toast.service';
 
 export default function DashBoardPage() {
   const user = useUser();  // Get user directly here
   const [hasOrganization, setHasOrganization] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isManageStakeholderModalOpen, setIsManageStakeholderModalOpen] = useState(false);
-  const handleShareClick = () => {
-    setIsManageStakeholderModalOpen(true); 
-  };
   const { setCurrentOrganization } = useOrganizationWorkspaceContext();
   const breadcrumbTitle = user.role === UserRole.STAKEHOLDER ? '' : 'Playground';
  
@@ -36,7 +32,9 @@ export default function DashBoardPage() {
             body: JSON.stringify(requestBody),
         });
         const data = await response.json(); 
-        console.log(data);
+        if (data.success) {
+          toastService.showDefault("You have successfully accepted the invitation.");
+        }
       };
       
       // Remove the token from local storage
@@ -75,7 +73,7 @@ export default function DashBoardPage() {
 
   return (
     <div>
-      <BreadcrumbsHeader href='/dashboard' current={breadcrumbTitle} parent='/' onShareClick={handleShareClick} />
+      <BreadcrumbsHeader href='/dashboard' current={breadcrumbTitle} parent='/'/>
       {user.role !== UserRole.STAKEHOLDER && (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {hasOrganization ? (
@@ -85,8 +83,6 @@ export default function DashBoardPage() {
           )}
         </div>
       )}
-      
-
     </div>
   );
 }
