@@ -6,8 +6,7 @@ import BpmnModelerComponent from '../text2bpmn/(components)/bpmn-modeler-compone
 import { AlertCircle, Image as ImageIcon, Cog } from 'lucide-react';
 import { UploadSection } from './(components)/upload-section';
 import { Button } from '@/components/ui/button';
-import BpmnViewerComponent from '../text2bpmn/(components)/bpmn-viewer-component';
-import BpmnCommentComponent from '../text2bpmn/(components)/bpmn-comment-component';
+// import BpmnCommentComponent from '../text2bpmn/(components)/bpmn-comment-component';
 
 export default function Image2BPMNPage() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -92,9 +91,7 @@ export default function Image2BPMNPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <BreadcrumbsHeader href='/dashboard' current='Image2BPMN' parent='Playground' onShareClick={function (): void {
-        throw new Error('Function not implemented.');
-      } }/>
+      <BreadcrumbsHeader href='/dashboard' current='Image2BPMN' parent='Playground'/>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
 
@@ -166,9 +163,9 @@ export default function Image2BPMNPage() {
           {xml && (
               <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden transition-all duration-300">
               <div className="h-[calc(100vh-24rem)] md:h-[800px]">
-                <BpmnViewerComponent
+                <BpmnModelerComponent
                   containerId="bpmn-modeler"
-                  //propertiesPanelId="properties-panel"
+                  propertiesPanelId="properties-panel"
                   diagramXML={xml}
                   onError={(error: Error) => setError(error.message)}
                   onImport={() => console.log('BPMN diagram imported successfully')}
