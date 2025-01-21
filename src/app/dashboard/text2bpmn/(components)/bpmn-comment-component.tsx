@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle, useRef, useEffect } from 'react
 import { useBpmnViewer } from '@/hooks/use-bpmn-viewer';
 import { BpmnViewerProps } from '@/types/board/board-types';
 
-export const BpmnViewerComponent = forwardRef((props: BpmnViewerProps, ref) => {
+export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => {
   const { containerId, diagramXML, onError, onImport, height, width } = props;
   const { viewer, importXML, exportXML, addOverlay, clearOverlay } = useBpmnViewer({
     containerId,
@@ -64,4 +64,4 @@ export const BpmnViewerComponent = forwardRef((props: BpmnViewerProps, ref) => {
   );
 });
 
-export default BpmnViewerComponent;
+export default BpmnCommentComponent;

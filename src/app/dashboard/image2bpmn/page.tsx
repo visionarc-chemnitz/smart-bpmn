@@ -6,6 +6,7 @@ import BpmnModelerComponent from '../text2bpmn/(components)/bpmn-modeler-compone
 import { AlertCircle, Image as ImageIcon, Cog } from 'lucide-react';
 import { UploadSection } from './(components)/upload-section';
 import { Button } from '@/components/ui/button';
+// import BpmnCommentComponent from '../text2bpmn/(components)/bpmn-comment-component';
 
 export default function Image2BPMNPage() {
   const [loading, setLoading] = useState<boolean>(false);

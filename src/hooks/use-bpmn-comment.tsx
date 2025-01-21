@@ -1,77 +1,55 @@
-import { use, useEffect, useRef, useState } from 'react';
-import BpmnModeler from 'bpmn-js/lib/Modeler';
-import { 
-  BpmnPropertiesPanelModule, 
-  BpmnPropertiesProviderModule,
-} from 'bpmn-js-properties-panel';
-import { BpmnModelerProps, BpmnModelerHookResult } from '@/types/board/board-types';
+
+import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
+import { useEffect, useRef, useState } from 'react';
+import {BpmnViewerProps, BpmnViewerHookResult} from '@/types/board/board-types';
 import { useBpmnTheme } from './use-bpmn-theme';
+import EmbeddedComments from 'bpmn-js-embedded-comments';
 
 interface IOverlays {
   add: (elementId: string, options: {
-    position: {
-      top?: number;
-      right?: number;
-      bottom?: number;
-      left?: number;
-    };
+    position: { top?: number; right?: number; bottom?: number; left?: number; };
     html: string | HTMLElement;
   }) => string;
-  remove: (filter: { element?: string }) => void;
   clear: () => void;
 }
 
-export const useBpmnModeler = ({
+export function useBpmnComment({ 
   containerId,
-  propertiesPanelId,
   diagramXML,
   onError,
   onImport,
   height = '100%',
-  width = '100%',
-}: BpmnModelerProps): BpmnModelerHookResult => {
-  const [modeler, setModeler] = useState<BpmnModeler | null>(null);
+  width = '100%'
+}: BpmnViewerProps): BpmnViewerHookResult {
+  const [viewer, setViewer] = useState<BpmnViewer | null>(null);
   const containerRef = useRef<HTMLElement | null>(null);
-  const propertiesPanelRef = useRef<HTMLElement | null>(null);
-
-  useBpmnTheme(modeler);
+  
+  useBpmnTheme(viewer);
 
   useEffect(() => {
     const container = document.getElementById(containerId);
-    const propertiesPanel = document.getElementById(propertiesPanelId);
     if (!container) return;
 
     containerRef.current = container;
-    propertiesPanelRef.current = propertiesPanel;
     container.style.height = typeof height === 'number' ? `${height}px` : height;
     container.style.width = typeof width === 'number' ? `${width}px` : width;
 
-    const bpmnModeler = new BpmnModeler({
+    const bpmnViewer = new BpmnViewer({
       container,
-      propertiesPanel: {
-        parent: propertiesPanel
-      },
       additionalModules: [
-        BpmnPropertiesPanelModule,
-        BpmnPropertiesProviderModule
+        EmbeddedComments
       ],
-      palette: {
-        open: true
-      },
-      contextPad: {
-        open: true
-      }
     });
 
-    setModeler(bpmnModeler);
+    setViewer(bpmnViewer);
 
     return () => {
-      bpmnModeler.destroy();
+      bpmnViewer.destroy();
     };
-  }, [containerId, propertiesPanelId, height, width]);
+  }, [containerId, height, width]);
 
   useEffect(() => {
-  if (diagramXML && modeler) {
+  if (diagramXML && viewer) {
     importXML(diagramXML);
   } else {
     const defaultDiagramXML = `
@@ -94,16 +72,15 @@ export const useBpmnModeler = ({
     `;
     importXML(defaultDiagramXML);
   }
-  }, [diagramXML, modeler]);
+  }, [diagramXML, viewer]);
 
-  // Import XML
   const importXML = async (xml: string) => {
-    if (!modeler) return;
+    if (!viewer) return;
 
     try {
       console.log(xml)
-      await modeler.importXML(xml);
-      const canvas = modeler.get('canvas') as { zoom: (type: string) => void };
+      await viewer.importXML(xml);
+      const canvas = viewer.get('canvas') as { zoom: (type: string) => void };
       canvas.zoom('fit-viewport');
       onImport?.();
     } catch (err) {
@@ -111,12 +88,11 @@ export const useBpmnModeler = ({
     }
   };
 
-  // Export XML
   const exportXML = async (): Promise<string> => {
-    if (!modeler) return '';
+    if (!viewer) return '';
 
     try {
-      const { xml } = await modeler.saveXML({ format: true });
+      const { xml } = await viewer.saveXML({ format: true });
       return xml as string;
     } catch (err) {
       onError?.(err as Error);
@@ -124,57 +100,35 @@ export const useBpmnModeler = ({
     }
   };
 
-  // Export SVG
-  const exportSVG = async (): Promise<string> => {
-    if (!modeler) return '';
-
-    try {
-      const { svg } = await modeler.saveSVG();
-      return svg;
-    } catch (err) {
-      onError?.(err as Error);
-      return '';
-    }
-  };
-
-  // Add overlay methods
   const addOverlay = (elementId: string, html: string | HTMLElement) => {
-    if (!modeler) return;
-    const overlays = modeler.get<IOverlays>('overlays');
+    if (!viewer) return;
+    const overlays = viewer.get<IOverlays>('overlays');
     overlays.add(elementId, {
       position: {
-        bottom: -5,
-        left: 0
+        top: 5,
+        right: 5
       },
       html: html
     });
   };
 
-  const removeOverlay = (elementId: string) => {
-    if (!modeler) return;
-    const overlays = modeler.get<IOverlays>('overlays');
-    overlays.remove({ element: elementId });
-  };
-
-  // Update clearOverlays function
   const clearOverlay = () => {
-    if (!modeler) return;
+    if (!viewer) return;
     try {
-      const overlays = modeler.get<IOverlays>('overlays');
+      const overlays = viewer.get<IOverlays>('overlays');
       overlays.clear();
     } catch (error) {
       console.error('Error clearing overlays:', error);
     }
   };
 
-  // Update return type to include overlay methods
   return {
-    modeler,
+    viewer,
     importXML,
     exportXML,
-    exportSVG,
+    exportSVG: () => viewer?.saveSVG(),
     addOverlay,
-    removeOverlay,
-    clearOverlay
+    clearOverlay,
+    containerRef
   };
-};
+}

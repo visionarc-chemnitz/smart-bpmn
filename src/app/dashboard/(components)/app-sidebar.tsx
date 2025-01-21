@@ -64,10 +64,10 @@ const data = {
           title: "Chat",
           url: "/dashboard/chat",
         },
-        // {
-        //   title: "Settings",
-        //   url: "#",
-        // },
+        {
+          title: "Diff Checker",
+          url: "/dashboard/diff-checker",
+        },
       ],
     },
   ],
