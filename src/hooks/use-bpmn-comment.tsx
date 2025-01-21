@@ -1,7 +1,7 @@
 
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
 import { useEffect, useRef, useState } from 'react';
-import {BpmnViewerProps, BpmnViewerHookResult} from '@/types/board/board-types';
+import {BpmnViewerProps, BpmnCommentHookResult} from '@/types/board/board-types';
 import { useBpmnTheme } from './use-bpmn-theme';
 import EmbeddedComments from 'bpmn-js-embedded-comments';
 
@@ -20,7 +20,7 @@ export function useBpmnComment({
   onImport,
   height = '100%',
   width = '100%'
-}: BpmnViewerProps): BpmnViewerHookResult {
+}: BpmnViewerProps): BpmnCommentHookResult {
   const [viewer, setViewer] = useState<BpmnViewer | null>(null);
   const containerRef = useRef<HTMLElement | null>(null);
   
