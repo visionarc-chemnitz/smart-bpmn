@@ -6,6 +6,8 @@ interface Difference {
   type: string;
   name?: string;
   change: string;
+  marker: string;
+  markerType: string;
 }
 
 interface DifferencesTableProps {

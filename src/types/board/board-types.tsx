@@ -17,7 +17,6 @@ export interface BpmnViewerHookResult {
   exportSVG: () => Promise<{ svg: string }> | undefined;
   addOverlay: (elementId: string, html: string | HTMLElement) => void;
   clearOverlay: () => void;
-  containerRef: React.RefObject<HTMLElement | null>;
 }
 
 export interface BpmnModelerProps {
@@ -38,8 +37,6 @@ export interface BpmnModelerHookResult {
   addOverlay: (elementId: string, html: string | HTMLElement) => void;
   removeOverlay: (elementId: string) => void;
   clearOverlay: () => void;
-  containerRef: React.RefObject<HTMLElement | null>;
-  propertiesPanelRef: React.RefObject<HTMLElement | null>;
 }
 
 // Types for Upload Section

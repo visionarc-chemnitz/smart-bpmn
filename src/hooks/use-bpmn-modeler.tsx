@@ -6,8 +6,6 @@ import {
 } from 'bpmn-js-properties-panel';
 import { BpmnModelerProps, BpmnModelerHookResult } from '@/types/board/board-types';
 import { useBpmnTheme } from './use-bpmn-theme';
-// import { layoutProcess } from "bpmn-auto-layout"
-// Add overlay import
 
 interface IOverlays {
   add: (elementId: string, options: {
@@ -20,7 +18,7 @@ interface IOverlays {
     html: string | HTMLElement;
   }) => string;
   remove: (filter: { element?: string }) => void;
-  clear: () => void;  // Add this method
+  clear: () => void;
 }
 
 export const useBpmnModeler = ({
@@ -103,11 +101,6 @@ export const useBpmnModeler = ({
     if (!modeler) return;
 
     try {
-      // Apply auto layout to the XML
-      // const layoutedXml = await layoutProcess(xml);
-      
-      // Import the layouted XML
-      // await modeler.importXML(layoutedXml);
       console.log(xml)
       await modeler.importXML(xml);
       const canvas = modeler.get('canvas') as { zoom: (type: string) => void };
@@ -182,8 +175,6 @@ export const useBpmnModeler = ({
     exportSVG,
     addOverlay,
     removeOverlay,
-    clearOverlay,     // Add this
-    containerRef,
-    propertiesPanelRef
+    clearOverlay
   };
 };

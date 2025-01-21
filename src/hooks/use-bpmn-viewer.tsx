@@ -20,16 +20,14 @@ export function useBpmnViewer({
   height = '100%',
   width = '100%'
 }: BpmnViewerProps): BpmnViewerHookResult {
-  const [viewer, setViewer] = useState<BpmnViewer | null>(null);
-  const containerRef = useRef<HTMLElement | null>(null);
+  const viewerRef = useRef<BpmnViewer | null>(null);
   
-  useBpmnTheme(viewer);
+  useBpmnTheme(viewerRef.current);
 
   useEffect(() => {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    containerRef.current = container;
     container.style.height = typeof height === 'number' ? `${height}px` : height;
     container.style.width = typeof width === 'number' ? `${width}px` : width;
 
@@ -37,13 +35,16 @@ export function useBpmnViewer({
       container,
     });
 
-    setViewer(bpmnViewer);
+    viewerRef.current = bpmnViewer;
 
     return () => {
       bpmnViewer.destroy();
+      viewerRef.current = null;
     };
   }, [containerId, height, width]);
 
+  
+  const viewer = viewerRef.current;
   useEffect(() => {
   if (diagramXML && viewer) {
     importXML(diagramXML);
@@ -124,7 +125,6 @@ export function useBpmnViewer({
     exportXML,
     exportSVG: () => viewer?.saveSVG(),
     addOverlay,
-    clearOverlay,
-    containerRef
+    clearOverlay
   };
 }

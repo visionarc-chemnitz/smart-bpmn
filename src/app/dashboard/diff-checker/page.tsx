@@ -276,12 +276,7 @@ export default function DiffCheckerPage() {
 
   return (
     <div style={{ height: '100vh' }}>
-      <BreadcrumbsHeader 
-        href='/dashboard' 
-        current='Diff-Checker' 
-        parent='Playground' 
-        onShareClick={() => console.log('Share clicked')} 
-      />
+      <BreadcrumbsHeader href='/dashboard' current='Diff-Checker' parent='Playground' />
       <div style={{ height: '85%', width: '100%' }}>
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={50}>
