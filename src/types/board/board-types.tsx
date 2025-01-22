@@ -19,6 +19,16 @@ export interface BpmnViewerHookResult {
   clearOverlay: () => void;
 }
 
+export interface BpmnCommentHookResult {
+  viewer: BpmnViewer | null;
+  importXML: (xml: string) => Promise<void>;
+  exportXML: () => Promise<string>; 
+  exportSVG: () => Promise<{ svg: string }> | undefined;
+  addOverlay: (elementId: string, html: string | HTMLElement) => void;
+  clearOverlay: () => void;
+  containerRef: React.RefObject<HTMLElement | null>;
+}
+
 export interface BpmnModelerProps {
   containerId: string;
   propertiesPanelId: string;
