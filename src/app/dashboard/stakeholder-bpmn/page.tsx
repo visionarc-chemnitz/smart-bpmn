@@ -71,7 +71,7 @@ export default function StakeolderBpmnPage() {
                 <TableRow key={bpmn.id}>
                     <TableCell>{bpmn.fileName}</TableCell>
                     <TableCell>
-                    <Link href={`/dashboard/stakeholder-bpmn-version?bpmnVersionId=${bpmn.currentVersionId}`}>
+                    <Link href={`/dashboard/stakeholder-bpmn/${bpmn.currentVersionId}`}>
                     <RainbowButton
                       type="button"
                       className="ml-5 mr-2 py-0 text-sm h-8 px-3"

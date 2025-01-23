@@ -27,6 +27,21 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
     clearOverlay
   }));
 
+  const handleExportXML = async () => {
+    const xml = await exportXML();
+    if (xml) {
+      const blob = new Blob([xml], { type: 'application/xml' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'diagram.bpmn';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  };
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -61,9 +76,18 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
         >
           Import BPMN
         </button>
+
+        <button
+            onClick={handleExportXML}
+            className="px-3 py-2 text-xs sm:text-sm font-medium text-white bg-gray-500 rounded-md hover:bg-blue-700 whitespace-nowrap"
+          >
+            Export BPMN
+          </button>
       </div>
     </div>
   );
 });
+
+BpmnCommentComponent.displayName = 'BpmnCommentComponent';
 
 export default BpmnCommentComponent;

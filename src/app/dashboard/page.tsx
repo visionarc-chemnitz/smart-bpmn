@@ -21,7 +21,7 @@ export default function DashBoardPage() {
     const invitationToken = localStorage.getItem('invitationToken');
     const requestBody = {
       invitationToken,
-    };
+    };a
 
     // If invitation token is present in local storage, decode the token and give access to the user
     if (invitationToken) {
