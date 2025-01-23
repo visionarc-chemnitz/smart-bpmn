@@ -18,4 +18,5 @@ export const API_PATHS = {
     GET_MEMBERS: '/api/member/get-members',
     GET_PENDING_MEMBERS: '/api/invitation/get-pending-members',
     REVOKE_MEMBER_ACCESS: '/api/member/revoke-access',
+    GET_BPMN_VERSION: '/api/bpmn/get-bpmn-version',
 };
