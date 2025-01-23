@@ -15,7 +15,7 @@ import Link from 'next/link';
 
 
 
-export default function StakeolderBpmnPage() {
+export default function StakeholderBpmnPage() {
     const [bpmnFiles, setBpmnFiles] = useState<Bpmn[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
