@@ -9,6 +9,7 @@ import { API_PATHS } from '../api/api-path/apiPath';
 import { UserRole } from '@/types/user/user';
 import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
 import { toastService } from '../services/toast.service';
+import StakeolderBpmnPage from './stakeholder-bpmn/page';
 
 export default function DashBoardPage() {
   const user = useUser();  // Get user directly here
@@ -21,7 +22,7 @@ export default function DashBoardPage() {
     const invitationToken = localStorage.getItem('invitationToken');
     const requestBody = {
       invitationToken,
-    };a
+    };
 
     // If invitation token is present in local storage, decode the token and give access to the user
     if (invitationToken) {
@@ -82,6 +83,9 @@ export default function DashBoardPage() {
             <NewTeam />
           )}
         </div>
+      )}
+      {user.role == UserRole.STAKEHOLDER && (
+        <StakeolderBpmnPage />
       )}
     </div>
   );

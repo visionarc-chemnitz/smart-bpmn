@@ -22,14 +22,6 @@ export default function StakeolderBpmnPage() {
     const user = useUser();
     const { currentProject, currentBpmn, setCurrentBpmn, selectionChanged } = useOrganizationWorkspaceContext();
 
-    interface HandleViewClick {
-        (bpmnVersionId: string): void;
-    }
-
-    const handleViewClick: HandleViewClick = (bpmnVersionId) => {
-        router.push(`/dashboard/stakeholder-bpmn-version/${bpmnVersionId}`);
-    };
-
     useEffect(() => {
         const fetchBpmnFiles = async () => {
             try {
@@ -55,8 +47,6 @@ export default function StakeolderBpmnPage() {
     }, [currentProject, selectionChanged]);
 
   return (
-    <div style={{ height: '100vh' }}>
-        <BreadcrumbsHeader href='/dashboard' current='Stakeholder' parent='Playground' />
         <div className="p-4">
           <h3 className="text-md font-semibold">Shared BPMN files with you</h3>
 
@@ -75,19 +65,16 @@ export default function StakeolderBpmnPage() {
                     <RainbowButton
                       type="button"
                       className="ml-5 mr-2 py-0 text-sm h-8 px-3"
+                      onClick={() => setCurrentBpmn(bpmn)}
                     >
                       View
                     </RainbowButton>
                   </Link>
                     </TableCell>
                 </TableRow>
-                
                 ))}
             </TableBody>
         </Table>
-        </div>
-       
     </div>
-   
   );
 };
