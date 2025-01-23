@@ -18,10 +18,10 @@ export async function POST(req: NextRequest) {
 
   // Check if existing stakeholder
   const user = await prisma.user.findUnique({
-    where: { email, role: Role.STAKEHOLDER},
+    where: { email: email, role: Role.STAKEHOLDER},
   });
 
-  if (user) {
+  if (user !== null) {
     await prisma.stakeholderBpmn.create({
       data: {
         bpmnId: bpmnId,

@@ -8,6 +8,7 @@ import { API_PATHS } from '../api/api-path/apiPath';
 import { UserRole } from '@/types/user/user';
 // import { useOrganizationContext } from '@/providers/organization-provider';
 import { toastService } from '../_services/toast.service';
+import StakeholderBpmnPage from './stakeholder-bpmn/page';
 import NewUserDashBoardPage from './_components/new-user-dashboard';
 
 export default function DashBoardPage() {
@@ -50,6 +51,9 @@ export default function DashBoardPage() {
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <NewUserDashBoardPage />
         </div>
+      )}
+      {user.role == UserRole.STAKEHOLDER && (
+        <StakeholderBpmnPage />
       )}
       
 
