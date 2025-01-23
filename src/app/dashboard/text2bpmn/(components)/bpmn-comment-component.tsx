@@ -1,10 +1,12 @@
 import React, { forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
 import { useBpmnViewer } from '@/hooks/use-bpmn-viewer';
 import { BpmnViewerProps } from '@/types/board/board-types';
+import { useBpmnComment } from '@/hooks/use-bpmn-comment';
+import '../../../style.css';
 
 export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => {
   const { containerId, diagramXML, onError, onImport, height, width } = props;
-  const { viewer, importXML, exportXML, addOverlay, clearOverlay } = useBpmnViewer({
+  const { viewer, importXML, exportXML, addOverlay, clearOverlay } = useBpmnComment({
     containerId,
     diagramXML,
     onError,
