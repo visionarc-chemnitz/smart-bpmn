@@ -30,5 +30,6 @@ export const API_PATHS = {
 
     // bpmn version
     GET_BPMN_VERSION: '/api/bpmn/get-bpmn-version',
+    SAVE_BPMN_VERSION: '/api/bpmn/save-bpmn-version',
     
 };

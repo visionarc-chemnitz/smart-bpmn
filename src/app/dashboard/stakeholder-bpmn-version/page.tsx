@@ -1,21 +1,17 @@
 "use client";
 
 import { useEffect, useState, DragEvent } from 'react';
-import BreadcrumbsHeader from '../(components)/breadcrumbs-header';
-import BpmnModelerComponent from '../text2bpmn/(components)/bpmn-modeler-component';
 import { AlertCircle, Image as ImageIcon, Cog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { API_PATHS } from '@/app/api/api-path/apiPath';
 import BpmnCommentComponent from '../text2bpmn/(components)/bpmn-comment-component';
 import { useSearchParams } from 'next/navigation';
+import BreadcrumbsHeader from '../_components/breadcrumbs-header';
 // import BpmnCommentComponent from '../text2bpmn/(components)/bpmn-comment-component';
 
 export default function StakeholderBpmnVersion() {
-  const [loading, setLoading] = useState<boolean>(false);
   const [xml, setXml] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [ setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const bpmnVersionId = searchParams.get('bpmnVersionId');
 

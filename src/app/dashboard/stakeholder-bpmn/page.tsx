@@ -5,30 +5,27 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Bpmn } from '@/types/bpmn/bpmn';
 import { useUser } from '@/providers/user-provider';
 import { API_PATHS } from '@/app/api/api-path/apiPath';
-import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
-import { toastService } from '@/app/services/toast.service';
-import BreadcrumbsHeader from '../(components)/breadcrumbs-header';
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import { IoShareSocialOutline } from 'react-icons/io5';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useWorkspaceStore } from '@/store/workspace-store';
+import { toastService } from '@/app/_services/toast.service';
+import BreadcrumbsHeader from '../_components/breadcrumbs-header';
 
 
 
-export default function StakeolderBpmnPage() {
+export default function StakeholderBpmnPage() {
     const [bpmnFiles, setBpmnFiles] = useState<Bpmn[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const user = useUser();
-    const { currentProject, currentBpmn, setCurrentBpmn, selectionChanged } = useOrganizationWorkspaceContext();
+    const { currentProject, currentBpmn, setCurrentBpmn, selectionChanged } = useWorkspaceStore();
 
     interface HandleViewClick {
         (bpmnVersionId: string): void;
     }
 
-    const handleViewClick: HandleViewClick = (bpmnVersionId) => {
-        router.push(`/dashboard/stakeholder-bpmn-version/${bpmnVersionId}`);
-    };
 
     useEffect(() => {
         const fetchBpmnFiles = async () => {
@@ -55,10 +52,8 @@ export default function StakeolderBpmnPage() {
     }, [currentProject, selectionChanged]);
 
   return (
-    <div style={{ height: '100vh' }}>
-        <BreadcrumbsHeader href='/dashboard' current='Stakeholder' parent='Playground' />
         <div className="p-4">
-          <h3 className="text-md font-semibold">Shared BPMN files with you</h3>
+          <h3 className="text-md font-semibold">Shared with you</h3>
 
           <Table className='mt-4'>
             <TableHeader>
@@ -75,18 +70,16 @@ export default function StakeolderBpmnPage() {
                     <RainbowButton
                       type="button"
                       className="ml-5 mr-2 py-0 text-sm h-8 px-3"
+                      onClick={() => setCurrentBpmn(bpmn)}
                     >
                       View
                     </RainbowButton>
                   </Link>
                     </TableCell>
                 </TableRow>
-                
                 ))}
             </TableBody>
         </Table>
-        </div>
-       
     </div>
    
   );

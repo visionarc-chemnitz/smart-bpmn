@@ -164,15 +164,14 @@ export const getUserOrgProj = async (userId: string, orgId: string): Promise<Pro
 }
 
 // get projects for stakeholder 
-export const getStakeholderOrgProject = async (userId: string, orgId: string): Promise<Project[]> => {
+export const getStakeholderOrgProject = async (userId: string): Promise<Project[]> => {
   try {
-    if (!userId || !orgId) {
+    if (!userId) {
       throw new Error('User ID and Organization ID are required');
     }
 
     return await prisma.project.findMany({
       where: {
-        organizationId: orgId,
         bpmn: {
           some: {
             StakeholderBpmn: {

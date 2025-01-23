@@ -1,5 +1,7 @@
+import { toastService } from '@/app/_services/toast.service';
 import { API_PATHS } from '@/app/api/api-path/apiPath';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { toast } from '@/hooks/use-toast';
 // import { useOrganizationContext } from '@/providers/organization-provider';
 import { useOrganizationStore } from '@/store/organization-store';
 import { useWorkspaceStore } from '@/store/workspace-store';
@@ -121,7 +123,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
     const data = await response.json();
     setPendingInvitations([...pendingInvitations, {email: email}]);
     setEmail('');
-    window.alert('User has been invited successfully!');
+    toastService.showDefault('User has been invited successfully!');
   };
 
   const handleEmailFocus = () => {
@@ -172,7 +174,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
     if (!response.ok) {
       throw new Error('Error inviting user.');
     }
-    window.alert('User has been reinvited successfully!');
+    toastService.showDefault('User has been reinvited successfully!');
   };
 
   const removeUser = async (email: string) => {

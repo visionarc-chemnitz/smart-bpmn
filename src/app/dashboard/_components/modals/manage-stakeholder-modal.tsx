@@ -13,6 +13,7 @@ import { User } from 'next-auth';
 import Image from 'next/image';
 import { useOrganizationStore } from "@/store/organization-store";
 import { useWorkspaceStore } from "@/store/workspace-store";
+import { toastService } from '@/app/_services/toast.service';
 // import { useWorkspaceContext } from "@/providers/workspace-provider";
 
 interface Invitation {
@@ -98,7 +99,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
         const data = await response.json();
         setPendingStakeholders([...pendingStakeholders, {email: email, bpmnId: bpmnId}]);
         setEmail('');
-        window.alert('User has been invited successfully!');
+        toastService.showDefault('User has been invited successfully!');
     };
 
     const handleEmailFocus = () => {
@@ -122,7 +123,7 @@ const ManageStakeholderModal: React.FC<ManageStakeholderModalProps> = ({ isOpen,
         }
 
         const data = await response.json();
-        window.alert('User has been reinvited successfully!');
+        toastService.showDefault('User has been reinvited successfully!');
     };
 
     const removeStakeholder = async (email: string, bpmnId: string) => {

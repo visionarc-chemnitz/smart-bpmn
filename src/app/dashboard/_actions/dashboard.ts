@@ -80,6 +80,7 @@ export const getUserInfo = cache(async (): Promise<User> => {
 export const getOrgProjects = cache(async (): Promise<Project[]> => {
     const session = await getUserData();
     const userId = session?.id;
+    console.log('userId', userId);
   
     if (!userId) {
       throw new Error('User not authenticated');
@@ -88,7 +89,7 @@ export const getOrgProjects = cache(async (): Promise<Project[]> => {
     try {
 
       const user = await getUser(userId);
-      if (!user?.role || !user?.organizationId) {
+      if (!user?.role) {
         console.error('Invalid user role or organization ID');
         return [];
       }
@@ -96,11 +97,15 @@ export const getOrgProjects = cache(async (): Promise<Project[]> => {
       let projects: Project[] = [];
       switch (user.role) {
         case Role.STAKEHOLDER:
-          projects = await getStakeholderOrgProject(user.id, user.organizationId);
+          projects = await getStakeholderOrgProject(user.id);
           break;
         
-        case Role.ADMIN || Role.MEMBER:
-          projects = await getUserOrgProj(user.id, user.organizationId);
+        case (Role.ADMIN || Role.MEMBER):
+          if (user.organizationId) {
+            projects = await getUserOrgProj(user.id, user.organizationId);
+          } else {
+            throw new Error('Invalid organization ID');
+          }
           break;
        
         default:
