@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
         buttonText: "ACCEPT INVITE",
         buttonLink: inviteLink,
     });
+    console.log('Invitation email sent successfully');
   
     return NextResponse.json({ message: 'Invitation email sent successfully', invitation });
     } catch (error) {
