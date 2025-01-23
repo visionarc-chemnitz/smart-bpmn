@@ -45,15 +45,6 @@ model Bpmn {
   project         Project?          @relation("ProjectBpmn", fields: [projectId], references: [id])
   invitations     Invitation[]
   StakeholderBpmn StakeholderBpmn[]
-  BpmnVersion     BpmnVersion[]
-  currentVersionId String?
-}
-
-model BpmnVersion {
-  id              String            @id @default(uuid())
-  xml             String
-  bpmnId String
-  bpmn   Bpmn   @relation(fields: [bpmnId], references: [id])
 }
 
 model Invitation {

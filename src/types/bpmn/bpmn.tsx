@@ -3,5 +3,4 @@ export interface Bpmn {
     fileName: string;
     url?: string
     isFavorite: boolean;
-    currentVersionId?: string;
 }

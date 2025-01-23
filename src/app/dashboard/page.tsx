@@ -9,7 +9,6 @@ import { API_PATHS } from '../api/api-path/apiPath';
 import { UserRole } from '@/types/user/user';
 import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
 import { toastService } from '../services/toast.service';
-import StakeholderBpmnPage from './stakeholder-bpmn/page';
 
 export default function DashBoardPage() {
   const user = useUser();  // Get user directly here
@@ -83,9 +82,6 @@ export default function DashBoardPage() {
             <NewTeam />
           )}
         </div>
-      )}
-      {user.role == UserRole.STAKEHOLDER && (
-        <StakeholderBpmnPage />
       )}
     </div>
   );

@@ -3,9 +3,6 @@ import { useBpmnViewer } from '@/hooks/use-bpmn-viewer';
 import { BpmnViewerProps } from '@/types/board/board-types';
 import { useBpmnComment } from '@/hooks/use-bpmn-comment';
 import '../../../style.css';
-import { API_PATHS } from '@/app/api/api-path/apiPath';
-import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
-import { toastService } from '@/app/services/toast.service';
 
 export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => {
   const { containerId, diagramXML, onError, onImport, height, width } = props;
@@ -17,7 +14,6 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
     height,
     width,
   });
-  const { currentBpmn } = useOrganizationWorkspaceContext();
 
   useEffect(() => {
     if (diagramXML) {
@@ -30,30 +26,6 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
     addOverlay,
     clearOverlay
   }));
-
-  const handleSaveComments = async () => {
-    const xml = await exportXML();
-    const requestBody = {
-      bpmnId: currentBpmn?.id,
-      xml: xml,
-    };
-    if (xml) {
-       const response = await fetch(API_PATHS.SAVE_BPMN_VERSION, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Error Response:', errorData);
-          toastService.showDestructive('Error in saving comments.');
-      }
-
-      const data = await response.json();
-      toastService.showDefault('All comments have been saved successfully.');
-    }
-  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,16 +56,14 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
           className="hidden"
         />
         <button
-            onClick={handleSaveComments}
-            className="px-3 py-2 text-xs sm:text-sm font-medium text-white bg-gray-500 rounded-md hover:bg-blue-700 whitespace-nowrap"
-          >
-            Save Comments
-          </button>
+          onClick={() => fileInputRef.current?.click()}
+          className="px-3 py-2 text-xs sm:text-sm font-medium text-white bg-gray-500 rounded-md hover:bg-blue-700 whitespace-nowrap"
+        >
+          Import BPMN
+        </button>
       </div>
     </div>
   );
 });
-
-BpmnCommentComponent.displayName = 'BpmnCommentComponent';
 
 export default BpmnCommentComponent;
