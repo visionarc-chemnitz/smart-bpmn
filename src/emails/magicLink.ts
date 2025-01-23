@@ -1,4 +1,4 @@
-import emailService from "@/app/services/email/email-service";
+import emailService from "@/app/_services/email/email-service";
 
 export const sendMagicSignInLink = async ({ identifier: email, url }: any) => {
   // const res = await emailService.sendEmail({
