@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import BreadcrumbsHeader from '../(components)/breadcrumbs-header'
-import BpmnModelerComponent from './(components)/bpmn-modeler-component';
+import BreadcrumbsHeader from '../_components/breadcrumbs-header'
+import BpmnModelerComponent from './_components/bpmn-modeler-component';
 import { AlertCircle, Download, Cog } from 'lucide-react';
 import { apiWrapper } from '@/lib/utils';
 import { nanoid } from 'nanoid';

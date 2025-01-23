@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState, DragEvent } from 'react';
-import BreadcrumbsHeader from '../(components)/breadcrumbs-header';
-import BpmnModelerComponent from '../text2bpmn/(components)/bpmn-modeler-component';
+import BreadcrumbsHeader from '../_components/breadcrumbs-header';
+import BpmnModelerComponent from '../text2bpmn/_components/bpmn-modeler-component';
 import { AlertCircle, Image as ImageIcon, Cog } from 'lucide-react';
-import { UploadSection } from './(components)/upload-section';
+import { UploadSection } from './_components/upload-section';
 import { Button } from '@/components/ui/button';
 import BpmnCommentComponent from '../text2bpmn/(components)/bpmn-comment-component';
 // import BpmnCommentComponent from '../text2bpmn/(components)/bpmn-comment-component';

@@ -6,12 +6,12 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import { BpmnViewerComponent } from '../text2bpmn/(components)/bpmn-viewer-component';
-import BreadcrumbsHeader from '../(components)/breadcrumbs-header';
+import { BpmnViewerComponent } from '../text2bpmn/_components/bpmn-viewer-component';
+import BreadcrumbsHeader from '../_components/breadcrumbs-header';
 import { diff } from 'bpmn-js-differ';
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
 import type { BpmnViewerRef } from '@/types/board/board-types';
-import DifferencesTable from './(components)/differences-table';
+import DifferencesTable from './_components/differences-table';
 
 interface ProcessedDiff {
   type: string;

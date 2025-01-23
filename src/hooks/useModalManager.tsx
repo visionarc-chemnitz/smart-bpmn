@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useUser } from "@/providers/user-provider";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
-import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
-import { toastService } from '@/app/services/toast.service';
+import { toastService } from '@/app/_services/toast.service';
+import { useOrganizationStore } from '@/store/organization-store';
+import { useWorkspaceStore } from '@/store/workspace-store';
 
 export const useModalManager = () => {
     // State variables
@@ -18,7 +19,9 @@ export const useModalManager = () => {
     const [selectedProject, setSelectedProject] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const user = useUser();
-    const { currentOrganization, currentProject, projectList, setProjectList, setCurrentOrganization, setCurrentProject, setCurrentBpmn, setSelectionChanged} = useOrganizationWorkspaceContext();
+
+    const { setCurrentOrganization, currentOrganization} = useOrganizationStore();
+    const { currentProject, setCurrentProject, projectList, setProjectList, setCurrentBpmn, setSelectionChanged} = useWorkspaceStore();
 
     // Modal management
     const openModal = () => setIsOpen(true);
