@@ -4,8 +4,9 @@ import { BpmnViewerProps } from '@/types/board/board-types';
 import { useBpmnComment } from '@/hooks/use-bpmn-comment';
 import '../../../style.css';
 import { API_PATHS } from '@/app/api/api-path/apiPath';
-import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
-import { toastService } from '@/app/services/toast.service';
+import { useWorkspaceStore } from '@/store/workspace-store';
+import { toast } from "sonner"
+
 
 export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => {
   const { containerId, diagramXML, onError, onImport, height, width } = props;
@@ -17,7 +18,7 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
     height,
     width,
   });
-  const { currentBpmn } = useOrganizationWorkspaceContext();
+  const { currentBpmn } = useWorkspaceStore();
 
   useEffect(() => {
     if (diagramXML) {
@@ -47,11 +48,11 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
       if (!response.ok) {
           const errorData = await response.json();
           console.error('Error Response:', errorData);
-          toastService.showDestructive('Error in saving comments.');
+          toast.error('Error in saving comments.');
       }
 
       const data = await response.json();
-      toastService.showDefault('All comments have been saved successfully.');
+      toast.success('All comments have been saved successfully.');
     }
   };
 

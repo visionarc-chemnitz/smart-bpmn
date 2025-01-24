@@ -6,11 +6,20 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 import { config } from "@/config"
-export const apiWrapperurl = config.URL
+import prisma from "@/lib/prisma"
 
-export const apiWrapper = async (uri: string, method: string, body: any) => {
+type allowedMethods = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
+interface ApiWrapperProps {
+  url?: string
+  uri: string
+  method: allowedMethods
+  body?: any
+}
+
+export const apiWrapper = async ({url = config.NextURL , uri, method, body}: ApiWrapperProps) => {
   try {
-    const response = await fetch(apiWrapperurl + uri, {
+    const response = await fetch(url + uri, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -27,4 +36,11 @@ export const apiWrapper = async (uri: string, method: string, body: any) => {
     console.error('Error in apiWrapper:', error)
     throw error
   }
+}
+
+export function getInitials(name: string) {
+  const words = name.split(" ");
+  if (words.length === 0) return "";
+  if (words.length === 1) return words[0].charAt(0).toUpperCase();
+  return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
 }

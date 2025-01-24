@@ -53,11 +53,11 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    if (bpmnFiles.length === 0) {
-      console.log('No BPMN files found for project ID:', projectId);
-    } else {
-      console.log('BPMN files found:', bpmnFiles);
-    }
+    // if (bpmnFiles.length === 0) {
+    //   console.log('No BPMN files found for project ID:', projectId);
+    // } else {
+    //   console.log('BPMN files found:', bpmnFiles);
+    // }
 
     return NextResponse.json({ bpmnFiles });
   } catch (error) {
