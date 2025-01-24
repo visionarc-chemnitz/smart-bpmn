@@ -7,6 +7,20 @@ import {
 import { BpmnModelerProps, BpmnModelerHookResult } from '@/types/board/board-types';
 import { useBpmnTheme } from './use-bpmn-theme';
 
+interface IOverlays {
+  add: (elementId: string, options: {
+    position: {
+      top?: number;
+      right?: number;
+      bottom?: number;
+      left?: number;
+    };
+    html: string | HTMLElement;
+  }) => string;
+  remove: (filter: { element?: string }) => void;
+  clear: () => void;
+}
+
 export const useBpmnModeler = ({
   containerId,
   propertiesPanelId,
@@ -39,7 +53,7 @@ export const useBpmnModeler = ({
       },
       additionalModules: [
         BpmnPropertiesPanelModule,
-        BpmnPropertiesProviderModule,
+        BpmnPropertiesProviderModule
       ],
       palette: {
         open: true
@@ -122,10 +136,44 @@ export const useBpmnModeler = ({
     }
   };
 
+  // Add overlay methods
+  const addOverlay = (elementId: string, html: string | HTMLElement) => {
+    if (!modeler) return;
+    const overlays = modeler.get<IOverlays>('overlays');
+    overlays.add(elementId, {
+      position: {
+        bottom: -5,
+        left: 0
+      },
+      html: html
+    });
+  };
+
+  const removeOverlay = (elementId: string) => {
+    if (!modeler) return;
+    const overlays = modeler.get<IOverlays>('overlays');
+    overlays.remove({ element: elementId });
+  };
+
+  // Update clearOverlays function
+  const clearOverlay = () => {
+    if (!modeler) return;
+    try {
+      const overlays = modeler.get<IOverlays>('overlays');
+      overlays.clear();
+    } catch (error) {
+      console.error('Error clearing overlays:', error);
+    }
+  };
+
+  // Update return type to include overlay methods
   return {
     modeler,
     importXML,
     exportXML,
     exportSVG,
+    addOverlay,
+    removeOverlay,
+    clearOverlay
   };
 };

@@ -4,7 +4,7 @@ import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
-import { socialAccount } from "@/app/services/account";
+import { socialAccount } from "@/app/_services/account";
 import { useSearchParams } from "next/navigation";
 
 const ClientMagicLinkForm = () => {

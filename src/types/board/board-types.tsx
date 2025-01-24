@@ -2,7 +2,7 @@ import BpmnViewer from 'bpmn-js';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 
 export interface BpmnViewerProps {
-  diagramXML: string;
+  diagramXML?: string;
   containerId: string;
   onError?: (err: Error) => void;
   onImport?: () => void;
@@ -12,8 +12,21 @@ export interface BpmnViewerProps {
 
 export interface BpmnViewerHookResult {
   viewer: BpmnViewer | null;
-  importXML: (xml: string) => Promise<{ warnings: Array<any> }> | undefined;
+  importXML: (xml: string) => Promise<void>;
+  exportXML: () => Promise<string>; 
   exportSVG: () => Promise<{ svg: string }> | undefined;
+  addOverlay: (elementId: string, html: string | HTMLElement) => void;
+  clearOverlay: () => void;
+}
+
+export interface BpmnCommentHookResult {
+  viewer: BpmnViewer | null;
+  importXML: (xml: string) => Promise<void>;
+  exportXML: () => Promise<string>; 
+  exportSVG: () => Promise<{ svg: string }> | undefined;
+  addOverlay: (elementId: string, html: string | HTMLElement) => void;
+  clearOverlay: () => void;
+  containerRef: React.RefObject<HTMLElement | null>;
 }
 
 export interface BpmnModelerProps {
@@ -31,8 +44,10 @@ export interface BpmnModelerHookResult {
   importXML: (xml: string) => Promise<void>;
   exportXML: () => Promise<string>;
   exportSVG: () => Promise<string>;
+  addOverlay: (elementId: string, html: string | HTMLElement) => void;
+  removeOverlay: (elementId: string) => void;
+  clearOverlay: () => void;
 }
-
 
 // Types for Upload Section
 export interface UploadSectionProps {
@@ -40,4 +55,19 @@ export interface UploadSectionProps {
   onDrop: (e: React.DragEvent) => void;
   selectedFile: File | null;
   isLoading: boolean;
+}
+
+export interface BpmnModelerRef {
+  exportXML: () => Promise<string>;
+  addOverlay: (elementId: string, html: string | HTMLElement) => void;
+  removeOverlay: (elementId: string) => void;
+  clearOverlay: () => void;
+}
+
+export interface BpmnViewerRef {
+  importXML: (xml: string) => Promise<{ warnings: Array<any> }> | undefined;
+  exportXML: () => Promise<string>; 
+  exportSVG: () => Promise<{ svg: string }> | undefined;
+  addOverlay: (elementId: string, html: string | HTMLElement) => void;
+  clearOverlay: () => void;
 }

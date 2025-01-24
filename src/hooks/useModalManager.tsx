@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useUser } from "@/providers/user-provider";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
-import { useOrganizationWorkspaceContext } from '@/providers/organization-workspace-provider';
+import { toast } from "sonner"
+import { useOrganizationStore } from '@/store/organization-store';
+import { useWorkspaceStore } from '@/store/workspace-store';
 
 export const useModalManager = () => {
     // State variables
@@ -13,12 +15,13 @@ export const useModalManager = () => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [isShared, setIsShared] = useState(false);
     const [organizations, setOrganizations] = useState<any | null>(null);
-    const [projects, setProjects] = useState<any[]>([]);
     const [bpmnFiles, setBpmnFiles] = useState<any[]>([]);
     const [selectedProject, setSelectedProject] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const user = useUser();
-    const { currentProject, projectList, setCurrentOrganization, setCurrentProject, setCurrentBpmn, setSelectionChanged} = useOrganizationWorkspaceContext();
+
+    const { setCurrentOrganization, currentOrganization} = useOrganizationStore();
+    const { currentProject, setCurrentProject, projectList, setProjectList, setCurrentBpmn, setSelectionChanged} = useWorkspaceStore();
 
     // Modal management
     const openModal = () => setIsOpen(true);
@@ -62,7 +65,7 @@ export const useModalManager = () => {
                 throw new Error('Failed to fetch projects.');
             }
             const data = await response.json();
-            setProjects(data.projects);
+            setProjectList(data.projects);
             if (data.projects.length > 0) {
                 setCurrentProject(data.projects[0]);
             } else {
@@ -102,12 +105,12 @@ export const useModalManager = () => {
         e.preventDefault();
 
         if (!user || !user.id) {
-            window.alert('User is not logged in or user ID is missing');
+            toast.error('User is not logged in or user ID is missing');
             return;
         }
 
         if (!organizationName) {
-            window.alert('Organization name is required');
+            toast.error('Organization name is required');
             return;
         }
 
@@ -134,7 +137,7 @@ export const useModalManager = () => {
             setOrganizations(data);
             setCurrentOrganization(data);
             closeModal();
-            window.alert('Organization has been created successfully!');
+            toast.success('Organization has been created successfully.');
             window.location.reload();
         } catch (error) {
             console.error('Error creating organization:', error);
@@ -145,18 +148,17 @@ export const useModalManager = () => {
 
     // Handle project submission
     const handleProjectSubmit = async (e: React.FormEvent) => {
-        const selectedOrganizationId = localStorage.getItem('selectedOrganizationId');
+        const selectedOrganizationId = currentOrganization?.id;
         e.preventDefault();
+        if (isLoading) return;
 
         if (!user || !user.id) {
-            //console.error('User is not logged in or user ID is missing');
-            window.alert('User is not logged in or user ID is missing');
+            toast.error('User is not logged in or user ID is missing');
             return;
         }
 
         if (!selectedOrganizationId) {
-            console.error('Organization is not created');
-            window.alert('Organization is not created');
+            toast.error('Organization is not selected');
             return;
         }
 
@@ -177,20 +179,16 @@ export const useModalManager = () => {
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Error Response:', errorData);
-                window.alert('Failed to create project.');
-                throw new Error('Error while creating project');
+                toast.error('Failed to create project.');
             }
 
             const data = await response.json();
-            console.log('Project created:', data);
-            setProjects((prevProjects) => [...prevProjects, data]);
+            toast.success('Project has been created successfully.');
+            setProjectList([...projectList, data]);
             setCurrentProject(data);
             closeModal();
-            window.alert('Project is created successfully!');
-            window.location.reload();
         } catch (error) {
-            console.error('Error while creating project:', error);
-            window.alert('An error occurred while saving the data.');
+            toast.error('An error occurred while creating project.');
         } finally {
             setIsLoading(false);
         }
@@ -225,7 +223,7 @@ export const useModalManager = () => {
 
             // Parse response data
             const data = await response.json();
-            console.log('BPMN file saved successfully:', data);
+            toast.success('BPMN has been saved successfully.');
 
             // Update state and close modal
             setBpmnFiles((prevFiles) => [...prevFiles, data]);
@@ -240,6 +238,7 @@ export const useModalManager = () => {
             closeModal();
 
         } catch (error) {
+            toast.error('An error occurred while saving BPMN.');
         } finally {
             setIsLoading(false);
         }
@@ -267,7 +266,6 @@ export const useModalManager = () => {
         // fetchOrganization,
         fetchProjects,
         organizations,
-        projects,
         bpmnFiles,
         selectedProject,
         isLoading,

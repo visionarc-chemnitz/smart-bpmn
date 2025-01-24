@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import nodemailer from "nodemailer";
 import prisma from '@/lib/prisma';
 import { InvitationStatus, Role } from '@prisma/client';
-import emailService from '@/app/services/email/email-service';
+import emailService from '@/app/_services/email/email-service';
 
 export async function POST(req: NextRequest) {
   const { email, organizationId } = await req.json();
@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
         buttonText: "ACCEPT INVITE",
         buttonLink: inviteLink,
     });
+    console.log('Invitation email sent successfully');
   
     return NextResponse.json({ message: 'Invitation email sent successfully', invitation });
     } catch (error) {
