@@ -2,7 +2,7 @@ import os
 
 # import fastapi modules
 from fastapi import FastAPI, HTTPException, status, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # import services
@@ -10,6 +10,8 @@ from services import ChatService, GraphService
 
 # import json
 import json
+import markdown2
+import tempfile
 
 # load environment variables
 from dotenv import load_dotenv
@@ -70,7 +72,8 @@ async def chat_endpoint(request: Request):
         body = await request.json()
         message = body.get("message", "").strip()
         thread_id = body.get("thread_id", "").strip()
-        
+        # xml = body.get("xml", "").strip()
+
         if not message:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -90,6 +93,9 @@ async def chat_endpoint(request: Request):
                 
                 print(f"request: {body} config: {config}, message: {message}")
                 
+                # Parse the xml - fetch comments and return those comments then ask use to confirm if he want to update xml based on those comments.
+                # if yes then trigger the whole generation again but with different prompts.
+
                 async for chunk in chat_service.process_message(message, config):
                   yield f"data: {json.dumps({'response': chunk, 'thread_id': config['configurable']['thread_id']})}\n\n"
                 
@@ -130,3 +136,41 @@ async def get_thread_history(request: Request):
       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
       detail=str(e)
     )
+
+@app.post("/generate-arc42")
+async def generate_arc42(request: Request):
+    try:
+        # Parse the request body
+        body = await request.json()
+        thread_id = body.get("thread_id", "").strip()
+        
+        if not thread_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Thread ID is required"
+            )
+            
+        config = await chat_service.get_thread_config(thread_id)
+        
+        markdown_content = await chat_service.generate_arc42_doc(config)
+        # Convert markdown to HTML
+        # html_content = markdown2.markdown(markdown_content)
+        
+        # # Create temporary file
+        # with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as tmp:
+        #     tmp.write(html_content)
+        #     tmp_path = tmp.name
+            
+        # return FileResponse(
+        #     path=tmp_path,
+        #     filename="arc42_documentation.html",
+        #     media_type="text/html"
+        # )
+
+        return markdown_content
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail=str(e)
+        )

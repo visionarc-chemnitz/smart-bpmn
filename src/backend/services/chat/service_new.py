@@ -17,7 +17,7 @@ from psycopg_pool import AsyncConnectionPool
 from psycopg.rows import dict_row
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
-from .prompts import CATEGORIZED_PROMPT, GREETING_PROMPT, OFFTOPIC_PROMPT, QUESTION_PROMPT, SCENARIO_UNDERSTANDING_PROMPT, SCENARIO_REVISION_WITH_ANSWER_PROMPT, SCENARIO_SUMMARY_PROMPT, GATHER_FUNC_NON_FUNC_PROMPT, BPMN_PROMPT
+from .prompts import CATEGORIZED_PROMPT, GREETING_PROMPT, OFFTOPIC_PROMPT, QUESTION_PROMPT, SCENARIO_UNDERSTANDING_PROMPT, SCENARIO_REVISION_WITH_ANSWER_PROMPT, SCENARIO_SUMMARY_PROMPT, GATHER_FUNC_NON_FUNC_PROMPT, BPMN_PROMPT, ARC42_GENERATION_PROMPT, FEEDBACK_PROMPT
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -194,6 +194,8 @@ class ChatService:
     workflow.add_node("human", self.human_input)
     workflow.add_node("gather", self.gather)
     workflow.add_node("generate", self.generate_bpmn)
+    workflow.add_node("collect_feedback", self.collect_feedback)
+    workflow.add_node("process_feedback", self.process_feedback)
     
 
     # Add edges
@@ -219,7 +221,11 @@ class ChatService:
     workflow.add_edge("human", "gather") # go to gather for funtional and non-funitonal requirements
     
     workflow.add_edge("gather", "generate") # go to generate for generating the bpmn diagram
-    workflow.add_edge("generate", END) # end the conversation after generating the bpmn diagram
+    workflow.add_edge("generate", END) # go to collect_feedback for collecting feedback on the generated bpmn diagram
+    # workflow.add_edge("generate", "collect_feedback") # go to collect_feedback for collecting feedback on the generated bpmn diagram
+    # workflow.add_edge("collect_feedback", "process_feedback") # end the conversation if feedback is approved
+    # workflow.add_edge("process_feedback", "agent") # go to agent for modifications based on feedback
+    # workflow.add_edge("process_feedback", END) # end the conversation if feedback is approved
 
     # Yet to be implemented
     # workflow.add_edge("gather", "plan") # go to plan for generating detailed instruction on the bpmn diagram adhering to the requirements 
@@ -472,7 +478,7 @@ class ChatService:
     print("All questions answered")
     # If all questions are answered, use the questions and answers to update the context
     system_prompt = SystemMessage(content=SCENARIO_REVISION_WITH_ANSWER_PROMPT.format(summary=summary, context=context, qa_pairs=human_in_loop_dict))
-    new_context = self.llm.invoke(system_prompt.content)
+    new_context = self.llm.invoke(system_prompt.content, temperature=0.2)
 
     scenario_prompt = SystemMessage(content=SCENARIO_SUMMARY_PROMPT.format(context=new_context.content, summary=summary, qa_pairs=human_in_loop_dict))
     scenario_summary = self.llm.invoke(scenario_prompt.content)
@@ -564,35 +570,52 @@ class ChatService:
     #     print("JSON content not found in the response")
     return Command(
       update={
-        "functional_and_nonfunctional_requirements": response.content
+        "gathered_info": response.content
       }
     )
 
   def generate_bpmn(self, state: StateService):
-    # Retrieve context and state information
     context = state.get('context', '')
-    scenario = state.get('scenario', '')
-    summary = state.get('summary', '')
-    functional_and_nonfunctional_requirements = state.get('functional_and_nonfunctional_requirements', '')
+    messages = state.get('messages', [])
 
-    # Generate BPMN diagram using the LLM
-    bpmn_prompt = BPMN_PROMPT.format(context=context, scenario=scenario, summary=summary, functional_and_nonfunctional_requirements=functional_and_nonfunctional_requirements)
+    bpmn_prompt = BPMN_PROMPT.format(context=context)
     system_prompt = SystemMessage(content=bpmn_prompt)
-    bpmn_xml = self.llm.invoke(system_prompt.content, model="llama-3.3-70b-versatile")
+    bpmn_xml = self.llm.invoke(system_prompt.content, model="llama3-70b-8192", temperature=0.2) #llama-3.3-70b-versatile llama3-70b-8192
     bpmn_xml = bpmn_xml.content
-
-    # Print the generated BPMN diagram
+    
+    # Clean XML
     xml_start = bpmn_xml.find('<?xml')
     xml_end = bpmn_xml.find('</bpmn:definitions>') + len('</bpmn:definitions>')
     if xml_start >= 0 and xml_end >= 0:
         bpmn_xml = bpmn_xml[xml_start:xml_end]
     print(f"BPMN XML: {bpmn_xml}")
+
     return Command(
-      update={
-        "bpmn_xml": bpmn_xml
-      }
+        update={
+            "bpmn_xml": bpmn_xml
+        }
     )
+
+  def collect_feedback(self, state: StateService):
+    bpmn_xml = state.get('bpmn_xml', '')
+    messages = state.get('messages', [])
+
+    system_prompt = SystemMessage(content=FEEDBACK_PROMPT)
+    response = self.llm.invoke(system_prompt.content)
+
+    return {"messages": [response]}
   
+  def process_feedback(self, state: StateService):
+    feedback = state.get('messages', [])[-1]
+    if feedback.content.lower() in ["yes", "y"]:
+      return Command(goto="END")
+    else:
+      return Command(
+         update={
+            "next_step": "agent"
+          }
+      )
+
   async def get_thread_history(self, config: ChatConfigWrapper, value: str):
     """Get message history with connection management."""
     try:
@@ -787,7 +810,7 @@ class ChatService:
               can_proceed=False,
               # functional_requirements=[],
               # nonfunctional_requirements=[],
-              functional_and_nonfunctional_requirements=None,
+              gathered_info=None,
               bpmn_xml=None
             )
     
@@ -874,3 +897,32 @@ class ChatService:
           return step["messages"][-1].content
     
     return None
+
+  async def generate_arc42_doc(self, config: ChatConfigWrapper):
+    """Generate an arc42 document based on the context."""
+    try:
+      if not self.app:
+        await self.__call__()
+
+      async with self._lock:
+        await self.ensure_connection()
+
+      # Get the thread history
+      state = await self.get_thread_history(config, "history")
+
+      if not state:
+            raise Exception("No thread history found")
+      
+      # Extract required information
+      gathered_info = state.get('gathered_info', '')
+      context = state.get('context', '')
+
+      # Generate the arc42 document
+      bpmn_prompt = ARC42_GENERATION_PROMPT.format(context=context,gathered_info=gathered_info)
+      system_prompt = SystemMessage(content=bpmn_prompt)
+      response = self.llm.invoke(system_prompt.content)
+      return response.content
+
+    except Exception as e:
+      print(f"Error generating arc42 document: {e}")
+      return None

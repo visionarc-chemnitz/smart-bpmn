@@ -37,7 +37,7 @@ class StateService(MessagesState):
 
   # functional_requirements: List[str] = []
   # nonfunctional_requirements: List[str] = []
-  functional_and_nonfunctional_requirements: str = None
+  gathered_info: str = None
 
 
 # Define the schema for the input
