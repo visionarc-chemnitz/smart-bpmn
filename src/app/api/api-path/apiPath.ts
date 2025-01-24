@@ -23,10 +23,11 @@ export const API_PATHS = {
     
     // bpmn
     SAVE_BPMN: '/api/bpmn/save-bpmn',
+    CREATE_BPMN_VERSION: '/api/bpmn/create-bpmn-version',
+    UPDATE_BPMN_VERSION: '/api/bpmn/update-bpmn-version',
+    CHECKFILE: '/api/bpmn/checkfile',
     GET_BPMN_FILES: '/api/bpmn/get-bpmn-files',
     GET_BPMN_STAKEHOLDERS: '/api/stakeholder/get-bpmn-stakeholders',
     GET_PENDING_BPMN_STAKEHOLDERS: '/api/invitation/get-pending-bpmn-stakeholders',
-    REVOKE_STAKEHOLDER_BPMN_ACCESS: '/api/stakeholder/revoke-bpmn-access',  
-    GET_BPMN_VERSION: '/api/bpmn/get-bpmn-version',
-    SAVE_BPMN_VERSION: '/api/bpmn/save-bpmn-version',
+    REVOKE_STAKEHOLDER_BPMN_ACCESS: '/api/stakeholder/revoke-bpmn-access',
 };

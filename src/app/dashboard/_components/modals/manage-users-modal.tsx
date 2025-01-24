@@ -1,5 +1,7 @@
+import { getBpmnFileVersion } from '@/app/_services/user/user.service';
 import { API_PATHS } from '@/app/api/api-path/apiPath';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { apiWrapper } from '@/lib/utils';
 // import { useOrganizationContext } from '@/providers/organization-provider';
 import { useOrganizationStore } from '@/store/organization-store';
 import { useWorkspaceStore } from '@/store/workspace-store';
@@ -10,6 +12,7 @@ import Image from 'next/image';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { MdOutlineMailOutline } from 'react-icons/md';
 import { TiDeleteOutline } from 'react-icons/ti';
+import { toast } from 'sonner';
 
 interface Invitation {
   id?: string;
@@ -78,6 +81,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
   
   const handleInviteClick = async () => {
 
+    try {
     // TODO: Save the bpmn xml + isShare flag in the bpmn table
 
     // STEPS 
@@ -91,37 +95,88 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
     // check versionno. for existing record and increment by 1 for new version record
     // if 1 then set the new record with version as 2
 
+      console.log(currentBpmn);
+
+      if(!currentBpmn) {
+        throw new Error('BPMN file not found');
+      }
+      
+      console.log(currentBpmn)
+      const fileId  = currentBpmn?.id
+      // console.log(fileId)
+      
+      const xml = localStorage.getItem(fileId);
+
+      console.log(currentBpmn.currentVersionId)
+      // console.log(xml)
+
+      // Saving Bpmn version Logic
+      if (currentBpmn.currentVersionId === null) {
+        // New file 
+        const versionRecord = {
+          bpmnId: currentBpmn?.id,
+          xml: xml,
+          versionNumber: "1"
+        }
+
+        // create a new record in bpmn version table and update the currentVersionId in bpmn table
+        const response = await apiWrapper({uri: API_PATHS.CREATE_BPMN_VERSION, method: 'POST', body: versionRecord});
+      
+        console.log("response in new file",response)
+
+      } else {
+        // Existing file
+        console.log("existing file")
+        console.log(currentBpmn);
+        const updateVersionRecord = {
+          bpmnId: fileId,
+          xml: xml
+        }
+        const response = await apiWrapper({uri: API_PATHS.UPDATE_BPMN_VERSION, method: 'POST', body: updateVersionRecord});
+        console.log("response in existing file ie new version record",response)
+      }
+  
     
   
     // (existing file)
     // 1. check if version id exists and not null
     // 2. create a new record in bpmn version table
     // 3. update the currentversionId in bpmn table
+      
 
-    if (!email) {
-        setError('Email is required');
-        return;
-    }
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    const inviteUrl = isMemberModal ? memberInviteLink : stakeholderInviteLink;
-    const requestBody = isMemberModal ? { email: email, organizationId: currentOrganizationId } : { email: email, bpmnId: bpmnId };
-
-    // Handle the invite logic here
-    const response = await fetch(inviteUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody),
-    });
     
+    // ************** Dont touch the codde below **************
 
-    const data = await response.json();
-    setPendingInvitations([...pendingInvitations, {email: email}]);
-    setEmail('');
-    window.alert('User has been invited successfully!');
+      if (!email) {
+          setError('Email is required');
+          return;
+      }
+      if (!validateEmail(email)) {
+        setError('Please enter a valid email address');
+        return;
+      }
+
+      const inviteUrl = isMemberModal ? memberInviteLink : stakeholderInviteLink;
+      const requestBody = isMemberModal ? { email: email, organizationId: currentOrganizationId } : { email: email, bpmnId: bpmnId };
+
+      // Handle the invite logic here
+      const response = await fetch(inviteUrl, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(requestBody),
+      });
+      
+
+      const data = await response.json();
+      setPendingInvitations([...pendingInvitations, {email: email}]);
+      setEmail('');
+      toast.success('User has been invited successfully!');
+
+    } catch (error) {
+      console.error('Error inviting user:', error);
+      setError('Error inviting user'); 
+    }
+
   };
 
   const handleEmailFocus = () => {
@@ -172,7 +227,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
     if (!response.ok) {
       throw new Error('Error inviting user.');
     }
-    window.alert('User has been reinvited successfully!');
+    toast.success('User has been reinvited successfully!');
   };
 
   const removeUser = async (email: string) => {
@@ -199,7 +254,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
     }
 
     const data = await response.json();
-    window.alert(data.message);
+    toast.info(data.message);
   }
 
   return (

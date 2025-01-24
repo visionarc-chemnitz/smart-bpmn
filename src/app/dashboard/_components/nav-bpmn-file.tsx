@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
     SidebarGroup,
     SidebarGroupLabel,
@@ -16,12 +16,10 @@ import { FileText, ChevronRight, Loader } from "lucide-react";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
 import { useUser } from "@/providers/user-provider";
 import { UserRole } from "@/types/user/user";
-// import { useWorkspaceContext } from "@/providers/workspace-provider";
-import { useOrganizationStore } from "@/store/organization-store";
 import { useWorkspaceStore } from "@/store/workspace-store";
 import { Bpmn } from "@/types/bpmn/bpmn";
-import { useModalManager } from "@/hooks/useModalManager";
-import { toastService } from "@/app/_services/toast.service";
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface NavBpmnFileProps {
     projectId: string;
@@ -29,47 +27,25 @@ interface NavBpmnFileProps {
 
 export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
     const [bpmnFiles, setBpmnFiles] = useState<Bpmn[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
     const user = useUser();
     const bpmnFileListLabel = user.role === UserRole.STAKEHOLDER ? 'Shared with you' : 'History';
     const { currentProject, currentBpmn, setCurrentBpmn, selectionChanged } = useWorkspaceStore();
+    const router = useRouter(); 
+
+    const fetchBpmnFiles = useCallback(async () => {
+      try {
+        const response = await fetch(`${API_PATHS.GET_BPMN_FILES}?projectId=${currentProject?.id}`);
+        const data = await response.json();
+        setBpmnFiles(data.bpmnFiles || []);
+      } catch (error) {
+        toast.error("Error fetching BPMN files");
+      }
+    }, [currentProject?.id]);
 
     useEffect(() => {
-        const fetchBpmnFiles = async () => {
-            try {
-                const response = await fetch(`${API_PATHS.GET_BPMN_FILES}?projectId=${currentProject?.id}`);
-                const data = await response.json();
-                setBpmnFiles(data.bpmnFiles || []);
-                setLoading(false);
+      fetchBpmnFiles();
+    }, [fetchBpmnFiles, selectionChanged]);
 
-                // Automatically select the last file (most recently created)
-                if (data.bpmnFiles?.length > 0) {
-                    setCurrentBpmn(data.bpmnFiles[data.bpmnFiles.length - 1]);
-                } else {
-                    setCurrentBpmn(null);
-                }
-            } catch (error) {
-                setError("Error fetching BPMN files");
-                setLoading(false);
-                toastService.showDestructive("Error fetching BPMN files");
-            }
-        };
-        fetchBpmnFiles();
-
-    }, [currentProject, selectionChanged]);
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-full">
-                <Loader className="animate-spin" />
-            </div>
-        );
-    }
-
-    if (error) {
-        return <div>{error}</div>;
-    }
 
     return (
         <SidebarGroup>
@@ -96,16 +72,21 @@ export function NavBpmnFile({ projectId }: NavBpmnFileProps) {
                                         <SidebarMenuSubItem
                                             key={file.id}
                                             className={`hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md ${
-                                                currentBpmn?.id === file.id ? "bg-blue-100 dark:bg-blue-800" : ""
+                                                currentBpmn?.id === file.id && window.location.pathname === `/dashboard/chat/${file.id}` ? "bg-blue-100 dark:bg-blue-800" : ""
                                             }`}
                                             // TODO : update the route here tonavigate the user to the file selected.
-                                            onClick={() => setCurrentBpmn(file)}
+                                            onClick={() => {
+                                              setCurrentBpmn(file)
+                                              // router.prefetch(`/dashboard/chat/${file.id}`)
+                                              router.push(`/dashboard/chat/${file.id}`)
+                                            }}
                                         >
                                             <SidebarMenuSubButton asChild>
                                                 <a
                                                     href={file.url}
                                                     className="flex-1 text-blue-500 hover:no-underline cursor-pointer"
-                                                    aria-current={currentBpmn?.id === file.id ? "true" : "false"}
+                                                    aria-current={currentBpmn?.id === file.id && window.location.pathname === `/dashboard/chat/${file.id}` ? "true" : "false"}
+                                                    
                                                 >
                                                     {file.fileName}
                                                 </a>

@@ -59,17 +59,17 @@ const data = {
       icon: SquareTerminal,
       isActive: true,
       items: [
+        // {
+        //   title: "Text2BPMN",
+        //   url: "/dashboard/text2bpmn",
+        // },
         {
-          title: "Text2BPMN",
-          url: "/dashboard/text2bpmn",
+          title: "Chat",
+          url: "/dashboard/chat",
         },
         {
           title: "Image2BPMN",
           url: "/dashboard/image2bpmn",
-        },
-        {
-          title: "Chat",
-          url: "/dashboard/chat",
         },
         {
           title: "Diff Checker",
@@ -140,11 +140,11 @@ export function AppSidebar({orgs, projs, ...props }: AppSidebarProps ) {
           <NavMain items={data.navMain} />
         )}
         {currentProject && <NavBpmnFile projectId={currentProject.id} />}
-        {user.role !== UserRole.STAKEHOLDER && (
+        {/* {user.role !== UserRole.STAKEHOLDER && (
           <div className="m-4">
             <Bpmn />
           </div>
-        )}
+        )} */}
         {user.role === UserRole.ADMIN && (
           <Settings/>
         )}

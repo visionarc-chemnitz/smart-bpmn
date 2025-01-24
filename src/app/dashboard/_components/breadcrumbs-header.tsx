@@ -13,42 +13,73 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useToggleButton } from "@/hooks/use-toggle-button";
 import { useUser } from "@/providers/user-provider";
-import { ProjectModal } from "@/app/dashboard/_components/modals/projectModal";
-import {ChevronDown, Info, Plus } from "lucide-react";
-import { API_PATHS } from '@/app/api/api-path/apiPath';
+import { ProjectModal } from "@/app/dashboard/_components/modals/project-modal";
+import { ChevronDown, Info, Plus } from "lucide-react";
+import { API_PATHS } from "@/app/api/api-path/apiPath";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { UserRole } from "@/types/user/user";
-// import { useOrganizationContext } from "@/providers/organization-provider";
-
 import { Project } from "@/types/project/project";
 import { ManageUsersModal } from "./modals/manage-users-modal";
-import { toastService } from "@/app/_services/toast.service";
-import { ProjectSelector } from "./project-selector";
+import { toast } from "sonner";
 import { useOrganizationStore } from "@/store/organization-store";
 import { useWorkspaceStore } from "@/store/workspace-store";
-// import { useWorkspaceContext } from "@/providers/workspace-provider";
-
+import { Label } from "@/components/ui/label";
+import { usePathname } from 'next/navigation'
 
 interface BreadcrumbsHeaderProps {
   href: string;
   current: string;
+  subParent?: string;
+  subParentHref?: string;
   parent: string;
 }
 
-
-export default function BreadcrumbsHeader({ href, current, parent  }: BreadcrumbsHeaderProps) {
+export default function BreadcrumbsHeader({
+  href,
+  current,
+  subParent,
+  subParentHref,
+  parent,
+}: BreadcrumbsHeaderProps) {
   const { toggleButton } = useToggleButton();
-  const {  currentProject, currentBpmn, setCurrentProject, projectList, setProjectList } = useWorkspaceStore();
+  const {
+    currentProject,
+    currentBpmn,
+    setCurrentProject,
+    projectList,
+    setProjectList,
+  } = useWorkspaceStore();
   const { currentOrganization } = useOrganizationStore();
-  // const [selectedProject, setSelectedProject] = useState<string>("");
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false); // New info modal state
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
-  const [hasOrganization, setHasOrganization] = useState<boolean>(!!currentOrganization);
+  const [hasOrganization, setHasOrganization] = useState<boolean>(
+    !!currentOrganization
+  );
   const user = useUser();
-  
-  const [isManageStakeholderModalOpen, setIsManageStakeholderModalOpen] = useState(false);
+  const [isManageStakeholderModalOpen, setIsManageStakeholderModalOpen] =
+    useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+
+  // Close dropdown when clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const isDropdownClick = dropdownRef.current?.contains(target);
+      const isProjectModalClick = target.closest(".project-modal");
+      const isDialogContent = document
+        .querySelector('[role="dialog"]')
+        ?.contains(target);
+
+      if (!isDropdownClick && !isProjectModalClick && !isDialogContent) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const onShareClick = () => {
     setIsManageStakeholderModalOpen(true);
@@ -58,7 +89,9 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
       const fetchData = async () => {
         try {
           if (currentOrganization) {
-            const projectsResponse = await fetch(`${API_PATHS.GET_PROJECTS}?organizationId=${currentOrganization.id}`);
+            const projectsResponse = await fetch(
+              `${API_PATHS.GET_PROJECTS}?organizationId=${currentOrganization.id}`
+            );
 
             // const orgData = await orgResponse.json();
             if (!projectsResponse) {
@@ -76,9 +109,8 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
               setProjectList(projectsData.projects);
             }
           }
-          
         } catch (error) {
-          toastService.showDestructive("Error fetching projects.");
+          toast.error("Error fetching projects.");
         }
       };
 
@@ -92,25 +124,12 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
     }
   }, [currentProject]);
 
-  const openCreateProjectModal = () => {
-    setIsProjectModalOpen(true);
-  }
-
   const handleProjectChange = (project: Project) => {
-    if (!hasOrganization) {
-      setIsInfoModalOpen(true);
-    }
     setCurrentProject(project);
     setIsDropdownOpen(false);
   };
 
-  const handleProjectModalClose = () => {
-    setIsProjectModalOpen(false);
-  };
-
-  const handleInfoModalClose = () => {
-    setIsInfoModalOpen(false);
-  };
+  console.log("pathname", pathname);
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -124,6 +143,16 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
                 <BreadcrumbLink href={href}>{parent}</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
+              {subParent && subParentHref ? (
+                <>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href={subParentHref}>
+                      {subParent}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                </>
+              ) : null}
               <BreadcrumbItem>
                 <BreadcrumbPage>{current}</BreadcrumbPage>
               </BreadcrumbItem>
@@ -132,55 +161,77 @@ export default function BreadcrumbsHeader({ href, current, parent  }: Breadcrumb
         )}
       </div>
       <div className="flex-1" />
-        {user.role !== UserRole.STAKEHOLDER && (currentBpmn !== null) && (
-          <RainbowButton type="submit" className="ml-5 mr-2 py-0 text-sm h-8 px-3" onClick={onShareClick}>
+      {user.role !== UserRole.STAKEHOLDER && currentBpmn !== null && (
+        <RainbowButton
+          type="submit"
+          className="ml-5 mr-2 py-0 text-sm h-8 px-3"
+          onClick={onShareClick}
+        >
             Share
             <IoShareSocialOutline className="ml-1" />
           </RainbowButton>
         )}
         <div className="relative flex items-center gap-2">
-        {/* <ProjectSelector /> */}
-        <label htmlFor="project-select" className="mr-2">Project:</label>
-        <div className="relative">
+        
+        {/* Project dropDown */}
+        { pathname.startsWith('/dashboard/chat/') && pathname.length > '/dashboard/chat/'.length ?
+          null
+          :
+          <>
+            <Label>Project:</Label>
+            <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => (hasOrganization ? setIsDropdownOpen(!isDropdownOpen) : setIsInfoModalOpen(true))}
-            className="w-full min-w-[200px] border border-gray-300 rounded-md p-2 dark:bg-gray-700 dark:border-gray-600 flex items-center justify-between"
-          >
+                onClick={() =>
+                  hasOrganization && setIsDropdownOpen(!isDropdownOpen)
+                }
+                className="flex items-center justify-between w-full min-w-[200px] px-3 py-2 text-sm 
+                  bg-background border rounded-md shadow-sm hover:bg-accent
+                  transition-colors duration-200 ease-in-out"
+              >
+                <span className="truncate">
             {currentProject?.name || "Select Project"}
-            <ChevronDown className="ml-2" />
+                </span>
+                <ChevronDown
+                  className={`ml-2 h-4 w-4 transition-transform duration-200 
+                  ${isDropdownOpen ? "rotate-180" : ""}`}
+                />
           </button>
           {isDropdownOpen && hasOrganization && (
-            <div className="absolute mt-1 w-full min-w-[200px] bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-10">
-              <ul className="py-1">
-                {user.role !== UserRole.STAKEHOLDER && (
-                  <li
-                    onClick={() => openCreateProjectModal()}
-                    className="cursor-pointer px-4 py-2 text-green-500 font-bold hover:bg-gray-100 dark:hover:bg-gray-800"
-                  >
-                    <span> <Plus /> Create </span>
-                  </li>
+                <div
+                  className="absolute mt-1 w-full min-w-[200px] bg-popover border rounded-md shadow-lg z-50
+                animate-in fade-in-0 zoom-in-95"
+                >
+                  <div className="py-1">
+                    {user.role !== UserRole.STAKEHOLDER &&
+                      currentOrganization &&
+                      currentOrganization.id && (
+                        <div className="px-2 py-1.5">
+                          <ProjectModal
+                            orgId={currentOrganization?.id}
+                            open={isOpen}
+                            setOpen={setIsOpen}
+                          />
+                        </div>
                 )}
                 {projectList.map((project) => (
-                  <li
+                      <button
                     key={project.id}
                     onClick={() => handleProjectChange(project)}
-                    className="cursor-pointer px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent 
+                        transition-colors duration-200 ease-in-out"
                   >
                     {project.name}
-                  </li>
+                      </button>
                 ))}
-              </ul>
+                  </div>
             </div>
           )}
         </div>
+          </>
+        }
+        
       </div>
-      <div className="flex items-center gap-2 px-4">
-        {toggleButton()}
-      </div>
-      {/* <ProjectModal
-        isOpen={isProjectModalOpen}
-        onClose={handleProjectModalClose}
-      /> */}
+      <div className="flex items-center gap-2 px-4">{toggleButton()}</div>
       <ManageUsersModal
         isOpen={isManageStakeholderModalOpen}
         onClose={() => setIsManageStakeholderModalOpen(false)}

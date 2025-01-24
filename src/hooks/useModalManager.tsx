@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from "@/providers/user-provider";
 import { API_PATHS } from '@/app/api/api-path/apiPath';
-import { toastService } from '@/app/_services/toast.service';
+import { toast } from "sonner"
 import { useOrganizationStore } from '@/store/organization-store';
 import { useWorkspaceStore } from '@/store/workspace-store';
 
@@ -105,12 +105,12 @@ export const useModalManager = () => {
         e.preventDefault();
 
         if (!user || !user.id) {
-            toastService.showDestructive('User is not logged in or user ID is missing');
+            toast.error('User is not logged in or user ID is missing');
             return;
         }
 
         if (!organizationName) {
-            toastService.showDestructive('Organization name is required');
+            toast.error('Organization name is required');
             return;
         }
 
@@ -137,7 +137,7 @@ export const useModalManager = () => {
             setOrganizations(data);
             setCurrentOrganization(data);
             closeModal();
-            toastService.showDefault('Organization has been created.');
+            toast.success('Organization has been created successfully.');
             window.location.reload();
         } catch (error) {
             console.error('Error creating organization:', error);
@@ -153,12 +153,12 @@ export const useModalManager = () => {
         if (isLoading) return;
 
         if (!user || !user.id) {
-            toastService.showDestructive('User is not logged in or user ID is missing');
+            toast.error('User is not logged in or user ID is missing');
             return;
         }
 
         if (!selectedOrganizationId) {
-            toastService.showDestructive('Organization is not selected');
+            toast.error('Organization is not selected');
             return;
         }
 
@@ -179,17 +179,16 @@ export const useModalManager = () => {
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Error Response:', errorData);
-                toastService.showDestructive('Failed to create project.');
+                toast.error('Failed to create project.');
             }
 
             const data = await response.json();
-            toastService.showDefault('Project has been created successfully.');
-            console.log('Project created:', data);
+            toast.success('Project has been created successfully.');
             setProjectList([...projectList, data]);
             setCurrentProject(data);
             closeModal();
         } catch (error) {
-            toastService.showDestructive('An error occurred while creating project.');
+            toast.error('An error occurred while creating project.');
         } finally {
             setIsLoading(false);
         }
@@ -224,7 +223,7 @@ export const useModalManager = () => {
 
             // Parse response data
             const data = await response.json();
-            toastService.showDefault('BPMN has been saved.');
+            toast.success('BPMN has been saved successfully.');
 
             // Update state and close modal
             setBpmnFiles((prevFiles) => [...prevFiles, data]);
@@ -239,7 +238,7 @@ export const useModalManager = () => {
             closeModal();
 
         } catch (error) {
-            toastService.showDestructive('An error occurred while saving BPMN.');
+            toast.error('An error occurred while saving BPMN.');
         } finally {
             setIsLoading(false);
         }

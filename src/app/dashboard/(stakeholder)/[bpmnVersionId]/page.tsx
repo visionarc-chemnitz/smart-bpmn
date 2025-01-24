@@ -2,7 +2,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { API_PATHS } from '@/app/api/api-path/apiPath';
-import BreadcrumbsHeader from '../../(components)/breadcrumbs-header';
+import BreadcrumbsHeader from '@/app/dashboard/_components/breadcrumbs-header';
 import BpmnCommentComponent from '../../text2bpmn/(components)/bpmn-comment-component';
 
 interface BpmnVersionParams {
@@ -16,23 +16,23 @@ export default function StakeholderBpmnVersionPage({params}: BpmnVersionParams) 
     const [xml, setXml] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchBpmnVersion = async () => {
-            const versionId = params.bpmnVersionId;
-            if (versionId) {
-                // Fetch BPMN version
-                const bpmnVersion = await fetch(`${API_PATHS.GET_BPMN_VERSION}?bpmnVersionId=${versionId}`);
-                if (!bpmnVersion) {
-                  throw new Error("Failed to fetch projects");
-                }
-                const bpmnVersionData = await bpmnVersion.json();
-                if (bpmnVersionData.bpmnVersion?.xml) {
-                  setXml(bpmnVersionData.bpmnVersion.xml);
-                }
-              }
-        };
-        fetchBpmnVersion();
-    }, []);
+    // useEffect(() => {
+    //     const fetchBpmnVersion = async () => {
+    //         const versionId = params.bpmnVersionId;
+    //         if (versionId) {
+    //             // Fetch BPMN version
+    //             const bpmnVersion = await fetch(`${API_PATHS.GET_BPMN_VERSION}?bpmnVersionId=${versionId}`);
+    //             if (!bpmnVersion) {
+    //               throw new Error("Failed to fetch projects");
+    //             }
+    //             const bpmnVersionData = await bpmnVersion.json();
+    //             if (bpmnVersionData.bpmnVersion?.xml) {
+    //               setXml(bpmnVersionData.bpmnVersion.xml);
+    //             }
+    //           }
+    //     };
+    //     fetchBpmnVersion();
+    // }, []);
 
  return (
      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">

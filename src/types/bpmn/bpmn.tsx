@@ -6,5 +6,5 @@ export interface Bpmn {
     isShared: boolean;
     isFavorite: boolean;
     currentVersionId?: string;
-    createdAt: string;
+    createdAt?: string;
 }

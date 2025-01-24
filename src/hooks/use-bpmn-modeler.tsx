@@ -101,7 +101,6 @@ export const useBpmnModeler = ({
     if (!modeler) return;
 
     try {
-      console.log(xml)
       await modeler.importXML(xml);
       const canvas = modeler.get('canvas') as { zoom: (type: string) => void };
       canvas.zoom('fit-viewport');

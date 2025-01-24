@@ -1,21 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import BreadcrumbsHeader from './_components/breadcrumbs-header';
 import { useUser } from "@/providers/user-provider";
-import ManageStakeholderModal from './_components/modals/manage-stakeholder-modal';
 import { API_PATHS } from '../api/api-path/apiPath';
 import { UserRole } from '@/types/user/user';
-// import { useOrganizationContext } from '@/providers/organization-provider';
-import { toastService } from '../_services/toast.service';
-import StakeholderBpmnPage from './stakeholder-bpmn/page';
-import NewUserDashBoardPage from './_components/new-user-dashboard';
+import { toast } from "sonner"
+import NewUserDashBoardPage from './_components/pages/new-user-dashboard';
+import UserDashBoardPage from './_components/pages/user-dashboard';
+import { useOrganizationStore } from '@/store/organization-store';
+import StakeHolderDashBoardPage from './(stakeholder)/_components/stakeholder-dashboard-page';
+import { useWorkspaceStore } from '@/store/workspace-store';
 
 export default function DashBoardPage() {
-  const user = useUser();  // Get user directly here
-  const [hasOrganization, setHasOrganization] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
-  // const { setCurrentOrganization } = useOrganizationContext();
+  const user = useUser();
+  const {currentOrganization} = useOrganizationStore();
+  const {currentProject, currentBpmn, setCurrentBpmn, selectionChanged} = useWorkspaceStore();
   const breadcrumbTitle = user.role === UserRole.STAKEHOLDER ? '' : 'Playground';
  
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function DashBoardPage() {
         });
         const data = await response.json(); 
         if (data.success) {
-          toastService.showDefault("You have successfully accepted the invitation.");
+          toast.success("You have successfully accepted the invitation.");
         }
       };
       
@@ -47,15 +47,26 @@ export default function DashBoardPage() {
   return (
     <>
       <BreadcrumbsHeader href='/dashboard' current={breadcrumbTitle} parent='/'/>
-       {user.role !== UserRole.STAKEHOLDER && (
+       {user.role !== UserRole.STAKEHOLDER && !currentOrganization && (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <NewUserDashBoardPage />
         </div>
       )}
-      {user.role == UserRole.STAKEHOLDER && (
-        <StakeholderBpmnPage />
+
+      {/* TODO: Work on the Dashboard for the existing users */}
+      {/* Like : Projects card or some datatable etc. */}
+      {user.role !== UserRole.STAKEHOLDER && (currentOrganization) && (
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <UserDashBoardPage />
+        </div>
       )}
-      
+
+      {/* TODO: implement a dashboard for stakholder */}
+      {user.role === UserRole.STAKEHOLDER && (currentProject && currentProject.id) && (
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <StakeHolderDashBoardPage projId={currentProject.id} />
+        </div>
+      )}
 
     </>
   );

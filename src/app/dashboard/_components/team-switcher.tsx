@@ -30,7 +30,7 @@ import { getInitials } from "@/lib/utils"
 export const TeamSwitcher = memo(function TeamSwitcher() {
   const { isMobile } = useSidebar();
   const {currentOrganization, setCurrentOrganization, orgList} = useOrganizationStore()
-  console.log('currentOrganization in team-switcher', currentOrganization);
+  // console.log('currentOrganization in team-switcher', currentOrganization);
   const {} = useWorkspaceStore()
 
   // Modal state management

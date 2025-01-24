@@ -33,27 +33,21 @@ model Project {
 }
 
 model Bpmn {
-  id              String            @id @default(uuid())
-  fileName        String
-  projectId       String?
-  createdBy       String
-  isFavorite      Boolean           @default(false)
-  isShared        Boolean           @default(false)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @default(now())
-  user            User              @relation("BpmnOwner", fields: [createdBy], references: [id], onDelete: Cascade)
-  project         Project?          @relation("ProjectBpmn", fields: [projectId], references: [id])
-  invitations     Invitation[]
-  StakeholderBpmn StakeholderBpmn[]
-  BpmnVersion     BpmnVersion[]
-  currentVersionId String?
-}
-
-model BpmnVersion {
-  id              String            @id @default(uuid())
-  xml             String
-  bpmnId String
-  bpmn   Bpmn   @relation(fields: [bpmnId], references: [id])
+  id               String            @id @default(uuid())
+  fileName         String
+  projectId        String?
+  createdBy        String
+  isFavorite       Boolean           @default(false)
+  isShared         Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @default(now())
+  currentVersionId String?           @unique
+  user             User              @relation("BpmnOwner", fields: [createdBy], references: [id], onDelete: Cascade)
+  currentVersion   BpmnVersion?      @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  project          Project?          @relation("ProjectBpmn", fields: [projectId], references: [id])
+  BpmnVersion      BpmnVersion[]
+  invitations      Invitation[]
+  StakeholderBpmn  StakeholderBpmn[]
 }
 
 model Invitation {
@@ -82,6 +76,7 @@ model User {
   accounts          Account[]
   Authenticator     Authenticator[]
   bpmnFiles         Bpmn[]            @relation("BpmnOwner")
+  bpmnVersions      BpmnVersion[]     @relation("VersionUpdatedBy")
   ownedOrganization Organization?     @relation("OrganizationOwner")
   projects          Project[]         @relation("ProjectOwner")
   sessions          Session[]
@@ -146,6 +141,17 @@ model StakeholderBpmn {
   user   User   @relation(fields: [userId], references: [id])
 
   @@id([userId, bpmnId])
+}
+
+model BpmnVersion {
+  id            String  @id @default(cuid())
+  xml           String
+  bpmnId        String
+  updatedBy     String
+  versionNumber String?
+  currentBpmn   Bpmn?   @relation("CurrentVersion")
+  Bpmn          Bpmn    @relation(fields: [bpmnId], references: [id])
+  user          User    @relation("VersionUpdatedBy", fields: [updatedBy], references: [id])
 }
 
 enum Role {
