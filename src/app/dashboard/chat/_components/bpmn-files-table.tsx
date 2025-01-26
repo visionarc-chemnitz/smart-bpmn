@@ -16,10 +16,10 @@ const BpmnFilesTable: React.FC<BpmnFilesTableProps> = ({ files }: BpmnFilesTable
           <TableRow>
             <TableHead>File Name</TableHead>
             {/* <TableHead>createdBy</TableHead> */}
-            <TableHead>Created Date</TableHead>
+            {/* <TableHead>Created Date</TableHead> */}
             <TableHead>Shared</TableHead>
             <TableHead>Favourite</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -27,11 +27,11 @@ const BpmnFilesTable: React.FC<BpmnFilesTableProps> = ({ files }: BpmnFilesTable
             <TableRow key={file.id}>
               <TableCell>{file.fileName}</TableCell>
               {/* <TableCell>{file.createdBy}</TableCell> */}
-              <TableCell>{new Date(file.createdAt).toLocaleDateString()}</TableCell>
+              {/* <TableCell>{new Date(file.createdAt).toLocaleDateString()}</TableCell> */}
                 <TableCell>{file.isShared ? <Check /> : <X />}</TableCell>
                 <TableCell>{file.isFavorite ? <Check /> : <X />}</TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
+              <TableCell>
+                <div className="flex justify-start gap-2">
                   <Button variant="outline" size="sm" onClick={() => {}}>
                     Download BPMN
                   </Button>

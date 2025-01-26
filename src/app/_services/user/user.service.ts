@@ -428,9 +428,19 @@ export const fetchBpmnFiles = async (projId: string, userId: string, userRole : 
         });
       break;
     }
-
-    console.log(res);
-    // const bpmnFiles = 
+    
+    if (res && res?.length > 0) {
+      bpmnFiles = res.map((file) => {
+        return {
+          id: file.id,
+          fileName: file.fileName,
+          createdBy: file.createdBy,
+          isShared: file.isShared,
+          isFavorite: file.isFavorite,
+          currentVersionId: file.currentVersion?.id ?? '',
+        }
+      })
+    }
 
     return bpmnFiles;
   } catch (error) {

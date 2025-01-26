@@ -117,7 +117,7 @@ export function NewFileModal({currentprojId}: NewFileModalProps) {
           <Button 
           type="submit" 
           disabled={isPending}
-          className="dark:bg-white dark:text-black dark:hover:bg-gray-200"
+          className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
           >
           {isPending ? 'Saving...' : 'Save'}
           </Button>

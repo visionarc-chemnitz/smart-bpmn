@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation"
 import { Plus } from "lucide-react"
 import { Project } from "@/types/project/project"
 import { saveProject } from "@/app/dashboard/_actions/dashboard"
+import { Separator } from "@/components/ui/separator"
 
 // Project schema
 const projSchema = z.object({
@@ -63,8 +64,6 @@ export function ProjectModal({ orgId, open, setOpen }: ProjModalProps) {
           console.log(response);
 
           router.refresh();
-          // // route to the new file
-          // router.push(`/dashboard/bpmn/${response.id}`);
         } else {
           toast.error("Something went wrong!");
         }
@@ -91,6 +90,7 @@ export function ProjectModal({ orgId, open, setOpen }: ProjModalProps) {
           Get Started
         </InteractiveHoverButton> */}
         </DialogTrigger>
+        <Separator className="mt-2"/>
         <DialogContent className="sm:max-w-[425px] dark:bg-gray-900 dark:text-white">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -125,7 +125,7 @@ export function ProjectModal({ orgId, open, setOpen }: ProjModalProps) {
             variant="default" 
             type="submit" 
             disabled={isPending}
-            className="dark:bg-white dark:text-black dark:hover:bg-gray-200"
+            className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
             >
             {isPending ? 'Saving...' : 'Save'}
             </Button>
