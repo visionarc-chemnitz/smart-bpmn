@@ -38,9 +38,9 @@ class ChatConfigWrapper(TypedDict):
   configurable: ChatConfig
 
 class ChatService:
-  def __init__(self, groq_api_key: str, graph_service: GraphService):
+  def __init__(self, groq_api_key: str): #, graph_service: GraphService):
       self.llm = ChatGroq(groq_api_key=groq_api_key, streaming=True,model="mixtral-8x7b-32768")
-      self.graph = graph_service
+      # self.graph = graph_service
       self.pool = None
       self.pool_context = None
       self.memory = None

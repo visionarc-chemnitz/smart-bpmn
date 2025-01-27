@@ -56,11 +56,11 @@ def check_status():
 # instantiate the chat service
 chat_service = ChatService(
     groq_api_key=os.getenv("GROQ_API_KEY"),
-    graph_service=GraphService(
-        uri=os.getenv("NEO4J_URI"),
-        username=os.getenv("NEO4J_USERNAME"),
-        password=os.getenv("NEO4J_PASSWORD")
-    )
+    # graph_service=GraphService(
+    #     uri=os.getenv("NEO4J_URI"),
+    #     username=os.getenv("NEO4J_USERNAME"),
+    #     password=os.getenv("NEO4J_PASSWORD")
+    # )
 )
 
 # endpoint to start a chat session
