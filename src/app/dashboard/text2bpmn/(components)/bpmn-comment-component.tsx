@@ -8,7 +8,7 @@ import { useWorkspaceStore } from '@/store/workspace-store';
 import { toast } from "sonner"
 
 
-export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => {
+const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => {
   const { containerId, diagramXML, onError, onImport, height, width } = props;
   const { viewer, importXML, exportXML, addOverlay, clearOverlay } = useBpmnComment({
     containerId,
@@ -39,7 +39,7 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
       xml: xml,
     };
     if (xml) {
-       const response = await fetch(API_PATHS.SAVE_BPMN_VERSION, {
+       const response = await fetch(API_PATHS.UPDATE_BPMN_VERSION, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody),
@@ -95,6 +95,5 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
   );
 });
 
-BpmnCommentComponent.displayName = 'BpmnCommentComponent';
 
 export default BpmnCommentComponent;

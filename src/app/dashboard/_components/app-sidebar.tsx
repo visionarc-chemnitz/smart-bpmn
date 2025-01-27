@@ -1,24 +1,15 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import {
-  AudioWaveform,
-  BookOpen,
   Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
+  ImagePlusIcon,
+  GitCompare,
   SquareTerminal,
-  // User,
 } from "lucide-react";
 
-import Bpmn from './bpmn-info';
-
 import { NavMain } from "./nav-main";
-import { NavProjects } from "./nav-projects";
+// import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
 import {
@@ -42,43 +33,8 @@ import { Project } from "@/types/project/project";
 import { useOrganizationStore } from "@/store/organization-store";
 import { useWorkspaceStore } from "@/store/workspace-store";
 import { Organization } from "@/types/organization/organization";
+import { usePathname } from "next/navigation";
 // import { useWorkspaceContext } from "@/providers/workspace-provider";
-
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-    role: UserRole.MEMBER,
-    organizationId: "",
-  },
-  navMain: [
-    {
-      title: "Playground",
-      url: "/dashboard",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        // {
-        //   title: "Text2BPMN",
-        //   url: "/dashboard/text2bpmn",
-        // },
-        {
-          title: "Chat",
-          url: "/dashboard/chat",
-        },
-        {
-          title: "Image2BPMN",
-          url: "/dashboard/image2bpmn",
-        },
-        {
-          title: "Diff Checker",
-          url: "/dashboard/diff-checker",
-        },
-      ],
-    },
-  ],
-};
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   orgs: Organization[];
@@ -87,10 +43,53 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export function AppSidebar({orgs, projs, ...props }: AppSidebarProps ) {
   const user = useUser();
+  
+  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const {setCurrentOrganization, setOrgList} = useOrganizationStore();
-  const {currentProject ,setProjectList} = useWorkspaceStore();
+  const {currentProject, setProjectList} = useWorkspaceStore();
+  const path = usePathname()
 
-  useEffect(() => {
+  const data = {
+    user: {
+      name: "shadcn",
+      email: "m@example.com",
+      avatar: "/avatars/shadcn.jpg",
+      role: UserRole.MEMBER,
+      organizationId: "",
+    },
+    navMain: [
+      {
+        title: "Playground",
+        url: "/dashboard",
+        icon: SquareTerminal,
+        isActive: path === "/dashboard/chat" || "/dashboard/image2bpmn" || "/dashboard/diff-checker" ? true : false,
+        items: [
+          {
+            title: "Chat",
+            isActive: path === "/dashboard/chat"? true : false,
+            icon: Bot,
+            url: "/dashboard/chat",
+          },
+          {
+            title: "Image2BPMN",
+            icon : ImagePlusIcon,
+            isActive: path === "/dashboard/image2bpmn"? true : false,
+            url: "/dashboard/image2bpmn",
+          },
+          {
+            title: "Diff Checker",
+            icon: GitCompare,
+            isActive: path === "/dashboard/diff-checker"? true : false,
+            url: "/dashboard/diff-checker",
+          },
+        ],
+      },
+    ],
+  };
+
+  const updateStores = useCallback((orgs: Organization[], projs: Project[]) => {
+    setIsLoading(true);
     if (orgs && orgs.length > 0) {
       setOrgList(orgs);
       setCurrentOrganization(orgs[0]);
@@ -99,36 +98,27 @@ export function AppSidebar({orgs, projs, ...props }: AppSidebarProps ) {
     if (projs && projs?.length > 0) {
       setProjectList(projs);
     }
-  }, [user, orgs, projs, setOrgList, setCurrentOrganization, setProjectList])
+    setIsLoading(false);
+  }, [setOrgList, setCurrentOrganization, setProjectList]);
 
-  // const { setCurrentOrganization, setOrgList} = useOrganizationContext();
-  // const { currentProject ,setProjectList} = useWorkspaceContext();
-  
-  // const orgFetcher = async (url: string ) => {
-  //   return await fetch(url).then((res) => res.json());
-  // }
-  // const projectFetcher = async (url: string ) => {
-  //   return await fetch(url).then((res) => res.json());
-  // }
+  useEffect(() => {
+    startTransition(() => {
+      updateStores(orgs, projs);
+    });
+  }, [user, orgs, projs, updateStores]);
 
-  // const { data: orgs, error: orgError } = useSWR(API_PATHS.GET_ORGANIZATION, orgFetcher);
-  // const { data: projs, error: projError } = useSWR<Project[]>(API_PATHS.GET_PROJECTS, projectFetcher);
-
-  // useEffect(() => {
-  //   if (orgError) console.error(orgError);
-  //   if (projError) console.error(projError);
-    
-  //   if (orgs && orgs.length > 0) {
-  //     setOrgList(orgs);
-  //     setCurrentOrganization(orgs[0]);
-  //   }
-
-  //   if (projs && projs?.length > 0) {
-  //     setProjectList(projs);
-  //   }
-  // }, [user, orgs, projs, orgError, projError, setOrgList, setCurrentOrganization, setProjectList])
-
-  // if (!orgs || !projs) return <SidebarSkeleton />;
+  if (isLoading) {
+    return (
+      // sidebar skeleton
+      <div className="w-64 h-screen animate-pulse bg-gray-100 dark:bg-gray-900">
+        <div className="h-16 bg-gray-200 dark:bg-gray-800 mb-4" />
+        <div className="px-4 space-y-3">
+          <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -139,12 +129,7 @@ export function AppSidebar({orgs, projs, ...props }: AppSidebarProps ) {
         {user.role !== UserRole.STAKEHOLDER && (
           <NavMain items={data.navMain} />
         )}
-        {currentProject && <NavBpmnFile projectId={currentProject.id} />}
-        {/* {user.role !== UserRole.STAKEHOLDER && (
-          <div className="m-4">
-            <Bpmn />
-          </div>
-        )} */}
+        {currentProject && <NavBpmnFile/>}
         {user.role === UserRole.ADMIN && (
           <Settings/>
         )}
@@ -156,15 +141,3 @@ export function AppSidebar({orgs, projs, ...props }: AppSidebarProps ) {
     </Sidebar>
   );
 }
-
-// function SidebarSkeleton() {
-//   return (
-//     <div className="w-64 h-screen animate-pulse bg-gray-100 dark:bg-gray-800">
-//       <div className="h-16 bg-gray-200 dark:bg-gray-700 mb-4" />
-//       <div className="px-4 space-y-3">
-//       <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-//       <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-//       </div>
-//     </div>
-//   );
-// }

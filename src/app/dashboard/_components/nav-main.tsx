@@ -28,6 +28,7 @@ export function NavMain({
     isActive?: boolean
     items?: {
       title: string
+      isActive?: boolean
       url: string
     }[]
   }[]
@@ -55,9 +56,16 @@ export function NavMain({
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
-                          <span>{subItem.title}</span>
+                      <SidebarMenuSubButton 
+                        asChild 
+                        className={`transition-colors duration-200 ${
+                        subItem.isActive 
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-100" 
+                          : "hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-300"
+                        }`}
+                      >
+                        <a href={subItem.url} className="w-full">
+                        <span className="font-medium">{subItem.title}</span>
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>

@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // TODO: Update this query (this is a wrong query)
     if (user.role === 'STAKEHOLDER') {
       bpmnFiles = await prisma.bpmn.findMany({
         where: {

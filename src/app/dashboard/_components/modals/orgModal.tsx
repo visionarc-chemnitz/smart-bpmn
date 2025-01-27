@@ -83,7 +83,7 @@ export function OrgModal() {
           <DialogHeader>
             <DialogTitle>Add Organization</DialogTitle>
             <DialogDescription>
-              Give name to your organization & project save when you're done.
+              Give name to your organization &amp; project save when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
