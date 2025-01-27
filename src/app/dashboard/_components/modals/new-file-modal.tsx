@@ -9,9 +9,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
-import { z } from "zod"
+import { set, z } from "zod"
 import {
   Form,
   FormControl,
@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation"
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button"
 import { Bpmn } from "@/types/bpmn/bpmn"
 import { ClipboardList } from "lucide-react"
+import { useWorkspaceStore } from "@/store/workspace-store"
 
 // Bpmn file schema
 const fileSchema = z.object({
@@ -41,6 +42,7 @@ export function NewFileModal({currentprojId}: NewFileModalProps) {
   const router = useRouter();
   const [open, setOpen] = useState<boolean>(false)
   const [isPending, startTransition] = useTransition();
+  const { setSelectionChanged } = useWorkspaceStore();
 
   const form = useForm<z.infer<typeof fileSchema>>({
     resolver: zodResolver(fileSchema),
@@ -50,6 +52,12 @@ export function NewFileModal({currentprojId}: NewFileModalProps) {
     },
   });
 
+  useEffect(() => {
+    form.reset({
+      fileName: "",
+      projId: currentprojId
+    });
+  }, [currentprojId, form]);
 
   const onSubmit = async (data: z.infer<typeof fileSchema>) => {
     try {
@@ -59,6 +67,7 @@ export function NewFileModal({currentprojId}: NewFileModalProps) {
         if (response && typeof response === 'object') {
           toast.success("New File created.");
           setOpen(false);          
+          setSelectionChanged(true);
 
           router.push(`/dashboard/chat/${response.id}`);
         } else {

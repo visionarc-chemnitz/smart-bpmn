@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -9,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 import {
@@ -27,6 +29,7 @@ import { Plus } from "lucide-react"
 import { Project } from "@/types/project/project"
 import { saveProject } from "@/app/dashboard/_actions/dashboard"
 import { Separator } from "@/components/ui/separator"
+import { useWorkspaceStore } from "@/store/workspace-store"
 
 // Project schema
 const projSchema = z.object({
@@ -43,6 +46,7 @@ interface ProjModalProps {
 export function ProjectModal({ orgId, open, setOpen }: ProjModalProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const {setCurrentProject, setProjectList, projectList, setSelectionChanged } = useWorkspaceStore();
 
   const form = useForm<z.infer<typeof projSchema>>({
     resolver: zodResolver(projSchema),
@@ -51,6 +55,13 @@ export function ProjectModal({ orgId, open, setOpen }: ProjModalProps) {
       orgId: orgId 
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      projName: "",
+      orgId: orgId
+    });
+  }, [orgId, form]);
 
 
   const onSubmit = async (data: z.infer<typeof projSchema>) => {
@@ -61,9 +72,9 @@ export function ProjectModal({ orgId, open, setOpen }: ProjModalProps) {
         if (response && typeof response === 'object') {
           toast.success("New Project created.");
           setOpen(false);          
-          console.log(response);
-
-          router.refresh();
+          setProjectList([...projectList, response]);
+          setCurrentProject(response);
+          setSelectionChanged(true); // to trigger the selection change
         } else {
           toast.error("Something went wrong!");
         }

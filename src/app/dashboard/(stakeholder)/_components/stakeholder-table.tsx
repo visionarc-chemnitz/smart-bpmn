@@ -7,66 +7,51 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Bpmn } from "@/types/bpmn/bpmn";
+import { BPMNFilesByOrg, BpmnXML } from "@/types/bpmn/bpmn";
 import Link from "next/link";
 import React, { useCallback, useEffect, useState, useTransition } from "react";
-import { getBpmnFiles } from "../../_actions/dashboard";
-import { useWorkspaceStore } from "@/store/workspace-store";
+import { getBpmnFilesbyOrg } from "../../_actions/dashboard";
 import { Button } from "@/components/ui/button";
+import { useOrganizationStore } from "@/store/organization-store";
+import { useWorkspaceStore } from "@/store/workspace-store";
 
-interface StakeHolderTableProps {
-  projId: string;
-}
-
-export default function StakeHolderTable({ projId }: StakeHolderTableProps) {
-  const [bpmnFiles, setBpmnFiles] = useState<Bpmn[]>([]);
-  const { setCurrentBpmn, selectionChanged } = useWorkspaceStore();
+export default function StakeHolderTable() {
+  const [bpmnFiles, setBpmnFiles] = useState<BPMNFilesByOrg>(
+    new Map<string, BpmnXML[]>()
+  );
+  const { currentOrganization } = useOrganizationStore();
+  const { setCurrentBpmnXml } = useWorkspaceStore();
   const [isPending, startTransition] = useTransition();
+  const [currentFiles, setCurrentFiles] = useState<BpmnXML[]>([]);
 
   const fetchFiles = useCallback(async () => {
     try {
-      if (!projId) {
-        return;
-      }
-
       startTransition(async () => {
-        const files = await getBpmnFiles(projId);
-        console.log("BPMN files:", files);
+        const files = await getBpmnFilesbyOrg();
+        console.log("BPMN files in table:", files);
         setBpmnFiles(files);
+        // Update currentFiles if org exists
+        if (currentOrganization?.id && files.has(currentOrganization.id)) {
+          setCurrentFiles(files.get(currentOrganization.id) ?? []);
+        }
       });
     } catch (error) {
       console.error("Error fetching BPMN files:", error);
     }
-  }, [projId, selectionChanged]);
+  }, [currentOrganization?.id]);
+
+  // Update currentFiles when organization changes
+  useEffect(() => {
+    if (currentOrganization?.id && bpmnFiles.has(currentOrganization.id)) {
+      setCurrentFiles(bpmnFiles.get(currentOrganization.id) ?? []);
+    } else {
+      setCurrentFiles([]);
+    }
+  }, [currentOrganization?.id, bpmnFiles]);
 
   useEffect(() => {
     fetchFiles();
   }, [fetchFiles]);
-
-  if (isPending) {
-    return (
-      <Table className="min-w-full">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {[1, 2, 3].map((i) => (
-            <TableRow key={i} className="hover:bg-gray-50">
-              <TableCell>
-                <div className="animate-pulse bg-gradient-to-r from-gray-200 to-gray-300 h-8 rounded-md" />
-              </TableCell>
-              <TableCell className="w-24">
-                <div className="animate-pulse bg-gradient-to-r from-gray-200 to-gray-300 h-9 w-16 rounded-md" />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    );
-  }
 
   return (
     <>
@@ -75,20 +60,24 @@ export default function StakeHolderTable({ projId }: StakeHolderTableProps) {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Project Name</TableHead>
+            <TableHead>Created At</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {bpmnFiles.map((bpmn) => (
+          {currentFiles.map((bpmn) => (
             <TableRow key={bpmn.id}>
               <TableCell>{bpmn.fileName}</TableCell>
-              <TableCell>Project 1</TableCell>
+              <TableCell>{bpmn.projectName}</TableCell>
               <TableCell>
-                <Link href={`/dashboard/${bpmn.currentVersionId}`}>
+                {new Date(bpmn.createdAt ?? Date.now()).toLocaleDateString()}
+              </TableCell>
+              <TableCell>
+                <Link href={`/dashboard/${bpmn.id}`}>
                   <Button
                     variant="default"
                     className="bg-black hover:bg-gray-800 dark:bg-white dark:text-black"
-                    onClick={() => setCurrentBpmn(bpmn)}
+                    onClick={() => setCurrentBpmnXml(bpmn)}
                   >
                     View
                   </Button>

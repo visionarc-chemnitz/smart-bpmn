@@ -204,7 +204,7 @@ export default function BreadcrumbsHeader({
                       {/* {user.role !== UserRole.STAKEHOLDER &&
                         currentOrganization &&
                         currentOrganization.id && ( */}
-                          <div className="px-2 py-1.5">
+                          <div className="px-2 py-1">
                             <ProjectModal
                               orgId={currentOrganization?.id}
                               open={isOpen}
@@ -212,18 +212,19 @@ export default function BreadcrumbsHeader({
                             />
                           </div>
                         {/* )} */}
-                      <ScrollArea className="max-h-[200px]">
-                        {projectList.map((project) => (
-                          <div className="px-2 py-1.5" key={project.id}>
+                      <ScrollArea className="h-[150px] px-2">
+                        <div className="space-y-1">
+                          {projectList.map((project) => (
                             <Button
+                              key={project.id}
                               variant="ghost"
                               onClick={() => handleProjectChange(project)}
                               className="w-full justify-start gap-2"
                             >
                               {project.name}
                             </Button>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </ScrollArea>
                     </div>
                   </div>

@@ -31,38 +31,36 @@ import BpmnFilesTable from "./_components/bpmn-files-table";
 import { NewFileModal } from "../_components/modals/new-file-modal";
 
 export default function ChatFiles() {
-  const { currentProject, currentBpmn, setCurrentBpmn, selectionChanged } = useWorkspaceStore();
+  const { currentProject, selectionChanged } = useWorkspaceStore();
   const [bpmnFiles, setBpmnFiles] = useState<Bpmn[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
  
   const fetchBpmnFiles = useCallback(async () => {
     try {
+      const projectId = currentProject?.id;
+      if (!projectId) {
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(
-        `${API_PATHS.GET_BPMN_FILES}?projectId=${currentProject?.id}`
+        `${API_PATHS.GET_BPMN_FILES}?projectId=${projectId}`
       );
       const data = await response.json();
       setBpmnFiles(data.bpmnFiles || []);
       setLoading(false);
-
-      // Automatically select the last file (most recently created)
-      // if (data.bpmnFiles?.length > 0) {
-      //   setCurrentBpmn(data.bpmnFiles[data.bpmnFiles.length - 1]);
-        
-      // } else {
-      //   setCurrentBpmn(null);
-      // }
 
     } catch (error) {
       setError("Error fetching BPMN files");
       setLoading(false);
       toast.error("Error fetching BPMN files");
     }
-  }, [currentProject?.id, setCurrentBpmn]);
+  }, [currentProject?.id, selectionChanged]);
 
   useEffect(() => { 
     fetchBpmnFiles();
-  }, [currentProject, selectionChanged]);
+  }, [fetchBpmnFiles]);
 
   if (loading) {
     return (
@@ -79,9 +77,9 @@ export default function ChatFiles() {
   return (
     <>
       <BreadcrumbsHeader href="/dashboard" current="Chat" parent="Playground" />
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-6 h-full">
         <div className="mb-6 flex justify-end">
-          { currentProject && currentProject.id && <NewFileModal currentprojId={currentProject?.id}  /> }
+          { currentProject && currentProject.id && <NewFileModal currentprojId={currentProject.id}  /> }
         </div>
 
         <div className="rounded-md border">

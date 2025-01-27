@@ -83,9 +83,9 @@ export default function DashBoardPage() {
       )}
 
       {/* TODO: implement a dashboard for stakholder */}
-      {user.role === UserRole.STAKEHOLDER && (currentProject && currentProject.id) && (
+      {user.role === UserRole.STAKEHOLDER && (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <StakeHolderDashBoardPage projId={currentProject.id} />
+          <StakeHolderDashBoardPage />
         </div>
       )}
     </>

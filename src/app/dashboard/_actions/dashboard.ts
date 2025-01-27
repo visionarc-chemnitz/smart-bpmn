@@ -1,7 +1,7 @@
 'use server'
 
 import { cache } from 'react';
-import { getUserData, getUser, getUserOrgProj, getStakeholderOrgProject, getUserOrgs, getAdminOrgs, createOrganization, createBpmnFile, createProject, fetchBpmnFiles } from "@/app/_services/user/user.service";
+import { getUserData, getUser, getUserOrgProj, getStakeholderOrgProject, getUserOrgs, getAdminOrgs, createOrganization, createBpmnFile, createProject, fetchBpmnFiles, fetchBpmnFilesbyOrg } from "@/app/_services/user/user.service";
 import { userOrg, getStakeHolderOrgs } from '@/app/_services/user/user.service';
 import { User, UserRole } from "@/types/user/user";
 import { Project } from "@/types/project/project";
@@ -97,10 +97,7 @@ export const getOrgProjects = cache(async (): Promise<Project[]> => {
       let projects: Project[] = [];
       switch (user.role) {
         case Role.STAKEHOLDER:
-          if (!user.organizationId) {
-            throw new Error('Organization ID is required');
-          }
-          projects = await getStakeholderOrgProject(user.id, user?.organizationId);
+          projects = await getStakeholderOrgProject(user.id);
           break;
         
         case Role.ADMIN || Role.MEMBER:
@@ -210,6 +207,36 @@ export async function getBpmnFiles(projId:string): Promise<Bpmn[]> {
 
   try {
     const bpmnFiles = await fetchBpmnFiles(projId, userId, userRole);
+
+    return bpmnFiles;
+  } catch (error) {
+    console.error('Error fetching BPMN files:', error);
+    throw new Error('Error fetching BPMN files');
+  }
+}
+
+// get bpmn files by organization (for stakeholder)
+export async function getBpmnFilesbyOrg() {
+  const session = await getUserData();
+  const userId = session?.id;
+
+  if (!userId) {
+    throw new Error('User not authorized');
+  }
+
+  const user = await getUser(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const userRole = user?.role;
+  if (!userRole || userRole !== Role.STAKEHOLDER) {
+    console.error('Invalid user role, must be a stakeholder');
+    throw new Error('Invalid user role');
+  }
+
+  try {
+    const bpmnFiles = await fetchBpmnFilesbyOrg(userId);
 
     return bpmnFiles;
   } catch (error) {

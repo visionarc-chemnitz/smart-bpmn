@@ -25,6 +25,7 @@ import { Bpmn } from "@/types/bpmn/bpmn";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function NavBpmnFile() {
   const [bpmnFiles, setBpmnFiles] = useState<Bpmn[]>([]);
@@ -33,7 +34,6 @@ export function NavBpmnFile() {
     user.role === UserRole.STAKEHOLDER ? "Shared with you" : "History";
   const { currentProject, currentBpmn, setCurrentBpmn, selectionChanged } =
     useWorkspaceStore();
-  const router = useRouter();
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchBpmnFiles = useCallback(async () => {
@@ -56,7 +56,6 @@ export function NavBpmnFile() {
   }, [fetchBpmnFiles, selectionChanged]);
 
   if (loading) {
-    
     // skeleton loader for the bpmn files
     return (
       <SidebarGroup>
@@ -77,59 +76,63 @@ export function NavBpmnFile() {
     <SidebarGroup>
       <SidebarGroupLabel>{bpmnFileListLabel}</SidebarGroupLabel>
       <SidebarMenu>
-        {bpmnFiles.length === 0 ? (
-          <SidebarMenuItem className="flex items-center p-2 rounded-md">
-            <FileText/>
-            <span className="text-gray-500 text-sm">No files available</span>
-          </SidebarMenuItem>
-        ) : (
-          <Collapsible defaultOpen={false} className="group/collapsible">
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton>
-                  <FileText className="mr-2" />
-                  <span className="flex-1">BPMN Files</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  {bpmnFiles.map((file) => (
+        <Collapsible defaultOpen={false} className="group/collapsible">
+          <SidebarMenuItem>
+            <CollapsibleTrigger asChild>
+              <SidebarMenuButton>
+                <FileText className="mr-2" />
+                <span className="flex-1">BPMN Files</span>
+                <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+              </SidebarMenuButton>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <SidebarMenuSub>
+                <ScrollArea className="h-[140px]">
+                  {bpmnFiles.length === 0 ? (
+                  <SidebarMenuItem className="flex items-center p-2 rounded-md">
+                    <FileText className="mr-2" />
+                    <span className="text-gray-500 text-sm">
+                    No files available
+                    </span>
+                  </SidebarMenuItem>
+                  ) : (
+                  bpmnFiles.map((file: Bpmn) => (
                     <SidebarMenuSubItem
-                      key={file.id}
-                      className={`hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md ${
+                    key={file.id}
+                    className={`hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md ${
+                      currentBpmn?.id === file.id &&
+                      window.location.pathname ===
+                      `/dashboard/chat/${file.id}`
+                      ? "bg-blue-100 dark:bg-blue-800"
+                      : ""
+                    }`}
+                    onClick={() => {
+                      setCurrentBpmn(file);
+                    }}
+                    >
+                    <SidebarMenuSubButton asChild>
+                      <Link
+                      href={`/dashboard/chat/${file.id}`}
+                      className="flex-1 text-blue-500 hover:no-underline cursor-pointer"
+                      aria-current={
                         currentBpmn?.id === file.id &&
                         window.location.pathname ===
-                          `/dashboard/chat/${file.id}`
-                          ? "bg-blue-100 dark:bg-blue-800"
-                          : ""
-                      }`}
-                      onClick={() => {
-                        setCurrentBpmn(file);
-                      }}
-                    >
-                      <SidebarMenuSubButton asChild>
-                        <Link
-                          href={`/dashboard/chat/${file.id}`}
-                          className="flex-1 text-blue-500 hover:no-underline cursor-pointer"
-                          aria-current={
-                            currentBpmn?.id === file.id &&
-                            window.location.pathname ===
-                              `/dashboard/chat/${file.id}`
-                              ? "true"
-                              : "false"
-                          }
-                        >
-                          {file.fileName}
-                        </Link>
-                      </SidebarMenuSubButton>
+                        `/dashboard/chat/${file.id}`
+                        ? "true"
+                        : "false"
+                      }
+                      >
+                      {file.fileName}
+                      </Link>
+                    </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-        )}
+                  ))
+                  )}
+                </ScrollArea>
+              </SidebarMenuSub>
+            </CollapsibleContent>
+          </SidebarMenuItem>
+        </Collapsible>
       </SidebarMenu>
     </SidebarGroup>
   );

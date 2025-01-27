@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
-import { Bpmn } from "@/types/bpmn/bpmn";
+import { Bpmn, BPMNFilesByOrg, BpmnXML } from "@/types/bpmn/bpmn";
 import { Organization } from "@/types/organization/organization";
 import { Project } from "@/types/project/project";
 import { Role } from "@prisma/client";
@@ -166,16 +166,15 @@ export const getUserOrgProj = async (userId: string, orgId: string): Promise<Pro
 }
 
 // get projects for stakeholder 
-export const getStakeholderOrgProject = async (userId: string, orgId: string): Promise<Project[]> => {
+export const getStakeholderOrgProject = async (userId: string) => {
   try {
-    if (!userId || !orgId) {
+    if (!userId) {
       throw new Error('User ID and Organization ID are required');
     }
 
-    return await prisma.project.findMany({
+    const projects = await prisma.project.findMany({
       where: {
-        organizationId: orgId,
-        bpmn: {
+        bpmn:{
           some: {
             StakeholderBpmn: {
               some: {
@@ -183,9 +182,16 @@ export const getStakeholderOrgProject = async (userId: string, orgId: string): P
               },
             },
           },
-        },
+        }
       },
+      select:{
+        id: true,
+        name: true,
+      }
     });
+
+    return projects;
+
   } catch (error) {
     throw new Error('Error fetching user organization projects');
   }
@@ -447,4 +453,76 @@ export const fetchBpmnFiles = async (projId: string, userId: string, userRole : 
     console.error('Error fetching BPMN files:', error);
     throw error;
   }
+}
+
+//fetch bpmn files by orgs (only for stakeholder)
+export const fetchBpmnFilesbyOrg = async (userId: string): Promise<BPMNFilesByOrg> => {
+  try {
+    let bpmnFiles: BPMNFilesByOrg = new Map<string, BpmnXML[]>();
+    let res;
+
+    res = await prisma.bpmn.findMany({
+      where: {
+        StakeholderBpmn: {
+          some: {
+          userId: userId
+          }
+        }
+      },
+      select: {
+        id: true,
+        fileName: true,
+        isShared: true,
+        isFavorite: true,
+        createdAt: true,
+        currentVersion: {
+          select: {
+            id: true,
+            versionNumber: true,
+            xml: true
+          }
+        },
+        project: {
+          select: {
+            id: true,
+            name: true,
+            organizationId: true
+          }
+        }
+      }
+    });
+
+    if (res && res.length > 0) {
+      res.forEach((file) => {
+        const orgId = file.project?.organizationId;
+        if (orgId) {
+          if(!bpmnFiles.has(orgId)) {
+            bpmnFiles.set(orgId, []);
+          }
+          bpmnFiles.set(orgId, [
+            ...(bpmnFiles.get(orgId) || []),
+            {
+              id: file.id,
+              fileName: file.fileName,
+              isShared: file.isShared,
+              isFavorite: file.isFavorite,
+              projectId: file.project?.id ?? '',
+              projectName: file.project?.name ?? '',
+              currentVersionId: file.currentVersion?.id ?? '',
+              xml: file.currentVersion?.xml ?? '',
+              // createdAt: file.createdAt,
+            }
+          ]);
+        }
+      });
+      
+    }
+
+    return bpmnFiles;
+
+  } catch (error) {
+    console.error('Error fetching BPMN files for stakeholder:', error);
+    throw error; 
+  }
+
 }

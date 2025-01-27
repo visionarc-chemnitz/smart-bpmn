@@ -78,7 +78,6 @@ export function useBpmnComment({
     if (!viewer) return;
 
     try {
-      console.log(xml)
       await viewer.importXML(xml);
       const canvas = viewer.get('canvas') as { zoom: (type: string) => void };
       canvas.zoom('fit-viewport');
