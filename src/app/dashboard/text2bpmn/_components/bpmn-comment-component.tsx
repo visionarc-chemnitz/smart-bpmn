@@ -64,4 +64,6 @@ export const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => 
   );
 });
 
+BpmnCommentComponent.displayName = 'BpmnCommentComponent';
+
 export default BpmnCommentComponent;

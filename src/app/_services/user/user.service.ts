@@ -458,10 +458,9 @@ export const fetchBpmnFiles = async (projId: string, userId: string, userRole : 
 //fetch bpmn files by orgs (only for stakeholder)
 export const fetchBpmnFilesbyOrg = async (userId: string): Promise<BPMNFilesByOrg> => {
   try {
-    let bpmnFiles: BPMNFilesByOrg = new Map<string, BpmnXML[]>();
-    let res;
+    const bpmnFiles: BPMNFilesByOrg = new Map<string, BpmnXML[]>();
 
-    res = await prisma.bpmn.findMany({
+    const res = await prisma.bpmn.findMany({
       where: {
         StakeholderBpmn: {
           some: {

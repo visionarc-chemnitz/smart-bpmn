@@ -82,68 +82,39 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
   const handleInviteClick = async () => {
 
     try {
-    // TODO: Save the bpmn xml + isShare flag in the bpmn table
-
-    // STEPS 
-    // (new file)
-    // 1. create a new record in bpmn version table (xml + iteration as (1) + updateBy )
-    // 2. update the currentVersionId in bpmn table with the newly created id from bpmn version table
-    // 2. versionid +  isShare flag in bpmn table(same as above)
-
-
-    // iteration
-    // check versionno. for existing record and increment by 1 for new version record
-    // if 1 then set the new record with version as 2
-
-      console.log(currentBpmn);
-
-      if(!currentBpmn) {
-        throw new Error('BPMN file not found');
-      }
-      
-      console.log(currentBpmn)
-      const fileId  = currentBpmn?.id
-      // console.log(fileId)
-      
-      const xml = localStorage.getItem(fileId);
-
-      console.log(currentBpmn.currentVersionId)
-      // console.log(xml)
-
       // Saving Bpmn version Logic
-      if (currentBpmn.currentVersionId === null) {
-        // New file 
-        const versionRecord = {
-          bpmnId: currentBpmn?.id,
-          xml: xml,
-          versionNumber: "1"
+      if(type === 'stakeholder') {
+        if(!currentBpmn) {
+          throw new Error('BPMN file not found');
         }
+        const fileId  = currentBpmn?.id        
+        const xml = localStorage.getItem(fileId);
 
-        // create a new record in bpmn version table and update the currentVersionId in bpmn table
-        const response = await apiWrapper({uri: API_PATHS.CREATE_BPMN_VERSION, method: 'POST', body: versionRecord});
-      
-        console.log("response in new file",response)
-
-      } else {
-        // Existing file
-        console.log("existing file")
-        console.log(currentBpmn);
-        const updateVersionRecord = {
-          bpmnId: fileId,
-          xml: xml
+        // Saving Bpmn version Logic
+        if (currentBpmn.currentVersionId === null) {
+          // New file 
+          const versionRecord = {
+            bpmnId: currentBpmn?.id,
+            xml: xml,
+            versionNumber: "1"
+          }
+  
+          // create a new record in bpmn version table and update the currentVersionId in bpmn table
+          const response = await apiWrapper({uri: API_PATHS.CREATE_BPMN_VERSION, method: 'POST', body: versionRecord});
+          // console.log("response in new file",response) // debug
+  
+        } else {
+          // Existing file
+          console.log("existing file")
+          console.log(currentBpmn);
+          const updateVersionRecord = {
+            bpmnId: fileId,
+            xml: xml
+          }
+          const response = await apiWrapper({uri: API_PATHS.UPDATE_BPMN_VERSION, method: 'POST', body: updateVersionRecord});
+          // console.log("response in existing file ie new version record",response)  // debug
         }
-        const response = await apiWrapper({uri: API_PATHS.UPDATE_BPMN_VERSION, method: 'POST', body: updateVersionRecord});
-        console.log("response in existing file ie new version record",response)
       }
-  
-    
-  
-    // (existing file)
-    // 1. check if version id exists and not null
-    // 2. create a new record in bpmn version table
-    // 3. update the currentversionId in bpmn table
-      
-
     
     // ************** Dont touch the codde below **************
 

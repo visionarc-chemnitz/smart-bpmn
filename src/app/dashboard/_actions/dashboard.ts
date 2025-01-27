@@ -100,14 +100,22 @@ export const getOrgProjects = cache(async (): Promise<Project[]> => {
           projects = await getStakeholderOrgProject(user.id);
           break;
         
-        case Role.ADMIN || Role.MEMBER:
+        case Role.ADMIN:
           if (!user.organizationId) {
             throw new Error('Organization ID is required');
           }
           projects = await getUserOrgProj(user.id, user.organizationId);
-          break;       
+          break;   
+        
+        case Role.MEMBER:
+          if (!user.organizationId) {
+            throw new Error('Organization ID is required');
+          }
+          projects = await getUserOrgProj(user.id, user.organizationId);
+          break;   
       }
       
+
       return projects;
       
     } catch (error) {

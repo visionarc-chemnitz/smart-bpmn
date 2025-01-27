@@ -56,7 +56,7 @@ export default function ChatFiles() {
       setLoading(false);
       toast.error("Error fetching BPMN files");
     }
-  }, [currentProject?.id, selectionChanged]);
+  }, [currentProject?.id]);
 
   useEffect(() => { 
     fetchBpmnFiles();
