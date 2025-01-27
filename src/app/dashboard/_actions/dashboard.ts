@@ -102,14 +102,14 @@ export const getOrgProjects = cache(async (): Promise<Project[]> => {
         
         case Role.ADMIN:
           if (!user.organizationId) {
-            throw new Error('Organization ID is required');
+            break;
           }
           projects = await getUserOrgProj(user.id, user.organizationId);
           break;   
         
         case Role.MEMBER:
           if (!user.organizationId) {
-            throw new Error('Organization ID is required');
+            break;
           }
           projects = await getUserOrgProj(user.id, user.organizationId);
           break;   
