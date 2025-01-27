@@ -206,6 +206,7 @@ export default function ChatPage({params}: ChatPageParams) {
               if (data.response) {
                 if (data.response.includes('<?xml')) {
                   setXml(data.response);
+                  persistXML(data.response);
                 } else {
                   assistantMessage += data.response;
                   setMessages(prev => {
