@@ -25,7 +25,9 @@ import { toast } from "sonner";
 import { useOrganizationStore } from "@/store/organization-store";
 import { useWorkspaceStore } from "@/store/workspace-store";
 import { Label } from "@/components/ui/label";
-import { usePathname } from 'next/navigation'
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface BreadcrumbsHeaderProps {
   href: string;
@@ -129,8 +131,6 @@ export default function BreadcrumbsHeader({
     setIsDropdownOpen(false);
   };
 
-  console.log("pathname", pathname);
-
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2 px-4">
@@ -167,77 +167,80 @@ export default function BreadcrumbsHeader({
           className="ml-5 mr-2 py-0 text-sm h-8 px-3"
           onClick={onShareClick}
         >
-            Share
-            <IoShareSocialOutline className="ml-1" />
-          </RainbowButton>
-        )}
+          Share
+          <IoShareSocialOutline className="ml-1" />
+        </RainbowButton>
+      )}
+      {user.role !== UserRole.STAKEHOLDER && ( currentOrganization && currentOrganization.id ) && (
         <div className="relative flex items-center gap-2">
-        
-        {/* Project dropDown */}
-        { pathname.startsWith('/dashboard/chat/') && pathname.length > '/dashboard/chat/'.length ?
-          null
-          :
-          <>
-            <Label>Project:</Label>
-            <div className="relative" ref={dropdownRef}>
-          <button
-                onClick={() =>
-                  hasOrganization && setIsDropdownOpen(!isDropdownOpen)
-                }
-                className="flex items-center justify-between w-full min-w-[200px] px-3 py-2 text-sm 
-                  bg-background border rounded-md shadow-sm hover:bg-accent
-                  transition-colors duration-200 ease-in-out"
-              >
-                <span className="truncate">
-            {currentProject?.name || "Select Project"}
-                </span>
-                <ChevronDown
-                  className={`ml-2 h-4 w-4 transition-transform duration-200 
-                  ${isDropdownOpen ? "rotate-180" : ""}`}
-                />
-          </button>
-          {isDropdownOpen && hasOrganization && (
-                <div
-                  className="absolute mt-1 w-full min-w-[200px] bg-popover border rounded-md shadow-lg z-50
-                animate-in fade-in-0 zoom-in-95"
+          {/* Project dropDown */}
+          {pathname.startsWith("/dashboard/chat/") &&
+          pathname.length > "/dashboard/chat/".length ? null : (
+            <>
+              <Label>Project:</Label>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() =>
+                    hasOrganization && setIsDropdownOpen(!isDropdownOpen)
+                  }
+                  className="flex items-center justify-between w-full min-w-[200px] px-3 py-2 text-sm 
+                    bg-background border rounded-md shadow-sm hover:bg-accent
+                    transition-colors duration-200 ease-in-out"
                 >
-                  <div className="py-1">
-                    {user.role !== UserRole.STAKEHOLDER &&
-                      currentOrganization &&
-                      currentOrganization.id && (
-                        <div className="px-2 py-1.5">
-                          <ProjectModal
-                            orgId={currentOrganization?.id}
-                            open={isOpen}
-                            setOpen={setIsOpen}
-                          />
-                        </div>
-                )}
-                {projectList.map((project) => (
-                      <button
-                    key={project.id}
-                    onClick={() => handleProjectChange(project)}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-accent 
-                        transition-colors duration-200 ease-in-out"
+                  <span className="truncate">
+                    {currentProject?.name || "Select Project"}
+                  </span>
+                  <ChevronDown
+                    className={`ml-2 h-4 w-4 transition-transform duration-200 
+                    ${isDropdownOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {isDropdownOpen && hasOrganization && (
+                  <div
+                    className="absolute mt-1 w-full min-w-[200px] bg-popover border rounded-md shadow-lg z-50
+                  animate-in fade-in-0 zoom-in-95"
                   >
-                    {project.name}
-                      </button>
-                ))}
+                    <div className="py-1">
+                      {/* {user.role !== UserRole.STAKEHOLDER &&
+                        currentOrganization &&
+                        currentOrganization.id && ( */}
+                          <div className="px-2 py-1">
+                            <ProjectModal
+                              orgId={currentOrganization?.id}
+                              open={isOpen}
+                              setOpen={setIsOpen}
+                            />
+                          </div>
+                        {/* )} */}
+                      <ScrollArea className="h-[150px] px-2">
+                        <div className="space-y-1">
+                          {projectList.map((project) => (
+                            <Button
+                              key={project.id}
+                              variant="ghost"
+                              onClick={() => handleProjectChange(project)}
+                              className="w-full justify-start gap-2"
+                            >
+                              {project.name}
+                            </Button>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
                   </div>
-            </div>
+                )}
+              </div>
+            </>
           )}
         </div>
-          </>
-        }
-        
-      </div>
+      )}
       <div className="flex items-center gap-2 px-4">{toggleButton()}</div>
       <ManageUsersModal
         isOpen={isManageStakeholderModalOpen}
         onClose={() => setIsManageStakeholderModalOpen(false)}
-        type="stakeholder" 
-        title="Manage who can view this BPMN" 
-        subTitle="Your BPMN is live! Choose who can view it." 
+        type="stakeholder"
+        title="Manage who can view this BPMN"
+        subTitle="Your BPMN is live! Choose who can view it."
       />
     </header>
   );

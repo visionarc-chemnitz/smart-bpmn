@@ -46,6 +46,10 @@ export const TeamSwitcher = memo(function TeamSwitcher() {
   // Fallback logo if undefined
   // const defaultLogo = GalleryVerticalEnd;
 
+  const handleOrgCLick = (organization: Organization) => () => {
+    setCurrentOrganization(organization);
+  }
+
 
   return (
     <>
@@ -81,13 +85,9 @@ export const TeamSwitcher = memo(function TeamSwitcher() {
                   orgList.map((organization) => (
                     <DropdownMenuItem
                       key={organization.id}
-                      onClick={() => organization.id && setCurrentOrganization(organization)}
+                      onClick={handleOrgCLick(organization)}
                       className="gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                     >
-                      {/* <div className="h-8 w-8 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded text-white">
-                        {getInitials(organization.name)}
-                      </div> */}
-                      {/* <span>{organization.name}</span> */}
                       {organization.name}
                     </DropdownMenuItem>
                   ))
