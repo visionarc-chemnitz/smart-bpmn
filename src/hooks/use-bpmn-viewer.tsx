@@ -43,10 +43,8 @@ export function useBpmnViewer({
     };
   }, [containerId, height, width]);
 
-  
-  const viewer = viewerRef.current;
   useEffect(() => {
-  if (diagramXML && viewer) {
+  if (diagramXML && viewerRef.current) {
     importXML(diagramXML);
   } else {
     const defaultDiagramXML = `
@@ -69,15 +67,15 @@ export function useBpmnViewer({
     `;
     importXML(defaultDiagramXML);
   }
-  }, [diagramXML, viewer]);
+  }, [diagramXML, viewerRef.current]);
 
   const importXML = async (xml: string) => {
-    if (!viewer) return;
+    if (!viewerRef.current) return;
 
     try {
-      console.log(xml)
-      await viewer.importXML(xml);
-      const canvas = viewer.get('canvas') as { zoom: (type: string) => void };
+      // console.log(xml)
+      await viewerRef.current.importXML(xml);
+      const canvas = viewerRef.current.get('canvas') as { zoom: (type: string) => void };
       canvas.zoom('fit-viewport');
       onImport?.();
     } catch (err) {
@@ -86,10 +84,10 @@ export function useBpmnViewer({
   };
 
   const exportXML = async (): Promise<string> => {
-    if (!viewer) return '';
+    if (!viewerRef.current) return '';
 
     try {
-      const { xml } = await viewer.saveXML({ format: true });
+      const { xml } = await viewerRef.current.saveXML({ format: true });
       return xml as string;
     } catch (err) {
       onError?.(err as Error);
@@ -98,8 +96,8 @@ export function useBpmnViewer({
   };
 
   const addOverlay = (elementId: string, html: string | HTMLElement) => {
-    if (!viewer) return;
-    const overlays = viewer.get<IOverlays>('overlays');
+    if (!viewerRef.current) return;
+    const overlays = viewerRef.current.get<IOverlays>('overlays');
     overlays.add(elementId, {
       position: {
         top: 5,
@@ -110,9 +108,9 @@ export function useBpmnViewer({
   };
 
   const clearOverlay = () => {
-    if (!viewer) return;
+    if (!viewerRef.current) return;
     try {
-      const overlays = viewer.get<IOverlays>('overlays');
+      const overlays = viewerRef.current.get<IOverlays>('overlays');
       overlays.clear();
     } catch (error) {
       console.error('Error clearing overlays:', error);
@@ -120,10 +118,10 @@ export function useBpmnViewer({
   };
 
   return {
-    viewer,
+    viewer: viewerRef.current,
     importXML,
     exportXML,
-    exportSVG: () => viewer?.saveSVG(),
+    exportSVG: () => viewerRef.current?.saveSVG(),
     addOverlay,
     clearOverlay
   };
