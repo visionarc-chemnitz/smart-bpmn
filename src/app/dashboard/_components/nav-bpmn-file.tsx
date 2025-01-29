@@ -23,7 +23,7 @@ import { UserRole } from "@/types/user/user";
 import { useWorkspaceStore } from "@/store/workspace-store";
 import { Bpmn } from "@/types/bpmn/bpmn";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -35,6 +35,7 @@ export function NavBpmnFile() {
   const { currentProject, currentBpmn, setCurrentBpmn, selectionChanged } =
     useWorkspaceStore();
   const [loading, setLoading] = useState<boolean>(true);
+  const isDiffChecker = usePathname().includes("diff-checker");
 
   const fetchBpmnFiles = useCallback(async () => {
     setLoading(true);
@@ -72,6 +73,11 @@ export function NavBpmnFile() {
     );
   }
 
+  // Add early return if on diff-checker page
+  if (isDiffChecker) {
+    return null;
+  }
+  
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{bpmnFileListLabel}</SidebarGroupLabel>

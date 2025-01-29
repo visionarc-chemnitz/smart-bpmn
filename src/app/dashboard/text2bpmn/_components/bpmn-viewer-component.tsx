@@ -20,6 +20,7 @@ export const BpmnViewerComponent = forwardRef((props: BpmnViewerProps, ref) => {
   }, [diagramXML, importXML]);
 
   useImperativeHandle(ref, () => ({
+    importXML,
     exportXML,
     addOverlay,
     clearOverlay

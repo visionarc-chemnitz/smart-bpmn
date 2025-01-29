@@ -12,6 +12,8 @@ import { diff } from 'bpmn-js-differ';
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
 import type { BpmnViewerRef } from '@/types/board/board-types';
 import DifferencesTable from './_components/differences-table';
+import VersionSelectorDropdown from './_components/version-selector-dropdown';
+import { BpmnVersion } from '@/types/bpmn/bpmnVersion';
 
 interface ProcessedDiff {
   type: string;
@@ -36,6 +38,13 @@ export default function DiffCheckerPage() {
   const [difference, setDifference] = useState(null);
   const [xml1, setXml1] = useState('');
   const [xml2, setXml2] = useState('');
+  const [leftProject, setLeftProject] = useState<any | null>(null);
+  const [rightProject, setRightProject] = useState<any | null>(null);
+  const [leftFile, setLeftFile] = useState<any | null>(null);
+  const [rightFile, setRightFile] = useState<any | null>(null);
+  const [leftVersion, setLeftVersion] = useState<BpmnVersion | null>(null);
+  const [rightVersion, setRightVersion] = useState<BpmnVersion | null>(null);
+
 
   const modeler1Ref = useRef<BpmnViewerRef>(null);
   const modeler2Ref = useRef<BpmnViewerRef>(null);
@@ -77,6 +86,26 @@ export default function DiffCheckerPage() {
     } catch (error) {
       console.error('Error in diagram comparison:', error);
       throw error;
+    }
+  };
+
+  const handleVersionChange1 = async (version: BpmnVersion | null) => {
+    setLeftVersion(version);
+    if (version) {
+      const xml = version.xml;
+      modeler1Ref.current?.importXML(xml);
+      setXml1(xml);
+      handleCompareDiagrams(xml, xml2);
+    }
+  };
+
+  const handleVersionChange2 = async (version: BpmnVersion | null) => {
+    setRightVersion(version);
+    if (version) {
+      const xml = version.xml;
+      modeler2Ref.current?.importXML(xml);
+      setXml2(xml);
+      handleCompareDiagrams(xml1, xml);
     }
   };
 
@@ -280,30 +309,50 @@ export default function DiffCheckerPage() {
       <div style={{ height: '85%', width: '100%' }}>
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={50}>
-            <div style={{ width: '100%', height: '100%' }}>
-              <BpmnViewerComponent
-                ref={modeler1Ref}
-                containerId="bpmn-container-1"
-                diagramXML=""
-                onError={(err) => console.error(err)}
-                onImport={handleImport1}
-                height="100%"
-                width="100%"
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <VersionSelectorDropdown
+                selectedProject={leftProject}
+                selectedFile={leftFile}
+                selectedVersion={leftVersion}
+                onSelectProject={setLeftProject}
+                onSelectFile={setLeftFile}
+                onSelectVersion={handleVersionChange1}
               />
+              <div style={{ flex: 1, width: '100%' }}>
+                <BpmnViewerComponent
+                  ref={modeler1Ref}
+                  containerId="bpmn-container-1"
+                  diagramXML=""
+                  onError={(err) => console.error(err)}
+                  onImport={handleImport1}
+                  height="100%"
+                  width="100%"
+                />
+              </div>
             </div>
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50}>
-            <div style={{ width: '100%', height: '100%' }}>
-              <BpmnViewerComponent
-                ref={modeler2Ref}
-                containerId="bpmn-container-2"
-                diagramXML=""
-                onError={(err) => console.error(err)}
-                onImport={handleImport2}
-                height="100%"
-                width="100%"
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <VersionSelectorDropdown
+                selectedProject={rightProject}
+                selectedFile={rightFile}
+                selectedVersion={rightVersion}
+                onSelectProject={setRightProject}
+                onSelectFile={setRightFile}
+                onSelectVersion={handleVersionChange2}
               />
+              <div style={{ flex: 1, width: '100%' }}>
+                <BpmnViewerComponent
+                  ref={modeler2Ref}
+                  containerId="bpmn-container-2"
+                  diagramXML=""
+                  onError={(err) => console.error(err)}
+                  onImport={handleImport2}
+                  height="100%"
+                  width="100%"
+                />
+              </div>
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
