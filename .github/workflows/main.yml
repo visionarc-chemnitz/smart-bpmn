@@ -19,8 +19,8 @@ jobs:
       
       # Push branches
       - name: Push Branches to GitLab
-        run: git push target --all
+        run: git push target --all --prune --force
 
       # Push tags
       - name: Push Tags to GitLab
-        run: git push target --tags
+        run: git push target --tags --prune --force
