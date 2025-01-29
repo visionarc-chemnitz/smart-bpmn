@@ -9,6 +9,33 @@ interface BpmnFilesTableProps {
 }
 
 const BpmnFilesTable: React.FC<BpmnFilesTableProps> = ({ files }: BpmnFilesTableProps) => {
+  const downloadArc42 = async (threadId: string) => {
+    try {
+      const response = await fetch('http://localhost:8000/generate-arc42', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ thread_id: threadId }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to download Arc42');
+      }
+  
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `arc42_${threadId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading Arc42:', error);
+    }
+  };
+  
   return (
     <>
       <Table>
@@ -35,7 +62,7 @@ const BpmnFilesTable: React.FC<BpmnFilesTableProps> = ({ files }: BpmnFilesTable
                   <Button variant="outline" size="sm" onClick={() => {}}>
                     Download BPMN
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => {}}>
+                  <Button variant="outline" size="sm" onClick={() => downloadArc42("2d1be027-5642-41f4-84ff-dbca933d223f")}>
                     Download Arc42
                   </Button>
                 </div>
