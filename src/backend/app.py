@@ -10,8 +10,6 @@ from services import ChatService, GraphService
 
 # import json
 import json
-import markdown2
-import tempfile
 
 # load environment variables
 from dotenv import load_dotenv
@@ -79,17 +77,16 @@ async def chat_endpoint(request: Request):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Message is required"
             )
+        
+        if not thread_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Thread ID is required"
+            )
 
         async def generate():
             try:
-                if thread_id:
-                    # is_valid_thread = await chat_service.check_thread_exists(thread_id)
-                    # if not is_valid_thread:
-                    #     yield f"data: {json.dumps({'error': 'Invalid thread_id'})}\n\n"
-                    #     return
-                    config = await chat_service.get_thread_config(thread_id)
-                else:
-                    config = await chat_service.create_new_config()
+                config = await chat_service.get_thread_config(thread_id)
                 
                 print(f"request: {body} config: {config}, message: {message}")
                 

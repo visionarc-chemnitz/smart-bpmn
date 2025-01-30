@@ -210,7 +210,8 @@ class ChatService:
             "summarize_conversation": "summarize_conversation", # return to summarize_conversation if messages > 6
             "categorize": "categorize", # return to categorize if category is not found
             "handler": "handler", # return to handler if category is greeting or offtopic
-            "agent": "agent" # return to agent if category is process
+            "agent": "agent", # return to agent if category is process
+            "human": "human" # return to human if there are questions to ask
         }
     )
     workflow.add_edge("handler", END) # end the conversation if category is greeting or offtopic
@@ -218,9 +219,10 @@ class ChatService:
 
     # INPROGRESS
     workflow.add_edge("agent", "human") # go to human if there are questions to ask 
-    workflow.add_edge("human", "gather") # go to gather for funtional and non-funitonal requirements
-    
-    workflow.add_edge("gather", "generate") # go to generate for generating the bpmn diagram
+    # workflow.add_edge("human", "gather") # go to gather for funtional and non-funitonal requirements
+    # workflow.add_edge("gather", END) # go to generate for generating the bpmn diagram
+
+    # workflow.add_edge("gather", "generate") # go to generate for generating the bpmn diagram
     workflow.add_edge("generate", END) # go to collect_feedback for collecting feedback on the generated bpmn diagram
     # workflow.add_edge("generate", "collect_feedback") # go to collect_feedback for collecting feedback on the generated bpmn diagram
     # workflow.add_edge("collect_feedback", "process_feedback") # end the conversation if feedback is approved
@@ -287,6 +289,7 @@ class ChatService:
   
 
   def gateway_router(self, state: StateService) -> Literal["categorize", "handler", "agent", "summarize_conversation"]:
+      print("Entering gateway_router")
       """
       Central routing function that determines the next node based on message category and conversation state.
       
@@ -301,9 +304,14 @@ class ChatService:
       # Get current state information
       category = state.get('category')
       messages = state.get('messages', [])
+      is_interrupted = state.get('is_interrupted', False)
       
       # Debug logging
       print(f"Gateway router - Category: {category}, Message count: {len(messages)}")
+
+      if is_interrupted:
+        print("Interrupted flow, routing to human")
+        return "human"
       
       # Step 1: Check if we need categorization
       if not category:
@@ -403,6 +411,7 @@ class ChatService:
 
   # agent will generate questions to clarify the scenario (max 3 questions)
   async def call_agent(self, state: StateService):
+    print("Entering call_agent")
     # Initialize human-in-loop dict if not exists
     # state["human_in_loop"] = state.get("human_in_loop", {})
     next_step = state.get('next_step')
@@ -460,40 +469,43 @@ class ChatService:
 
   
   def human_input(self, state: StateService):
+    is_interrupted = state.get('is_interrupted', False)
     messages = state.get('messages', [])
     summary = state.get('summary', '')
     questions = state.get('questions', [])
     context = state.get('context', '')
     human_in_loop_dict = state.get('human_in_loop', {})
 
-    # Find first unanswered question
-    for k,v in human_in_loop_dict.items():
-      print (f"Key: {k}, Value: {v}")
-      if v is None:
-        print(f"Interrupting for Question: {k}")
-        # Interrupt with question
-        interrupt(k)
-      print(f"Interruption skipped for: {k}")
-    
-    print("All questions answered")
-    # If all questions are answered, use the questions and answers to update the context
-    system_prompt = SystemMessage(content=SCENARIO_REVISION_WITH_ANSWER_PROMPT.format(summary=summary, context=context, qa_pairs=human_in_loop_dict))
-    new_context = self.llm.invoke(system_prompt.content, temperature=0.2)
+    if is_interrupted:
+      # Find first unanswered question
+      for k,v in human_in_loop_dict.items():
+        # print (f"Key: {k}, Value: {v}")
+        if v is None:
+          # print(f"Interrupting for Question: {k}")
+          # Interrupt with question
+          interrupt(k)
+        # print(f"Interruption skipped for: {k}")
+      
+      print("All questions answered")
+      # If all questions are answered, use the questions and answers to update the context
+      system_prompt = SystemMessage(content=SCENARIO_REVISION_WITH_ANSWER_PROMPT.format(summary=summary, context=context, qa_pairs=human_in_loop_dict))
+      new_context = self.llm.invoke(system_prompt.content, temperature=0.2)
 
-    scenario_prompt = SystemMessage(content=SCENARIO_SUMMARY_PROMPT.format(context=new_context.content, summary=summary, qa_pairs=human_in_loop_dict))
-    scenario_summary = self.llm.invoke(scenario_prompt.content)
+      scenario_prompt = SystemMessage(content=SCENARIO_SUMMARY_PROMPT.format(context=new_context.content, summary=summary, qa_pairs=human_in_loop_dict))
+      scenario_summary = self.llm.invoke(scenario_prompt.content)
 
-    # All questions answered, proceed to gather
-    return Command(
-        update={
-            "messages": messages,
-            "human_in_loop": human_in_loop_dict,
-            "is_interrupted": False,
-            "questions": questions,
-            "context": new_context.content,
-            "scenario": scenario_summary.content
-        }
-    )
+      # All questions answered, proceed to gather
+      return Command(
+          update={
+              "messages": messages,
+              "human_in_loop": human_in_loop_dict,
+              "is_interrupted": False,
+              "questions": questions,
+              "context": new_context.content,
+              "scenario": scenario_summary.content
+          },
+          goto="gather"
+      )
 
         # # Add question to message history
         # messages.append(SystemMessage(content=question))
@@ -528,6 +540,7 @@ class ChatService:
     
 
   def gather(self, state: StateService):
+    print("Entering gather")
     scenario = state.get('scenario', '')
     print("Gathering functional and non-functional requirements")
     summary = state.get('summary', '')
@@ -537,7 +550,7 @@ class ChatService:
     system_prompt = SystemMessage(content=GATHER_FUNC_NON_FUNC_PROMPT.format(scenario=scenario, context=context, summary=summary))
     response = self.llm.invoke(system_prompt.content, model="llama3-70b-8192")
 
-    print(f"Functional and non-functional requirements: {response.content}")
+    # print(f"Functional and non-functional requirements: {response.content}")
 
     # Extract JSON content from the response string
     # json_match = re.search(r'```json\n(.*?)\n```', response, re.DOTALL)
@@ -571,10 +584,12 @@ class ChatService:
     return Command(
       update={
         "gathered_info": response.content
-      }
+      },
+      goto="generate"
     )
 
   def generate_bpmn(self, state: StateService):
+    print("Entering generate_bpmn")
     context = state.get('context', '')
     messages = state.get('messages', [])
 
@@ -659,11 +674,11 @@ class ChatService:
 
           last_state = await self.get_thread_history(config, "history")
           rich = Console()
-          rich.print("==========================================================")
+          """ rich.print("==========================================================")
           rich.print("")
           rich.print("[cyan]Thread history:[/cyan]", last_state)
           rich.print("")
-          rich.print("==========================================================")
+          rich.print("==========================================================") """
 
           task = await self.get_thread_history(config, "tasks")
           if task is not None:
@@ -713,11 +728,11 @@ class ChatService:
                 #     "category": last_state.get('category'),
                 #     "current_question": None  # Clear current question
                 # }
-                rich.print("==========================================================")
+                """ rich.print("==========================================================")
                 rich.print("")
                 rich.print("Resuming workflow with updated state")
                 rich.print("")
-                rich.print("==========================================================")
+                rich.print("==========================================================") """
                 # async for step in self.app.astream(
                 #     Command(resume=message, update=state_to_update, goto="human"),
                 #     config=config,
@@ -815,11 +830,11 @@ class ChatService:
             )
     
           rich = Console()
-          rich.print("==========================================================")
+          """ rich.print("==========================================================")
           rich.print("")
           rich.print(f"[green]Processing message:[/green] {state}")
           rich.print("")
-          rich.print("==========================================================")
+          rich.print("==========================================================") """
 
           async for step in self.app.astream(state, config, stream_mode="updates"):
             yield await self.process_step(step,config)
@@ -862,11 +877,11 @@ class ChatService:
   async def process_step(self, step, config: ChatConfigWrapper):
     """Process a single step from the workflow stream."""
     rich = Console()
-    rich.print("==========================================================")
+    """ rich.print("==========================================================")
     rich.print("")
     rich.print(f"[yellow]Step: {step}[/yellow]")
     rich.print("")
-    rich.print("==========================================================")
+    rich.print("==========================================================") """
 
     # Get first key from step dict
     parent_key = next(iter(step))
@@ -876,11 +891,11 @@ class ChatService:
       question = step[parent_key].value if hasattr(step[parent_key], 'value') else step[parent_key][0].value
       # print(f"Interrupt value: {question}")
       tasks = await self.get_thread_history(config,'tasks')
-      rich.print("==========================================================")
+      """ rich.print("==========================================================")
       rich.print("")
       rich.print("[cyan]Thread bottom tasks :[/cyan]", tasks)
       rich.print("")  
-      rich.print("==========================================================")
+      rich.print("==========================================================") """
       return question
     
     
