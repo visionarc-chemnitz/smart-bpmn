@@ -170,7 +170,7 @@ export default function ChatPage({params}: ChatPageParams) {
       const reader = response.body?.getReader();
       if (!reader) throw new Error('No reader available');
 
-      let decoder = new TextDecoder();
+      const decoder = new TextDecoder();
       let buffer = '';
       let assistantMessage = '';
 

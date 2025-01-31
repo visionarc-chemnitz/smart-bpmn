@@ -64,4 +64,6 @@ export const BpmnViewerComponent = forwardRef((props: BpmnViewerProps, ref) => {
   );
 });
 
+BpmnViewerComponent.displayName = 'BpmnViewerComponent';
+
 export default BpmnViewerComponent;

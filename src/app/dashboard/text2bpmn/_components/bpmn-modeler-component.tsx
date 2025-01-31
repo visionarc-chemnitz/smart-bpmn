@@ -139,4 +139,6 @@ const BpmnModelerComponent = forwardRef((props: BpmnModelerProps, ref) => {
   );
 });
 
+BpmnModelerComponent.displayName = 'BpmnModelerComponent';
+
 export default BpmnModelerComponent;
