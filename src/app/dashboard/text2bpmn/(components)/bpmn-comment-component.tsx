@@ -18,6 +18,8 @@ const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => {
     height,
     width,
   });
+  
+  BpmnCommentComponent.displayName = 'BpmnCommentComponent';
   const { currentBpmn } = useWorkspaceStore();
 
   useEffect(() => {

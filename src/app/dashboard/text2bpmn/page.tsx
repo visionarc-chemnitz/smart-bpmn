@@ -42,7 +42,7 @@ export default function Text2BPMNPage() {
     setError(null);
 
     try {
-      const response = await apiWrapper(`generate/`, 'POST', { prompt });
+      const response = await apiWrapper({ uri: `generate/`, method: 'POST', body: { prompt } });
 
       if (!response?.bpmn_xml) throw new Error ("Invalid response!")
       setXml(response.bpmn_xml);
