@@ -6,6 +6,7 @@ import { Bpmn, BPMNFilesByOrg, BpmnXML } from "@/types/bpmn/bpmn";
 import { Organization } from "@/types/organization/organization";
 import { Project } from "@/types/project/project";
 import { Role } from "@prisma/client";
+import { BpmnFileWithProjectAndVersion } from "@/types/bpmn/bpmnVersion";
 
 
 export const updateUserName = async (id: string, name: string) => {
@@ -524,4 +525,55 @@ export const fetchBpmnFilesbyOrg = async (userId: string): Promise<BPMNFilesByOr
     throw error; 
   }
 
+}
+
+// fetch bpmn files with projects and versions
+export const fetchBpmnFilesWithProjectsAndVersions = async (orgId: string): Promise<BpmnFileWithProjectAndVersion[]> => {
+  try {
+    const res = await prisma.bpmn.findMany({
+      where: {
+        project: {
+          organizationId: orgId
+        }
+      },
+      select: {
+        id: true,
+        fileName: true,
+        BpmnVersion: {
+          select: {
+            id: true,
+            versionNumber: true,
+            xml: true
+          }
+        },
+        project: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
+    });
+    const filteredRes = res.filter(file => file.BpmnVersion.length > 0);
+
+    const bpmnFilesWithProjectsAndVersions: BpmnFileWithProjectAndVersion[] = filteredRes.map(file => ({
+      id: file.id,
+      fileName: file.fileName,
+      BpmnVersion: file.BpmnVersion.map(version => ({
+        id: version.id ?? '',
+        versionNumber: version.versionNumber ?? '',
+        xml: version.xml ?? ''
+      })),
+      project: {
+        id: file.project?.id ?? '',
+        name: file.project?.name ?? ''
+      }
+    }));
+    
+    return bpmnFilesWithProjectsAndVersions;
+
+  } catch (error) {
+    console.error('Error fetching BPMN files with projects and versions:', error);
+    throw error;
+  }
 }

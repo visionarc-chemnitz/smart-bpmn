@@ -63,6 +63,7 @@ export default function BreadcrumbsHeader({
     useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const isDiffChecker = usePathname().includes("diff-checker");
 
   // Close dropdown when clicked outside
   useEffect(() => {
@@ -171,7 +172,7 @@ export default function BreadcrumbsHeader({
           <IoShareSocialOutline className="ml-1" />
         </RainbowButton>
       )}
-      {user.role !== UserRole.STAKEHOLDER && ( currentOrganization && currentOrganization.id ) && (
+      {user.role !== UserRole.STAKEHOLDER && ( currentOrganization && currentOrganization.id ) && !isDiffChecker && (
         <div className="relative flex items-center gap-2">
           {/* Project dropDown */}
           {pathname.startsWith("/dashboard/chat/") &&
