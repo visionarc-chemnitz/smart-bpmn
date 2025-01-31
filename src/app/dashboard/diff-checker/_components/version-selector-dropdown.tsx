@@ -3,10 +3,9 @@ import { ChevronDown } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { API_PATHS } from "@/app/api/api-path/apiPath";
-import { BpmnVersion } from '@/types/bpmn/bpmnVersion';
-import { Bpmn } from '@/types/bpmn/bpmn';
-import { Project } from '@/types/project/project';
+import { Project, Bpmn, BpmnVersion } from '@/types/bpmn/bpmnVersion';
+import { getUserData, getUser, fetchBpmnFilesWithProjectsAndVersions } from '@/app/_services/user/user.service';
+
 
 interface VersionSelectorDropdownProps {
   selectedProject: Project | null;
@@ -28,6 +27,7 @@ export default function VersionSelectorDropdown({
   const [projects, setProjects] = useState<Project[]>([]);
   const [files, setFiles] = useState<Bpmn[]>([]);
   const [versions, setVersions] = useState<BpmnVersion[]>([]);
+  const [allFiles, setAllFiles] = useState<Bpmn[]>([]);
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
   const [isFileDropdownOpen, setIsFileDropdownOpen] = useState(false);
   const [isVersionDropdownOpen, setIsVersionDropdownOpen] = useState(false);
@@ -36,55 +36,65 @@ export default function VersionSelectorDropdown({
   const versionDropdownRef = useRef(null);
 
   useEffect(() => {
-    const loadProjects = async () => {
-      const response = await fetch(API_PATHS.GET_PROJECTS);
-      const data = await response.json();
-      setProjects(data.projects);
+    const fetchData = async () => {
+      try {
+        const session = await getUserData();
+        const userId = session?.id;
+      
+        if (!userId) {
+          throw new Error('User not authenticated');
+        }
+        const user = await getUser(userId);
+        if (user?.organizationId) {
+          const data = await fetchBpmnFilesWithProjectsAndVersions(user.organizationId);
+          console.log('Fetched data:', data);
+          const projects = data.map(item => item.project);
+          const uniqueProjects = Array.from(new Set(projects.map(p => p.id)))
+            .map(id => projects.find(p => p.id === id))
+            .filter((project): project is Project => project !== undefined);
+          
+          setProjects(uniqueProjects);
+          const mappedFiles = data.map(item => ({
+            id: item.id,
+            fileName: item.fileName,
+            projectId: item.project.id,
+            projectName: item.project.name,
+            versions: item.BpmnVersion.map(version => ({
+              id: version.id,
+              versionNumber: version.versionNumber,
+              xml: version.xml
+            }))
+          }));
+          setAllFiles(mappedFiles);
+          setFiles([]);
+          setVersions([]);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
 
-    loadProjects();
-  }, [setProjects]);
-
-  useEffect(() => {
-    if (selectedProject) {
-      const loadFiles = async () => {
-        const response = await fetch(`${API_PATHS.GET_BPMN_FILES}?projectId=${selectedProject.id}`);
-        const data = await response.json();
-        setFiles(data.bpmnFiles);
-      };
-
-      loadFiles();
-    } else {
-      setFiles([]);
-      onSelectFile(null);
-      setVersions([]);
-      onSelectVersion(null);
-    }
-  }, [selectedProject, setFiles, onSelectFile, setVersions, onSelectVersion]);
-
-  useEffect(() => {
-    if (selectedFile) {
-      const loadVersions = async () => {
-        const response = await fetch(`${API_PATHS.GET_BPMN_VERSIONS}?bpmnId=${selectedFile.id}`);
-        const data = await response.json();
-        setVersions(data.bpmnVersions);
-      };
-
-      loadVersions();
-    } else {
-      setVersions([]);
-      onSelectVersion(null);
-    }
-  }, [selectedFile, setVersions, onSelectVersion]);
+    fetchData();
+  }, []);
 
   const handleProjectChange = (project: Project | null) => {
     onSelectProject(project);
     setIsProjectDropdownOpen(false);
+    if (project) {
+      const filteredFiles = allFiles.filter(file => file.projectId === project.id);
+      setFiles(filteredFiles);
+      onSelectFile(null); // Reset file selection
+      onSelectVersion(null); // Reset version selection
+    }
   };
 
   const handleFileChange = (file: Bpmn | null) => {
     onSelectFile(file);
     setIsFileDropdownOpen(false);
+    if (file) {
+      setVersions(file.versions || []);
+      onSelectVersion(null); // Reset version selection
+    }
   };
 
   const handleVersionChange = (version: BpmnVersion | null) => {
@@ -110,7 +120,7 @@ export default function VersionSelectorDropdown({
   }, []);
 
   return (
-    <div className="dropdown-container" style={{ display: 'flex', gap: '10px' }}>
+    <div className="dropdown-container" style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'space-evenly', paddingBottom: '1rem' }}>
       <div className="relative" ref={projectDropdownRef}>
         <Label>Project:</Label>
         <button

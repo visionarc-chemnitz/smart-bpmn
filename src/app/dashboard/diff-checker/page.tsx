@@ -306,10 +306,10 @@ export default function DiffCheckerPage() {
   return (
     <div style={{ height: '100vh' }}>
       <BreadcrumbsHeader href='/dashboard' current='Diff-Checker' parent='Playground' />
-      <div style={{ height: '85%', width: '100%' }}>
+      <div style={{ height: '85%', width: '100%', padding: '1rem' }}>
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={50}>
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingRight: '1rem' }}>
               <VersionSelectorDropdown
                 selectedProject={leftProject}
                 selectedFile={leftFile}
@@ -333,7 +333,7 @@ export default function DiffCheckerPage() {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50}>
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingLeft: '1rem' }}>
               <VersionSelectorDropdown
                 selectedProject={rightProject}
                 selectedFile={rightFile}
