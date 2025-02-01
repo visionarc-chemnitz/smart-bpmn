@@ -5,6 +5,7 @@ export interface Bpmn {
     createdBy: string;
     isShared: boolean;
     isFavorite: boolean;
+    threadId: string;
     currentVersionId?: string;
     createdAt?: string;
 }

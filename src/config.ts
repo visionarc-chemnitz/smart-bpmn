@@ -3,7 +3,7 @@
 
 export const config = {
   //FastAPI backend endpoint
-  PythonURL: 'http://localhost:7860/',
+  PythonURL: 'http://localhost:8000/',
   //NEXTJS frontend endpoint
   NextURL : 'http://localhost:3000/',
 }
