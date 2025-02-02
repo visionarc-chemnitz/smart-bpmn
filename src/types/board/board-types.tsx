@@ -35,6 +35,7 @@ export interface BpmnModelerProps {
   diagramXML?: string;
   onError?: (err: Error) => void;
   onImport?: () => void;
+  onChange?: (xml: string) => void;
   height?: string | number;
   width?: string | number;
 }

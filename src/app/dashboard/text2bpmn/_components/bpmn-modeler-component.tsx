@@ -8,7 +8,7 @@ import '@bpmn-io/properties-panel/assets/properties-panel.css';
 import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 
 const BpmnModelerComponent = forwardRef((props: BpmnModelerProps, ref) => {
-  const { containerId, propertiesPanelId, diagramXML, onError, onImport, height, width } = props;
+  const { containerId, propertiesPanelId, diagramXML, onError, onImport, onChange, height, width } = props;
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
   const { modeler, importXML, exportXML, exportSVG, addOverlay, removeOverlay, clearOverlay } = useBpmnModeler({
     containerId,
@@ -16,15 +16,16 @@ const BpmnModelerComponent = forwardRef((props: BpmnModelerProps, ref) => {
     diagramXML,
     onError,
     onImport,
+    onChange,
     height,
     width,
   });
 
   useEffect(() => {
-    if (diagramXML) {
+    if (diagramXML && modeler) {
       importXML(diagramXML);
     }
-  }, [diagramXML, importXML]);
+  }, [diagramXML, modeler]);
 
   useImperativeHandle(ref, () => ({
     exportXML,

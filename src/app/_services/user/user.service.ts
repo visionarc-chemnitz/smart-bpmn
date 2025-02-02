@@ -358,6 +358,37 @@ export const saveBpmnVersion = async (bpmnId: string, xml: string, versionNumber
   }
 }
 
+// save bpmn data in existing file
+export const saveBPMN = async (bpmnId: string, currVersionId: string, userId: string,  xml: string,) => {
+  try {
+    const updateExisting = await prisma.bpmnVersion.update({
+      where:{
+        id: currVersionId,
+        bpmnId: bpmnId,
+      },data:{
+        xml: xml,
+        updatedBy: userId,
+      },
+      select:{
+        id: true,
+        bpmnId: true,
+        versionNumber: true,
+        updatedBy: true,
+      }
+    });
+
+    if (!updateExisting) {
+      throw new Error('Failed to update BPMN version');
+    }
+
+    return updateExisting;
+      
+  } catch (error) {
+    console.error('Error saving BPMN data in existing file:', error);
+    throw error;
+  }
+}
+
 // check file
 export const checkFile = async (bpmnId: string, userId: string) => {
   try {

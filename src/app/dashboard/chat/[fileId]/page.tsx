@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef, use } from "react";
 import BreadcrumbsHeader from "../../_components/breadcrumbs-header";
 import BpmnModelerComponent from "../../text2bpmn/_components/bpmn-modeler-component";
 import { apiWrapper } from "@/lib/utils";
@@ -16,6 +16,8 @@ import { useWorkspaceStore } from "@/store/workspace-store";
 import { Bpmn } from "@/types/bpmn/bpmn";
 import { useRouter } from "next/navigation";
 import { config } from "@/config";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { toast } from "sonner";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -37,9 +39,10 @@ export default function ChatPage({ params }: ChatPageParams) {
   const [isLoading, setIsLoading] = useState(false);
   const user = useUser();
   const [threadId, setThreadId] = useState<string | null>(null);
-  const { setCurrentBpmn } = useWorkspaceStore();
+  const { setCurrentBpmn, currentBpmn } = useWorkspaceStore();
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);  
+  const [isSaving, setIsSaving] = useState<boolean>(false); // auto-save state
 
   const checkFile = useCallback(async () => {
     try {
@@ -103,14 +106,18 @@ export default function ChatPage({ params }: ChatPageParams) {
         return;
       }
     },
-    [params.fileId, threadId]
+    [params.fileId]
   );
 
   // useEffect to initialize the BPMN file
   useEffect(() => {
-    setIsMounted(false);
     const initializeFile = async () => {
-      await checkFile();
+      setIsMounted(false);
+      const state = await checkFile();
+      if (state?.threadId) {
+        await fetchThreadHistory(state.threadId);
+      }
+      setIsMounted(true);
     };
 
     initializeFile();
@@ -122,20 +129,27 @@ export default function ChatPage({ params }: ChatPageParams) {
     };
   }, [params.fileId]);
 
-  // useEffect to initialize the chat-history
-  useEffect(() => {
-    setIsMounted(false);
-    const initializeHistory = async (thread_id: string) => {
-      await fetchThreadHistory(thread_id);
-    };
-
-    if (threadId !== null) initializeHistory(threadId);
-
-    // Cleanup function to handle component unmount
-    return () => {
-      setThreadId(null);
-    };
-  }, [threadId]);
+  // Auto-save the BPMN XML
+  useAutoSave({
+    xml: xml,
+    bpmnId: params.fileId,
+    currentVersionId: currentBpmn?.currentVersionId || '',
+    userId: user.id,
+    enabled: isMounted,
+    onSaveStart: () => {
+        setIsSaving(true);
+        toast.info('Saving changes...');
+    },
+    onSaveComplete: () => {
+      setIsSaving(false);
+      toast.success('Changes saved successfully');
+    },
+    onSaveError: (error) => {
+      setIsSaving(false);
+      console.error('Auto-save error:', error);
+      toast.error('Failed to save changes');
+    }
+  });
 
   // Persist the BPMN XML to localStorage
   const persistXML = (xml: string) => {
@@ -290,11 +304,18 @@ export default function ChatPage({ params }: ChatPageParams) {
       <div className="flex flex-1 gap-4 p-4 pt-0 h-[calc(100vh-8rem)]">
         {/* BPMN Modeler */}
         <div className="flex-1 rounded-xl bg-muted/50">
+          {isSaving && (
+            <div className="absolute top-4 right-4 flex items-center bg-background/80 rounded-lg px-3 py-2">
+              <Loader className="h-4 w-4 animate-spin" />
+              <span className="ml-2 text-sm">Saving...</span>
+            </div>
+          )}
           <BpmnModelerComponent
-            key={xml} // Forces remount when XML changes
+            key={params.fileId} // Forces remount
             containerId="bpmn-modeler"
             propertiesPanelId="properties-panel"
             diagramXML={xml}
+            onChange={(newXml: string) => setXml(newXml)}
             onError={handleError}
             onImport={handleImport}
             height="100%"
