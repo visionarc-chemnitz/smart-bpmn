@@ -32,6 +32,10 @@ export default function Text2BPMNPage() {
     console.log('BPMN diagram imported successfully');
   };
 
+  const handleXmlChange = (newXml: string) => {
+    setXml(newXml);
+  };
+
   const handleGenerate = async () => {
     if (!prompt) {
       setError('Please enter a description');
@@ -118,6 +122,7 @@ export default function Text2BPMNPage() {
             containerId="bpmn-modeler"
             propertiesPanelId="properties-panel"
             diagramXML={xml}
+            onChange={handleXmlChange}
             onError={handleError}
             onImport={handleImport}
             height="100%"
