@@ -57,7 +57,7 @@ export function useAutoSave({
       } finally {
         isSavingRef.current = false;
       }
-    }, 2000),
+    }, 5000),
     [bpmnId, currentVersionId, userId, onSaveStart, onSaveComplete, onSaveError]
   );
 
@@ -69,6 +69,18 @@ export function useAutoSave({
     return () => {
       debouncedSave.cancel();
     };
+  }, [xml, debouncedSave]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (xml !== lastSavedXmlRef.current) {
+        // flush the debounced function to force immediate save
+        debouncedSave.flush();
+      }
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [xml, debouncedSave]);
 
   // Cleanup
