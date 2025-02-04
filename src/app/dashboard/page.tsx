@@ -69,12 +69,10 @@ export default function DashBoardPage() {
     );
   }
 
-  console.log('User:', user);
   return (
     <>
       {user &&
-        (user.name === null || undefined
-        ? (
+        (!user.name ? (
           <RenameModal />
         ) : user.role !== UserRole.STAKEHOLDER && !currentOrganization ? (
           <OrgModal />
