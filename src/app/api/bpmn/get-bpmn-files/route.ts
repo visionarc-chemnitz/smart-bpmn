@@ -30,7 +30,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    console.log('Fetching BPMN files for project ID:', projectId);
     let bpmnFiles: Bpmn[] = [];
     if (user.role === 'ADMIN' || user.role === 'MEMBER') {
       bpmnFiles = await prisma.bpmn.findMany({
