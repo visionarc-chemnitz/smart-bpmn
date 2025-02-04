@@ -1,4 +1,4 @@
-import { use, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import { 
   BpmnPropertiesPanelModule, 
@@ -6,6 +6,7 @@ import {
 } from 'bpmn-js-properties-panel';
 import { BpmnModelerProps, BpmnModelerHookResult } from '@/types/board/board-types';
 import { useBpmnTheme } from './use-bpmn-theme';
+import { debounce } from 'lodash';
 
 interface IOverlays {
   add: (elementId: string, options: {
@@ -21,21 +22,29 @@ interface IOverlays {
   clear: () => void;
 }
 
+interface EventBus {
+  on: (event: string, callback: () => void) => void;
+  off: (event: string, callback: () => void) => void;
+}
+
 export const useBpmnModeler = ({
   containerId,
   propertiesPanelId,
   diagramXML,
   onError,
   onImport,
+  onChange,
   height = '100%',
   width = '100%',
 }: BpmnModelerProps): BpmnModelerHookResult => {
   const [modeler, setModeler] = useState<BpmnModeler | null>(null);
   const containerRef = useRef<HTMLElement | null>(null);
   const propertiesPanelRef = useRef<HTMLElement | null>(null);
+  const currentXMLRef = useRef<string>(diagramXML || '');
 
   useBpmnTheme(modeler);
 
+  // Initialize modeler
   useEffect(() => {
     const container = document.getElementById(containerId);
     const propertiesPanel = document.getElementById(propertiesPanelId);
@@ -70,6 +79,55 @@ export const useBpmnModeler = ({
     };
   }, [containerId, propertiesPanelId, height, width]);
 
+  // First useEffect - Handle diagram changes
+  useEffect(() => {
+    if (!modeler) return;
+
+    const eventBus = modeler.get('eventBus') as EventBus;
+    const events = [
+      'elements.changed',
+      'element.changed',
+      'shape.added',
+      'shape.removed',
+      'shape.changed',
+      'connection.added',
+      'connection.removed',
+      'connection.changed',
+      'label.added',
+      'label.removed',
+      'label.changed'
+    ];
+    
+    // comment events
+    // 'comments.added',
+    // 'comments.removed',
+    // 'comments.updated'
+
+    const onChanged = debounce(async () => {
+      try {
+        const { xml } = await modeler.saveXML({ format: true });
+        if (xml !== currentXMLRef.current) {
+          currentXMLRef.current = xml as string;
+          onChange?.(xml as string);
+        }
+      } catch (err) {
+        console.error('Error saving XML:', err);
+      }
+    }, 300);
+
+    events.forEach(event => {
+      eventBus.on(event, onChanged);
+    });
+
+    return () => {
+      events.forEach(event => {
+        eventBus.off(event, onChanged);
+      });
+      onChanged.cancel();
+    };
+  }, [modeler, onChange]);
+
+  // Second useEffect - Handle diagram initialization
   useEffect(() => {
   if (diagramXML && modeler) {
     importXML(diagramXML);

@@ -126,9 +126,15 @@ async def get_thread_history(request: Request):
       
     config = await chat_service.get_thread_config(thread_id)
     history = await chat_service.get_thread_history(config,value)
-    return history
+    
+    if history is None or 'messages' not in history:
+      return []
+    else :
+      messages = [{"role": "assistant" if message.type == "ai" else "user", "content": message.content} for message in history['messages']]
+    return messages
     
   except Exception as e:
+    print(f"Error: {str(e)}")
     raise HTTPException(
       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
       detail=str(e)
