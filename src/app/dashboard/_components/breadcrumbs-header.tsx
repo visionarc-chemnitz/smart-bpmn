@@ -119,7 +119,7 @@ export default function BreadcrumbsHeader({
 
       fetchData();
     }
-  }, [currentOrganization]);
+  }, [currentOrganization, setCurrentProject, setProjectList, user?.id]);
 
   useEffect(() => {
     if (currentProject) {

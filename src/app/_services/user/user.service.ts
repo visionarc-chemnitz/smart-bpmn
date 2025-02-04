@@ -623,3 +623,18 @@ export const fetchBpmnFilesWithProjectsAndVersions = async (orgId: string): Prom
     throw error;
   }
 }
+
+// rename user 
+export const renameUser = async (userId: string, name: string): Promise<boolean> => {
+  try {
+    const res = await prisma.user.update({
+      where: { id: userId },
+      data: { name },
+      select: { id: true, name: true }
+    });
+    return true;
+  } catch (error) {
+    console.error('Error renaming user:', error);
+    throw error;
+  }
+}

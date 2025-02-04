@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle, useRef, useEffect } from 'react
 import { useBpmnViewer } from '@/hooks/use-bpmn-viewer';
 import { BpmnViewerProps } from '@/types/board/board-types';
 import { useBpmnComment } from '@/hooks/use-bpmn-comment';
-import '../../../style.css';
+import '@/app/style.css';
 import { API_PATHS } from '@/app/api/api-path/apiPath';
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { toast } from "sonner"

@@ -88,7 +88,7 @@ export const ManageUsersModal: React.FC<ManageUsersModalProps> = ({ isOpen, onCl
           throw new Error('BPMN file not found');
         }
         const fileId  = currentBpmn?.id        
-        const xml = localStorage.getItem(fileId);
+        const xml = currentBpmn?.xml;
 
         // Will never enter this if block as the files's versionId is set during creation
         // Saving Bpmn version Logic

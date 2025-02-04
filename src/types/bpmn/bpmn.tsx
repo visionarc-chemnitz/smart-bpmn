@@ -8,6 +8,7 @@ export interface Bpmn {
     threadId: string;
     currentVersionId?: string;
     createdAt?: string;
+    xml?: string;
 }
 
 export type BPMNFilesByOrg = Map<string, BpmnXML[]>;

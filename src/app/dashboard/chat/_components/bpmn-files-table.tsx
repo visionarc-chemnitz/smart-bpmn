@@ -1,14 +1,18 @@
+"use client";
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Bpmn } from '@/types/bpmn/bpmn';
 import { Button } from '@/components/ui/button';
 import { Check, Heart, X } from 'lucide-react';
+import Link from 'next/link';
+import { useWorkspaceStore } from '@/store/workspace-store';
 
 interface BpmnFilesTableProps {
   files: Bpmn[];
 }
 
 const BpmnFilesTable: React.FC<BpmnFilesTableProps> = ({ files }: BpmnFilesTableProps) => {
+  const {setCurrentBpmn} = useWorkspaceStore()
   return (
     <>
       <Table>
@@ -25,7 +29,17 @@ const BpmnFilesTable: React.FC<BpmnFilesTableProps> = ({ files }: BpmnFilesTable
         <TableBody>
           {files.map((file) => (
             <TableRow key={file.id}>
-              <TableCell>{file.fileName}</TableCell>
+              <TableCell>
+                <Link href={`/dashboard/chat/${file.id}`}>
+                  <Button
+                    variant="link"
+                    className="text-blue dark:text-white"
+                    onClick={() => setCurrentBpmn(file)}
+                  >
+                    {file.fileName}
+                  </Button>
+                </Link>
+              </TableCell>
               {/* <TableCell>{file.createdBy}</TableCell> */}
               {/* <TableCell>{new Date(file.createdAt).toLocaleDateString()}</TableCell> */}
                 <TableCell>{file.isShared ? <Check className='text-green-600' /> : <X className='text-red-500'/>}</TableCell>

@@ -1,26 +1,26 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useState, useTransition } from 'react';
-import BreadcrumbsHeader from './_components/breadcrumbs-header';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { useUser } from "@/providers/user-provider";
 import { API_PATHS } from '../api/api-path/apiPath';
 import { UserRole } from '@/types/user/user';
 import { toast } from "sonner"
-import NewUserDashBoardPage from './_components/pages/new-user-dashboard';
-import UserDashBoardPage from './_components/pages/user-dashboard';
 import { useOrganizationStore } from '@/store/organization-store';
-import StakeHolderDashBoardPage from './(stakeholder)/_components/stakeholder-dashboard-page';
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { Loader } from 'lucide-react';
+import { OrgModal } from './_components/modals/org-modal';
+import DahboardContent from './_components/pages/dashbaord-content';
+import { RenameModal } from './_components/modals/rename-modal';
+import { useRouter } from 'next/navigation';
 
 
 export default function DashBoardPage() {
   const user = useUser();
   const {currentOrganization} = useOrganizationStore();
-  const {currentProject, currentBpmn, setCurrentBpmn, selectionChanged} = useWorkspaceStore();
-  const breadcrumbTitle = user.role === UserRole.STAKEHOLDER ? '' : 'Playground';
+  const {currentProject} = useWorkspaceStore();
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const router = useRouter();
 
 
   const acceptInvitation = useCallback(async (invitationToken: string) => {
@@ -34,6 +34,8 @@ export default function DashBoardPage() {
         const data = await response.json(); 
         if (data.success) {
           toast.success("You have successfully accepted the invitation.");
+          // TODO: update the user state instead of refreshing the page
+          router.refresh()
         }
         console.log('Invitation data:', data);
       } catch (error) {
@@ -66,28 +68,14 @@ export default function DashBoardPage() {
 
   return (
     <>
-      <BreadcrumbsHeader href='/dashboard' current={breadcrumbTitle} parent='/'/>
-       {user.role !== UserRole.STAKEHOLDER && !currentOrganization && (
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <NewUserDashBoardPage />
-        </div>
-      )}
-      
-      
-      {/* TODO: Work on the Dashboard for the existing users */}
-      {/* Like : Projects card or some datatable etc. */}
-      {user.role !== UserRole.STAKEHOLDER && (currentOrganization) && (
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <UserDashBoardPage />
-        </div>
-      )}
-
-      {/* TODO: implement a dashboard for stakholder */}
-      {user.role === UserRole.STAKEHOLDER && (
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <StakeHolderDashBoardPage />
-        </div>
-      )}
+      {user &&
+        (!user.name ? (
+          <RenameModal />
+        ) : user.role !== UserRole.STAKEHOLDER && !currentOrganization ? (
+          <OrgModal />
+        ) : (
+          <DahboardContent />
+        ))}
     </>
   );
 }
