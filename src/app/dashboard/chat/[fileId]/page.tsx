@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef, use } from "react";
 import BreadcrumbsHeader from "../../_components/breadcrumbs-header";
-import BpmnModelerComponent from "../../text2bpmn/_components/bpmn-modeler-component";
+import BpmnModelerComponent from "../../_components/bpmn-modeler-component";
 import { apiWrapper } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,7 +81,7 @@ export default function ChatPage({ params }: ChatPageParams) {
       router.push("/dashboard/chat");
       return;
     }
-  }, [params.fileId]);
+  }, [params.fileId, router, setCurrentBpmn]);
 
   const fetchThreadHistory = useCallback(
     async (threadId: string) => {
@@ -107,7 +107,7 @@ export default function ChatPage({ params }: ChatPageParams) {
         return;
       }
     },
-    [params.fileId]
+    []
   );
 
   // useEffect to initialize the BPMN file
@@ -128,7 +128,7 @@ export default function ChatPage({ params }: ChatPageParams) {
       setXml("");
       setThreadId(null);
     };
-  }, [params.fileId]);
+  }, [params.fileId, checkFile, fetchThreadHistory]);
 
   // Auto-save the BPMN XML
   useAutoSave({

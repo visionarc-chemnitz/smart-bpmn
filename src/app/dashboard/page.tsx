@@ -34,6 +34,7 @@ export default function DashBoardPage() {
         const data = await response.json(); 
         if (data.success) {
           toast.success("You have successfully accepted the invitation.");
+          // TODO: update the user state instead of refreshing the page
           router.refresh()
         }
         console.log('Invitation data:', data);

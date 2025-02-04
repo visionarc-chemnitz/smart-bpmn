@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { MagicCard } from '../ui/magic-card'
 import { ValueDialog } from '../ui/value-dialog'
 import { WavyLine } from '../ui/wavy-line'
+import Image from 'next/image'
 
 interface TabContentProps {
   title: string
@@ -328,7 +329,7 @@ export default function CoreValues() {
                   transition={{ duration: 0.4 }}
                   className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl"
                 >
-                  <img 
+                  <Image 
                     src={activeTab !== null ? tabContents[activeTab].image : ''}
                     alt={activeTab !== null ? tabContents[activeTab].title : ''}
                     className="w-full h-full object-cover"
