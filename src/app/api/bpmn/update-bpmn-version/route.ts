@@ -27,10 +27,9 @@ export async function POST(req: NextRequest) {
     }
 
     // TODO : increment the version number
-    const newVersionNum = getPreviousVersion?.currentVersion?.versionNumber + 1;
-    console.log(newVersionNum);
+    const newVersionNum = Number(getPreviousVersion?.currentVersion?.versionNumber) + 1;
 
-    const file = await saveBpmnVersion(bpmnId, xml, newVersionNum, userId);
+    const file = await saveBpmnVersion(bpmnId, xml, String(newVersionNum), userId);
 
     return NextResponse.json(file, { status: 201 });
 

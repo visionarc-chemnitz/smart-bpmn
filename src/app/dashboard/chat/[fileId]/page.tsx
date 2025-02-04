@@ -67,8 +67,9 @@ export default function ChatPage({ params }: ChatPageParams) {
         threadId: res.threadId,
         isFavorite: res.isFavorite,
         currentVersionId: res.currentVersionId,
+        xml: res.currentVersion.xml,
       };
-
+    
       setCurrentBpmn(state);
       setThreadId(res.threadId);
       setXml(res.currentVersion.xml);
@@ -138,10 +139,15 @@ export default function ChatPage({ params }: ChatPageParams) {
     enabled: isMounted,
     onSaveStart: () => {
         setIsSaving(true);
-        toast.info('Saving changes...');
     },
     onSaveComplete: () => {
       setIsSaving(false);
+      if (currentBpmn) {
+        setCurrentBpmn({
+          ...currentBpmn,
+          xml,
+        });
+      }
       toast.success('Changes saved successfully');
     },
     onSaveError: (error) => {
@@ -151,19 +157,7 @@ export default function ChatPage({ params }: ChatPageParams) {
     }
   });
 
-  // Persist the BPMN XML to localStorage
-  const persistXML = (xml: string) => {
-    if (!xml) return;
-
-    localStorage.setItem(params.fileId, xml);
-    // console.log('BPMN XML persisted to localStorage', localStorage.getItem(params.fileId));
-  };
-
-  // Clear the BPMN XML from localStorage
-  const clearXml = () => {
-    localStorage.removeItem(params.fileId);
-  };
-
+ 
   const startChat = () => {
     setIsChatStarted(true);
     setMessages([
@@ -250,7 +244,6 @@ export default function ChatPage({ params }: ChatPageParams) {
                 if (data.response.includes("<?xml")) {
                   console.log("BPMN XML received:", data.response);
                   setXml(data.response);
-                  persistXML(xml);
                 } else {
                   assistantMessage += data.response;
                   setMessages((prev) => {

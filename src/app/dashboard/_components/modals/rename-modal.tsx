@@ -25,16 +25,16 @@ import {
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiWrapper } from '@/lib/utils';
-import { saveOrganization } from "@/app/dashboard/_actions/dashboard"
+import { updateUserName } from "@/app/dashboard/_actions/dashboard"
 import { useRouter } from "next/navigation"
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button"
 
 // Organization schema
-const orgSchema = z.object({
-  orgName: z.string().min(1, "Organization name is required").trim(),
+const renameSchema = z.object({
+  name: z.string().min(1, "Profile name is required").trim(),
 })
 
-export function OrgModal() {
+export function RenameModal() {
   const router = useRouter();
   const [open, setOpen] = useState<boolean>(false)
   const [isPending, startTransition] = useTransition();
@@ -51,21 +51,21 @@ export function OrgModal() {
   };
 
 
-  const form = useForm<z.infer<typeof orgSchema>>({
-    resolver: zodResolver(orgSchema),
+  const form = useForm<z.infer<typeof renameSchema>>({
+    resolver: zodResolver(renameSchema),
     defaultValues: {
-      orgName: ""
+      name: ""
     },
   });
 
 
-  const onSubmit = async (data: z.infer<typeof orgSchema>) => {
+  const onSubmit = async (data: z.infer<typeof renameSchema>) => {
     try {
       startTransition(async () => {
-        const response = await saveOrganization(data.orgName)
+        const response = await updateUserName(data.name)
 
         if (response === true) {
-          toast.success("Organization has been created.");
+          toast.success("Profile Name has been updated.");
           setOpen(false);
           
           router.refresh();
@@ -77,7 +77,7 @@ export function OrgModal() {
     } catch (error: any) {
       toast.error("Something went wrong!" + error);
     } finally {
-      form.reset({orgName: "" });
+      form.reset({name: "" });
     }
   };
 
@@ -92,22 +92,22 @@ export function OrgModal() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
         <DialogHeader>
-          <DialogTitle className="dark:text-white">Add Organization</DialogTitle>
+          <DialogTitle className="dark:text-white">Add Profile Name</DialogTitle>
           <DialogDescription className="dark:text-gray-300">
-          Give a name to your organization. Click save when you&apos;re done.
+          Give a name to your profile. Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           <FormField
           control={form.control}
-          name="orgName"
+          name="name"
           render={({ field }) => (
             <FormItem>
-            <FormLabel className="dark:text-gray-200">Organization Name</FormLabel>
+            <FormLabel className="dark:text-gray-200">Profile Name</FormLabel>
             <FormControl>
               <Input 
               {...field} 
-              placeholder="Acme.Inc" 
+              placeholder="John Doe" 
               type="text"
               className="dark:bg-gray-800 dark:text-white dark:border-gray-700" 
               />
