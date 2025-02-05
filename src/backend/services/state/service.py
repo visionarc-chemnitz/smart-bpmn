@@ -1,9 +1,11 @@
-from langgraph.graph import MessagesState
-from typing import Literal, List
+from langgraph.graph import MessagesState, add_messages
+from typing import Literal, List, TypedDict
 from typing import Annotated
-from pydantic import BeforeValidator, BaseModel
+from pydantic import BeforeValidator, BaseModel, Field
+from langchain_core.messages import AnyMessage
 
-class StateService(MessagesState):
+class StateService(TypedDict):
+  messages: Annotated[list[AnyMessage], add_messages]
   summary: str
   
   # Workflow state management
@@ -38,16 +40,16 @@ class StateService(MessagesState):
   # functional_requirements: List[str] = []
   # nonfunctional_requirements: List[str] = []
   gathered_info: str = None
+  
+  # evaluator state
+  grade: Literal["valid", "invalid"] = None
+  feedback : str = None
 
-
-# Define the schema for the input
-# class HumanInputState(BaseModel):
-#   human_in_loop: dict
-#   questions: List[str]
-#   context: str
-
-
-# # Define the schema for the output
-# class HumanOutputState(BaseModel):
-#   human_in_loop: dict
-#   context: str
+# Schema for structured output to use in evaluation
+class Feedback(BaseModel):
+    grade: Literal["valid", "invalid"] = Field(
+        description="Decide if the xml is valid or not.",
+    )
+    feedback: str = Field(
+        description="If the xml is not valid, provide feedback on how to correct it.",
+    )
