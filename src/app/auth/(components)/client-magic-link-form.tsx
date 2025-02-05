@@ -36,11 +36,6 @@ const ClientMagicLinkForm = () => {
     setMessageType('');
   };
 
-  const handleEmailFocus = () => {
-    setMessage('Note: Sign-in with email is currently limited to some users.');
-    setMessageType('info');
-  };
-
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
@@ -80,7 +75,6 @@ const ClientMagicLinkForm = () => {
         onChange={handleEmailChange}
         className="w-full mb-4 p-2 border rounded bg-transparent text-gray-800 dark:text-white "
         onBlur={handleEmailBlur}
-        onFocus={handleEmailFocus}
         style={{ borderColor: '#ccc', borderWidth: '1px', position: 'relative', zIndex: 1 }}
       />
 
