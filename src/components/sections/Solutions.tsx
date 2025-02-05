@@ -21,12 +21,12 @@ const solutions = [
     description: "Compare two BPMN files to track changes and updates" 
   },
   { 
-    title: "Process Automation", 
-    description: "Automate repetitive tasks and streamline workflows" 
+    title: "Organization and Member Management", 
+    description: "Operates at an organization level, where people can be invited to work together on BPMN projects" 
   },
   { 
-    title: "Analytics & Insights", 
-    description: "Gain insights from process data and improve efficiency" 
+    title: "Arc42 document generation", 
+    description: "Export of BPMN models as arc42 compliant documents for documenting software architecture" 
   }
 ]
 
