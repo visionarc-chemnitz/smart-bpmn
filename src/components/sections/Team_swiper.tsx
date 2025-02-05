@@ -108,6 +108,8 @@ export const Team_swiper = () => {
                         fill
                         className="object-cover transition-transform duration-500 hover:scale-110"
                         sizes="(max-width: 768px) 192px, 192px"
+                        height={192}
+                        width={192}
                         priority
                       />
                     </div>

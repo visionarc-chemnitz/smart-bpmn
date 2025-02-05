@@ -333,6 +333,8 @@ export default function CoreValues() {
                     src={activeTab !== null ? tabContents[activeTab].image : ''}
                     alt={activeTab !== null ? tabContents[activeTab].title : ''}
                     className="w-full h-full object-cover"
+                    height={800}
+                    width={1200}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                 </motion.div>
