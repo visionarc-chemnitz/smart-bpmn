@@ -9,6 +9,7 @@ import { API_PATHS } from "@/app/api/api-path/apiPath";
 import { toast } from "sonner";
 import BpmnFilesTable from "./_components/bpmn-files-table";
 import { NewFileModal } from "../_components/modals/new-file-modal";
+export const dynamic = 'force-dynamic'; 
 
 export default function ChatFiles() {
   const { currentProject, selectionChanged } = useWorkspaceStore();
