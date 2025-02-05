@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { socialAccount } from "@/app/_services/account";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 const ClientMagicLinkForm = () => {
   const [email, setEmail] = useState("");
@@ -33,11 +34,6 @@ const ClientMagicLinkForm = () => {
   const handleEmailBlur = () => {
     setMessage('');
     setMessageType('');
-  };
-
-  const handleEmailFocus = () => {
-    setMessage('Note: Sign-in with email is currently limited to some users.');
-    setMessageType('info');
   };
 
   const validateEmail = (email: string) => {
@@ -69,7 +65,8 @@ const ClientMagicLinkForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
+    <>  
+      <form onSubmit={handleSubmit} className="w-full">
       <input
         type="text"
         name="email"
@@ -78,7 +75,6 @@ const ClientMagicLinkForm = () => {
         onChange={handleEmailChange}
         className="w-full mb-4 p-2 border rounded bg-transparent text-gray-800 dark:text-white "
         onBlur={handleEmailBlur}
-        onFocus={handleEmailFocus}
         style={{ borderColor: '#ccc', borderWidth: '1px', position: 'relative', zIndex: 1 }}
       />
 
@@ -93,6 +89,14 @@ const ClientMagicLinkForm = () => {
         </p>
       )}
     </form>
+
+    <div className="mt-2 text-xs text-gray-500 text-center" style={{ position: 'relative', zIndex: 2 }}>
+      By signing in, you agree to our{' '}
+      <Link href="/terms" className="text-blue-500">
+        Terms of Service
+      </Link>
+    </div>
+    </>
   );
 };
 

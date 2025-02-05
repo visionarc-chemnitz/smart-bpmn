@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # import services
-from services import ChatService, GraphService
+from services import ChatService
 
 # import json
 import json
@@ -26,22 +26,11 @@ origins = [
 # cors middleware
 app.add_middleware(
   CORSMiddleware,
-  # allow_origins=origins,
-  allow_origins=["*"],
+  allow_origins=origins,
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],
 )
-
-# GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-# LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
-# LANGSMITH_PROJECT = os.getenv("LANGSMITH_PROJECT")
-
-# set environment variables for LangSmith
-# os.environ["LANGCHAIN_API_KEY"] = LANGSMITH_API_KEY
-# os.environ["LANGCHAIN_TRACING_V2"]="true"
-# os.environ["LANGCHAIN_PROJECT"]= LANGSMITH_PROJECT
-
 
 
 # endpoint to check the status of the backend
@@ -54,11 +43,6 @@ def check_status():
 # instantiate the chat service
 chat_service = ChatService(
     groq_api_key=os.getenv("GROQ_API_KEY"),
-    # graph_service=GraphService(
-    #     uri=os.getenv("NEO4J_URI"),
-    #     username=os.getenv("NEO4J_USERNAME"),
-    #     password=os.getenv("NEO4J_PASSWORD")
-    # )
 )
 
 # endpoint to start a chat session
