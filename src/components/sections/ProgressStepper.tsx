@@ -5,20 +5,24 @@ import { MagicCard } from "../ui/magic-card"
 
 const progressSteps = [
   { 
-    title: "Inception", 
-    description: "VisionArc was founded with a mission to revolutionize AI-powered business solutions." 
+    title: "Milestone 1", 
+    description: "Team Building, Requirements Handling",
+    date: "31 Oct 2024"
   },
   { 
-    title: "First Product Launch", 
-    description: "We released our flagship AI analytics platform, transforming data processing for businesses." 
+    title: "Milestone 2", 
+    description: "Design Prototyping, Starting Development",
+    date: "11 Nov 2024"
   },
   { 
-    title: "Global Expansion", 
-    description: "VisionArc expanded operations to serve clients across multiple continents." 
+    title: "Milestone 3", 
+    description: "Data Collection, Automation Tool and Testing",
+    date: "9 Dec 2024"
   },
   { 
-    title: "AI Breakthrough", 
-    description: "Our team achieved a significant breakthrough in predictive modeling accuracy." 
+    title: "Milestone 4", 
+    description: "Deployment, Marketing Strategies and Integration Testing",
+    date: "31 Jan 2025"
   },
 ]
 
@@ -79,6 +83,7 @@ export default function ProgressStepper() {
                   <div className="p-6">
                     <h3 className="text-xl font-bold mb-2">{step.title}</h3>
                     <p className="text-muted-foreground">{step.description}</p>
+                    <p className='text-muted-foreground mt-4'>{step.date}</p>
                   </div>
                 </MagicCard>
               </div>
