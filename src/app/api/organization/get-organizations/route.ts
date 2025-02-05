@@ -4,7 +4,7 @@ import { Role } from '@prisma/client';
 import { getUserData } from '@/app/_services/user/user.service';
 import { userOrg, getStakeHolderOrgs } from '@/app/_services/user/user.service';
 import { Organization } from '@/types/organization/organization';
-
+export const dynamic = 'force-dynamic'; 
 export async function GET(req: NextRequest) {
   const session = await getUserData();
   const userId = session?.id

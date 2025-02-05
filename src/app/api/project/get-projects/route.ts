@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrgProjects } from '@/app/dashboard/_actions/dashboard';  // adjust the import path as needed
-
+export const dynamic = 'force-dynamic'; 
 export async function GET(req: NextRequest) {
   try {
     const projects = await getOrgProjects();

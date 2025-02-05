@@ -17,6 +17,7 @@ import { Suspense } from "react";
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
+export const dynamic = 'force-dynamic'; 
 
 const DashboardLayout = async ({ children }: DashboardLayoutProps) => {
 
