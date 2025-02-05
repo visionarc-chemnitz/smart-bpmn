@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart BPMN by Vision Arc
 
-## Getting Started
+## Description
 
-First, run the development server:
+Smart BPMN by Vision Arc is a platform that simplifies the creation, management, version tracking, and sharing of BPMN diagrams. Specially designed for enterprise teams of business analysts or enterprise architects, it provides an intuitive interface to streamline workflow design, collaboration, and documentation.
+
+## Table of Contents
+
+- [Smart BPMN by Vision Arc](#smart-bpmn-by-vision-arc)
+  - [Description](#description)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+    - [Running the Frontend](#running-the-frontend)
+    - [Running the Backend](#running-the-backend)
+  - [Running Locally with Virtual Environment](#running-locally-with-virtual-environment)
+  - [Contributors](#contributors)
+  - [Contact](#contact)
+
+---
+
+## Installation
+
+**Clone the repository**:
+
+```bash
+git clone https://gitlab.hrz.tu-chemnitz.de/vsr/edu/planspiel/ws2425/group04-visionarc.git
+```
+
+---
+
+### Running the Frontend
+
+1. Create environment file
+
+```bash
+cd group04-visionarc
+cp .env.example .env
+```
+
+Provide values to all the environment variable keys in  `.env`:
+
+2. Install dependencies
+
+```bash
+npm install
+```
+
+3. Start the server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Running the Backend
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create environment file:
 
-## Learn More
+  ```bash
+  cd src/backend
+  cp .env.example .env
+  ```
 
-To learn more about Next.js, take a look at the following resources:
+  Add your Groq API key to `.env`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  ```env
+  GROQ_API_KEY=your_api_key_here
+  ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Running with Docker:
 
-## Deploy on Vercel
+- Build and start the container:
+  
+```bash
+docker-compose up --build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Access the application at:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [http://localhost:7860](http://localhost:7860)
+
+
+## Running Locally with Virtual Environment
+
+1. Create a virtual environment:
+
+    ```bash
+    python3 -m venv .venv
+    ```
+
+2. Navigate to the backend folder:
+
+    ```bassh
+    cd path_to_backend_folder
+    ```
+
+3. Activate the virtual environment:
+    - Windows:
+  
+      ```bash
+      .venv\Scripts\activate
+      ```
+
+    - macOS/Linux:
+  
+      ```bash
+      source .venv/bin/activate
+      ```
+
+4. To run the app use :
+
+    ```bash
+    uvicorn app:app --reload 
+    ```
+
+5. To deactivate the virtual environment when finished:
+
+    ```bash
+    deactivate
+    ```
+
+## Contributors
+
+The following contributors are from GitHub, mapped to their corresponding GitLab profiles:
+
+| Contributor Name | GitHub Profile | Gitlab Profile
+|-------------|----------------|----------------|
+| Eshwari Suhas Kangutkar | [@EshwariK](https://github.com/EshwariK) | [@kesh-at-tu-chemnitz.de](https://gitlab.hrz.tu-chemnitz.de/kesh-at-tu-chemnitz.de)
+| Omkar Mirgal | [@OmkarMirgal](https://github.com/OmkarMirgal) | [@ommi-at-tu-chemnitz.de](https://gitlab.hrz.tu-chemnitz.de/ommi-at-tu-chemnitz.de)
+| Roshita Shakya | [@roshita02](https://github.com/roshita02) | [@rosha-at-tu-chemnitz.de](https://gitlab.hrz.tu-chemnitz.de/rosha-at-tu-chemnitz.de)
+| Shrusti Dilip Sakala | [@ShrushtiSakala](https://github.com/ShrushtiSakala) | [@saks-at-tu-chemnitz.de](https://gitlab.hrz.tu-chemnitz.de/saks-at-tu-chemnitz.de)
+| Toushika Islam | [@toushika111](https://github.com/toushika111) | [@islt-at-tu-chemnitz.de](https://gitlab.hrz.tu-chemnitz.de/islt-at-tu-chemnitz.de) 
+
+## Contact
+
+If you have any queries, please reach out to us on [visionarc.chemnitz@gmail.com](mailto:visionarc.chemnitz@gmail.com)
