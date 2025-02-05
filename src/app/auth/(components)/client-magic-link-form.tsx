@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { socialAccount } from "@/app/_services/account";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 const ClientMagicLinkForm = () => {
   const [email, setEmail] = useState("");
@@ -69,7 +70,8 @@ const ClientMagicLinkForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
+    <>  
+      <form onSubmit={handleSubmit} className="w-full">
       <input
         type="text"
         name="email"
@@ -93,6 +95,14 @@ const ClientMagicLinkForm = () => {
         </p>
       )}
     </form>
+
+    <div className="mt-2 text-xs text-gray-500 text-center" style={{ position: 'relative', zIndex: 2 }}>
+      By signing in, you agree to our{' '}
+      <Link href="/terms" className="text-blue-500">
+        Terms of Service
+      </Link>
+    </div>
+    </>
   );
 };
 
