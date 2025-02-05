@@ -1,17 +1,16 @@
 import {auth} from '@/auth'
+import { getCsrfToken } from 'next-auth/react';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 export async function middleware(req: NextRequest) {                                
   const { pathname } = req.nextUrl;
-  const session = await auth();
-  const user = session?.user;
-
+  const token = req.cookies.get('authjs.session-token')
   if (pathname.startsWith('/dashboard')) {
-    if (!user) {
+    if (!token) {
       const loginUrl = new URL('/auth/signin', req.url);
       return NextResponse.redirect(loginUrl);
     }
-  } else if (user && pathname.startsWith('/auth/signin')) {
+  } else if (token && pathname.startsWith('/auth/signin')) {
     const dashboardUrl = new URL('/dashboard', req.url);
     return NextResponse.redirect(dashboardUrl);
   }
