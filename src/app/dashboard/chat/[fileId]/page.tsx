@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef, use } from "react";
+import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
 import BreadcrumbsHeader from "../../_components/breadcrumbs-header";
 import BpmnModelerComponent from "../../_components/bpmn-modeler-component";
 import { apiWrapper } from "@/lib/utils";
@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { config } from "@/config";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -43,7 +44,14 @@ export default function ChatPage({ params }: ChatPageParams) {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState<boolean>(false);  
   const [isSaving, setIsSaving] = useState<boolean>(false); // auto-save state
+  const messageContainerRef = useRef<HTMLDivElement>(null);
 
+  useLayoutEffect(() => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [messages]);
+  
   const checkFile = useCallback(async () => {
     try {
       const res = await apiWrapper({
@@ -362,38 +370,40 @@ export default function ChatPage({ params }: ChatPageParams) {
             </motion.div>
           ) : (
             <div className="flex flex-col h-[calc(100vh-10rem)]">
-              <ScrollArea className="flex-1 p-4 overflow-y-auto">
-                <motion.div
-                  className="flex flex-col gap-4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  {messages.map((message, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{
-                        opacity: 0,
-                        x: message.role === "user" ? 20 : -20,
-                      }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card
-                        className={`p-4 shadow-sm ${
-                          message.role === "user"
-                            ? "ml-auto bg-primary text-primary-foreground"
-                            : "mr-auto bg-background"
-                        } max-w-[85%] break-words rounded-2xl ${
-                          message.role === "user"
-                            ? "rounded-br-sm"
-                            : "rounded-bl-sm"
-                        }`}
+              <ScrollArea className="flex-1 p-4 pb-12 overflow-y-auto">
+                <div ref={messageContainerRef}>
+                  <motion.div
+                    className="flex flex-col gap-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    {messages.map((message, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{
+                          opacity: 0,
+                          x: message.role === "user" ? 20 : -20,
+                        }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
                       >
-                        {message.content}
-                      </Card>
-                    </motion.div>
-                  ))}
-                </motion.div>
+                        <Card
+                          className={`p-4 shadow-sm ${
+                            message.role === "user"
+                              ? "ml-auto bg-primary text-primary-foreground"
+                              : "mr-auto bg-background"
+                          } max-w-[85%] break-words rounded-2xl ${
+                            message.role === "user"
+                              ? "rounded-br-sm"
+                              : "rounded-bl-sm"
+                          }`}
+                        >
+                          {message.content}
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </div>
               </ScrollArea>
 
               {/* Chat Input */}
@@ -410,17 +420,15 @@ export default function ChatPage({ params }: ChatPageParams) {
                     </motion.div>
                   )}
                   <div className="flex gap-2">
-                    <Input
+                    <Textarea
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={(e) =>
                         e.key === "Enter" && !e.shiftKey && handleSendMessage()
                       }
-                      placeholder={
-                        isLoading ? "Please wait..." : "Type your message..."
-                      }
+                      placeholder="Type your message..."
                       disabled={isLoading}
-                      className="flex-1 rounded-full px-4 bg-background"
+                      className="flex-1  px-4 bg-background"
                     />
                     <Button
                       onClick={handleSendMessage}
