@@ -1,7 +1,7 @@
 'use server'
 
 import { cache } from 'react';
-import { getUserData, getUser, getUserOrgProj, getStakeholderOrgProject, getUserOrgs, getAdminOrgs, createOrganization, createBpmnFile, createProject, fetchBpmnFiles, fetchBpmnFilesbyOrg } from "@/app/_services/user/user.service";
+import { getUserData, getUser, getUserOrgProj, getStakeholderOrgProject, getUserOrgs, getAdminOrgs, createOrganization, createBpmnFile, createProject, fetchBpmnFiles, fetchBpmnFilesbyOrg, renameUser } from "@/app/_services/user/user.service";
 import { userOrg, getStakeHolderOrgs } from '@/app/_services/user/user.service';
 import { User, UserRole } from "@/types/user/user";
 import { Project } from "@/types/project/project";
@@ -250,5 +250,24 @@ export async function getBpmnFilesbyOrg() {
   } catch (error) {
     console.error('Error fetching BPMN files:', error);
     throw new Error('Error fetching BPMN files');
+  }
+}
+
+// update user name
+export async function updateUserName(name: string): Promise<boolean> {
+  const session = await getUserData();
+  const userId = session?.id;
+
+  if (!userId) {
+    throw new Error('User not authorized');
+  }
+
+  try {
+    const res = renameUser(userId, name);
+
+    return res;
+  } catch (error) {
+    console.error('Error updating user name:', error);
+    throw new Error('Error updating user name');
   }
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, DragEvent } from 'react';
 import BreadcrumbsHeader from '../_components/breadcrumbs-header';
-import BpmnModelerComponent from '../text2bpmn/_components/bpmn-modeler-component';
+import BpmnModelerComponent from '../_components/bpmn-modeler-component';
 import { AlertCircle, Image as ImageIcon, Cog } from 'lucide-react';
 import { UploadSection } from './_components/upload-section';
 import { Button } from '@/components/ui/button';
@@ -136,6 +136,8 @@ export default function Image2BPMNPage() {
                 <Image
                   src={imagePreview}
                   alt="Preview"
+                  width={800}
+                  height={400}
                   className="max-h-[400px] object-contain rounded-lg"
                   priority
                 />

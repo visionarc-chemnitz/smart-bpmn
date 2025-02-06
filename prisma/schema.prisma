@@ -42,6 +42,7 @@ model Bpmn {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now())
   currentVersionId String?           @unique
+  threadId         String            @default(uuid())
   user             User              @relation("BpmnOwner", fields: [createdBy], references: [id], onDelete: Cascade)
   currentVersion   BpmnVersion?      @relation("CurrentVersion", fields: [currentVersionId], references: [id])
   project          Project?          @relation("ProjectBpmn", fields: [projectId], references: [id])

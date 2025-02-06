@@ -5,8 +5,10 @@ export interface Bpmn {
     createdBy: string;
     isShared: boolean;
     isFavorite: boolean;
+    threadId: string;
     currentVersionId?: string;
     createdAt?: string;
+    xml?: string;
 }
 
 export type BPMNFilesByOrg = Map<string, BpmnXML[]>;

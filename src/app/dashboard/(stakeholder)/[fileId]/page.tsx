@@ -1,8 +1,7 @@
 "use client";
 import React, { use, useEffect, useState } from "react";
-import { API_PATHS } from "@/app/api/api-path/apiPath";
 import BreadcrumbsHeader from "@/app/dashboard/_components/breadcrumbs-header";
-import BpmnCommentComponent from "../../text2bpmn/(components)/bpmn-comment-component";
+import BpmnCommentComponent from "../../_components/bpmn-comment-component";
 import { useWorkspaceStore } from "@/store/workspace-store";
 
 interface BpmnVersionParams {

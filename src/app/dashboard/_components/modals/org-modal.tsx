@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 import {
@@ -38,6 +38,18 @@ export function OrgModal() {
   const router = useRouter();
   const [open, setOpen] = useState<boolean>(false)
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setOpen(true);
+  }, []);
+
+  const handleClose = () => {
+    setOpen(false);
+    setTimeout(() => {
+      setOpen(true);
+    }, 10);
+  };
+
 
   const form = useForm<z.infer<typeof orgSchema>>({
     resolver: zodResolver(orgSchema),
@@ -70,12 +82,12 @@ export function OrgModal() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Dialog open={open} onOpenChange={handleClose}>
+      {/* <DialogTrigger asChild>
       <InteractiveHoverButton className='dark:bg-white dark:text-black bg-black text-white'>
         Get Started
       </InteractiveHoverButton>
-      </DialogTrigger>
+      </DialogTrigger> */}
       <DialogContent className="sm:max-w-[425px] dark:bg-gray-900 dark:text-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>

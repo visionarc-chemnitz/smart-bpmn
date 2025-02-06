@@ -1,8 +1,0 @@
-fastapi
-python-multipart
-fastapi-cors
-python-dotenv
-uvicorn
-processpiper
-mdextractor
-langchain-groq

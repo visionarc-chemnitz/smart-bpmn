@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'; // Adjust the import path as needed
 import { checkFile, getUserData, saveBpmnVersion } from '@/app/_services/user/user.service';
 
 export async function POST(req: NextRequest) {

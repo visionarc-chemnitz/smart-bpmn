@@ -7,12 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from xhtml2pdf import pisa
 
 # import services
-from services import ChatService, GraphService
+from services import ChatService
 
 # import json
 import json
-import markdown2
-import tempfile
 
 # load environment variables
 from dotenv import load_dotenv
@@ -29,22 +27,11 @@ origins = [
 # cors middleware
 app.add_middleware(
   CORSMiddleware,
-  # allow_origins=origins,
-  allow_origins=["*"],
+  allow_origins=origins,
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],
 )
-
-# GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-# LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
-# LANGSMITH_PROJECT = os.getenv("LANGSMITH_PROJECT")
-
-# set environment variables for LangSmith
-# os.environ["LANGCHAIN_API_KEY"] = LANGSMITH_API_KEY
-# os.environ["LANGCHAIN_TRACING_V2"]="true"
-# os.environ["LANGCHAIN_PROJECT"]= LANGSMITH_PROJECT
-
 
 
 # endpoint to check the status of the backend
@@ -57,11 +44,6 @@ def check_status():
 # instantiate the chat service
 chat_service = ChatService(
     groq_api_key=os.getenv("GROQ_API_KEY"),
-    # graph_service=GraphService(
-    #     uri=os.getenv("NEO4J_URI"),
-    #     username=os.getenv("NEO4J_USERNAME"),
-    #     password=os.getenv("NEO4J_PASSWORD")
-    # )
 )
 
 # endpoint to start a chat session
@@ -80,17 +62,16 @@ async def chat_endpoint(request: Request):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Message is required"
             )
+        
+        if not thread_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Thread ID is required"
+            )
 
         async def generate():
             try:
-                if thread_id:
-                    # is_valid_thread = await chat_service.check_thread_exists(thread_id)
-                    # if not is_valid_thread:
-                    #     yield f"data: {json.dumps({'error': 'Invalid thread_id'})}\n\n"
-                    #     return
-                    config = await chat_service.get_thread_config(thread_id)
-                else:
-                    config = await chat_service.create_new_config()
+                config = await chat_service.get_thread_config(thread_id)
                 
                 print(f"request: {body} config: {config}, message: {message}")
                 
@@ -130,9 +111,15 @@ async def get_thread_history(request: Request):
       
     config = await chat_service.get_thread_config(thread_id)
     history = await chat_service.get_thread_history(config,value)
-    return history
+    
+    if history is None or 'messages' not in history:
+      return []
+    else :
+      messages = [{"role": "assistant" if message.type == "ai" else "user", "content": message.content} for message in history['messages']]
+    return messages
     
   except Exception as e:
+    print(f"Error: {str(e)}")
     raise HTTPException(
       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
       detail=str(e)

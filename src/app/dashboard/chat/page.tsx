@@ -1,34 +1,15 @@
 "use client";
 
-import { useEffect, useState, useCallback, use } from "react";
+import { useEffect, useState, useCallback } from "react";
 import BreadcrumbsHeader from "../_components/breadcrumbs-header";
-import BpmnModelerComponent from "../text2bpmn/_components/bpmn-modeler-component";
-import { apiWrapper } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card } from "@/components/ui/card";
-import {
-  Bot,
-  Send,
-  AlertCircle,
-  ClipboardList,
-  Search,
-  CheckCircle,
-  Code2,
-  Loader,
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { useUser } from "@/providers/user-provider";
-import { nanoid } from "nanoid";
-import { BpmnFileInfoModal } from "../_components/modals/bpmnInfoModal";
-import { useModalManager } from "@/hooks/useModalManager";
+import { Loader } from "lucide-react";
 import { Bpmn } from "@/types/bpmn/bpmn";
 import { useWorkspaceStore } from "@/store/workspace-store";
 import { API_PATHS } from "@/app/api/api-path/apiPath";
 import { toast } from "sonner";
 import BpmnFilesTable from "./_components/bpmn-files-table";
 import { NewFileModal } from "../_components/modals/new-file-modal";
+export const dynamic = 'force-dynamic'; 
 
 export default function ChatFiles() {
   const { currentProject, selectionChanged } = useWorkspaceStore();

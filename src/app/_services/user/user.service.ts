@@ -6,6 +6,7 @@ import { Bpmn, BPMNFilesByOrg, BpmnXML } from "@/types/bpmn/bpmn";
 import { Organization } from "@/types/organization/organization";
 import { Project } from "@/types/project/project";
 import { Role } from "@prisma/client";
+import { BpmnFileWithProjectAndVersion } from "@/types/bpmn/bpmnVersion";
 
 
 export const updateUserName = async (id: string, name: string) => {
@@ -254,7 +255,7 @@ export const createProject = async (projectName: string, orgId: string, userId: 
 // create bpmn file
 export const createBpmnFile = async (fileName: string, projectId: string, userId: string): Promise<Bpmn> => {
   try {
-    const bpmn = await prisma.bpmn.create({
+    const newFile = await prisma.bpmn.create({
       data: {
         fileName: fileName,
         projectId: projectId,
@@ -265,11 +266,15 @@ export const createBpmnFile = async (fileName: string, projectId: string, userId
         fileName: true,
         createdBy: true,
         isShared: true,
+        threadId: true,
         isFavorite: true,
       }
     });
 
-    return bpmn
+    const versionedBpmn = await saveBpmnVersion(newFile.id, '', '1', userId, false); // Create first version
+    const bpmn = {...newFile, currentVersionId: versionedBpmn.id};
+
+    return bpmn;
   } catch (error) {
     console.error('Error creating BPMN file:', error);
     throw error;
@@ -279,6 +284,7 @@ export const createBpmnFile = async (fileName: string, projectId: string, userId
 // get version of bpmn file
 export const getBpmnFileVersion = async (bpmnId: string, userId: string) => {
   try {
+    // TODO:Check this as it is not working returning empty object
     console.log('bpmnId =', bpmnId);
     const bpmnFile = await prisma.bpmn.findFirst({
       where: {
@@ -299,7 +305,7 @@ export const getBpmnFileVersion = async (bpmnId: string, userId: string) => {
         }
       }
     });
-    console.log(bpmnFile);
+
     return bpmnFile;
   } catch (error) {
     console.error('Error fetching BPMN file versions:', error);
@@ -308,7 +314,7 @@ export const getBpmnFileVersion = async (bpmnId: string, userId: string) => {
 }
 
 // save bpmn-version
-export const saveBpmnVersion = async (bpmnId: string, xml: string, versionNumber: string, userId: string) => {
+export const saveBpmnVersion = async (bpmnId: string, xml: string, versionNumber: string, userId: string, isShared?: boolean) => {
   try {
 
     const bpmnVersion = await prisma.$transaction(async (tx) => {
@@ -327,12 +333,18 @@ export const saveBpmnVersion = async (bpmnId: string, xml: string, versionNumber
         }
       });
 
+      let flag = true;
+      // handle isSharedFlag
+      if(isShared !== undefined) {
+        flag = isShared;
+      }
+
       // Update BPMN with new version ID
       await tx.bpmn.update({
         where: { id: bpmnId },
         data: {
           currentVersionId: newVersion.id,
-          isShared: true,
+          isShared: flag,
         }
       });
 
@@ -342,6 +354,37 @@ export const saveBpmnVersion = async (bpmnId: string, xml: string, versionNumber
     return bpmnVersion;
   } catch (error) {
     console.error('Error saving BPMN version:', error);
+    throw error;
+  }
+}
+
+// save bpmn data in existing file
+export const saveBPMN = async (bpmnId: string, currVersionId: string, userId: string,  xml: string,) => {
+  try {
+    const updateExisting = await prisma.bpmnVersion.update({
+      where:{
+        id: currVersionId,
+        bpmnId: bpmnId,
+      },data:{
+        xml: xml,
+        updatedBy: userId,
+      },
+      select:{
+        id: true,
+        bpmnId: true,
+        versionNumber: true,
+        updatedBy: true,
+      }
+    });
+
+    if (!updateExisting) {
+      throw new Error('Failed to update BPMN version');
+    }
+
+    return updateExisting;
+      
+  } catch (error) {
+    console.error('Error saving BPMN data in existing file:', error);
     throw error;
   }
 }
@@ -361,6 +404,7 @@ export const checkFile = async (bpmnId: string, userId: string) => {
         id: true,
         isShared: true,
         isFavorite: true,
+        threadId: true,
         currentVersionId: true,
         currentVersion: {
           select: {
@@ -403,6 +447,7 @@ export const fetchBpmnFiles = async (projId: string, userId: string, userRole : 
             createdBy: true,
             isShared: true,
             isFavorite: true,
+            threadId: true,
             currentVersion: {
               select: {
                 id: true,
@@ -424,6 +469,7 @@ export const fetchBpmnFiles = async (projId: string, userId: string, userRole : 
             createdBy: true,
             isShared: true,
             isFavorite: true,
+            threadId: true,
             currentVersion: {
               select: {
                 id: true,
@@ -443,6 +489,7 @@ export const fetchBpmnFiles = async (projId: string, userId: string, userRole : 
           createdBy: file.createdBy,
           isShared: file.isShared,
           isFavorite: file.isFavorite,
+          threadId: file.threadId,
           currentVersionId: file.currentVersion?.id ?? '',
         }
       })
@@ -524,4 +571,70 @@ export const fetchBpmnFilesbyOrg = async (userId: string): Promise<BPMNFilesByOr
     throw error; 
   }
 
+}
+
+// fetch bpmn files with projects and versions
+export const fetchBpmnFilesWithProjectsAndVersions = async (orgId: string): Promise<BpmnFileWithProjectAndVersion[]> => {
+  try {
+    const res = await prisma.bpmn.findMany({
+      where: {
+        project: {
+          organizationId: orgId
+        }
+      },
+      select: {
+        id: true,
+        fileName: true,
+        BpmnVersion: {
+          select: {
+            id: true,
+            versionNumber: true,
+            xml: true
+          }
+        },
+        project: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
+    });
+    const filteredRes = res.filter(file => file.BpmnVersion.length > 0);
+
+    const bpmnFilesWithProjectsAndVersions: BpmnFileWithProjectAndVersion[] = filteredRes.map(file => ({
+      id: file.id,
+      fileName: file.fileName,
+      BpmnVersion: file.BpmnVersion.map(version => ({
+        id: version.id ?? '',
+        versionNumber: version.versionNumber ?? '',
+        xml: version.xml ?? ''
+      })),
+      project: {
+        id: file.project?.id ?? '',
+        name: file.project?.name ?? ''
+      }
+    }));
+    
+    return bpmnFilesWithProjectsAndVersions;
+
+  } catch (error) {
+    console.error('Error fetching BPMN files with projects and versions:', error);
+    throw error;
+  }
+}
+
+// rename user 
+export const renameUser = async (userId: string, name: string): Promise<boolean> => {
+  try {
+    const res = await prisma.user.update({
+      where: { id: userId },
+      data: { name },
+      select: { id: true, name: true }
+    });
+    return true;
+  } catch (error) {
+    console.error('Error renaming user:', error);
+    throw error;
+  }
 }

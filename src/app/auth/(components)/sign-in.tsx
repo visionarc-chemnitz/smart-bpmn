@@ -7,6 +7,7 @@ import { providerMap } from "@/auth";
 import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 export default function SignIn() {
   const { toggleButton } = useToggleButton()
@@ -65,7 +66,7 @@ export default function SignIn() {
         </div>
           <div className="flex flex-col justify-center w-full md:w-1/2 rounded-r-lg bg-gray-50 dark:bg-gray-900 space-y-4 p-6 bg ">
               <div className="text-center">
-                <img src="/assets/img/logo/vision_arc_logo_transparent.png" alt="Logo" className="mx-auto mb-4 h-20 w-24 rounded-full object-cover" />
+                <Image src="/assets/img/logo/vision_arc_logo_transparent.png" alt="Logo" className="mx-auto mb-4 h-20 w-24 rounded-full object-cover" height={300} width={200} />
                 <p className="text-sm text-muted-foreground">
                       Choose your preferred sign in method
                 </p>
