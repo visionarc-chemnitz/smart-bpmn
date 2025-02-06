@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPMN Diagram Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: #343a40;
+            color: #fff;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004a99;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div class="container my-5">
+    <h1 class="mb-4 text-center text-dark">
+        <i class="fas fa-project-diagram mr-2"></i>
+        BPMN Generator
+    </h1>
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-code mr-2"></i>
+                    Generate BPMN
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="promptInput" class="form-label">Enter text:</label>
+                        <textarea class="form-control" id="promptInput" rows="3"></textarea>
+                    </div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-primary" id="generateButton">
+                                <i class="fa fa-cog fa-spin d-none" id="loadingIcon"></i>
+                                Generate
+                            </button>
+                            <button class="btn btn-secondary" id="saveButton" style="display: none;">
+                                <i class="fas fa-download mr-2"></i>
+                                Save Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-file-alt mr-2"></i>
+                    Output
+                </div>
+                <div class="card-body">
+                    <div class="form-group" style="display: none;">
+                        <label for="pipeFlowText" class="form-label">Pipe Flow Text:</label>
+                        <p id="pipeFlowText"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="pipeFlowImage" class="form-label">Pipe Flow Image:</label>
+                        <img id="pipeFlowImage" alt="Pipe Flow Image" class="img-fluid d-none">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const generateButton = document.getElementById('generateButton');
+    const saveButton = document.getElementById('saveButton');
+    const loadingIcon = document.getElementById('loadingIcon');
+    const pipeFlowText = document.getElementById('pipeFlowText');
+    const pipeFlowImage = document.getElementById('pipeFlowImage');
+
+
+    generateButton.addEventListener('click', async () => {
+        const promptInput = document.getElementById('promptInput').value;
+        if (!promptInput) {
+            alert('Please enter some text.');
+            return;
+        }
+
+        // Show the loading indicator
+        loadingIcon.classList.remove('d-none');
+
+        try {
+            const response = await fetch('/api/v1/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt: promptInput })
+            });
+
+            const data = await response.json();
+
+            // Hide the loading indicator
+            loadingIcon.classList.add('d-none');
+
+            pipeFlowText.textContent = data.pipeFlowText;
+
+            if (data.pipeFlowImage) {
+                pipeFlowImage.src = `data:image/png;base64,${data.pipeFlowImage}`;
+                pipeFlowImage.classList.remove('d-none');
+                saveButton.style.display = 'inline-block';
+            } else {
+                pipeFlowImage.classList.add('d-none');
+                saveButton.style.display = 'none';
+            }
+
+            saveButton.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.download = 'bpmn-diagram.png';
+                link.href = pipeFlowImage.src;
+                link.click();
+            });
+        } catch (error) {
+            // Hide the loading indicator
+            loadingIcon.classList.add('d-none');
+            alert('Error generating the BPMN diagram. Please try again later.');
+            console.error('Error:', error);
+        }
+    });
+</script>
+</body>
+</html>

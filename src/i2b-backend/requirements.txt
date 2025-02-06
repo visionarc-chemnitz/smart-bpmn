@@ -1,0 +1,15 @@
+marshmallow
+python-dotenv
+passlib
+setuptools
+numpy
+requests
+opencv-python-headless
+pytesseract
+torch
+torchvision
+Jinja2
+starlette
+uvicorn
+python-multipart
+# git+https://github.com/facebookresearch/detectron2.git@v0.6

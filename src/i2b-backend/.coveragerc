@@ -1,0 +1,16 @@
+[run]
+include =
+        ./bpmn_redrawer_backend/api/*
+        ./bpmn_redrawer_backend/commons/utils.py
+        ./bpmn_redrawer_backend/bpmn/*
+omit =
+        *tests*
+        *__init__*
+        ./bpmn_redrawer_backend/api/views.py
+
+[report]
+show_missing = True
+exclude_lines = if TYPE_CHECKING:
+
+[html]
+directory = backend_coverage
