@@ -31,7 +31,7 @@ const teamMembers = [
     { name: "Eshwari", role: "CEO", image: "/assets/img/team/eshwari.png", github: "https://github.com/EshwariK", linkedin: "https://www.linkedin.com/in/eshwari-kangutkar" },
     { name: "Omkar", role: "CTO", image: "/assets/img/team/omkar.jpeg", github: "https://github.com/OmkarMirgal", linkedin: "https://www.linkedin.com/in/omkar-mirgal-19a959227/" },
     { name: "Roshita", role: "Product Manager", image: "/assets/img/team/roshita.jpg", github: "https://github.com/roshita02", linkedin: "https://www.linkedin.com/in/roshitashk/" },
-    { name: "Shrushti", role: "QA Manager", image: "/assets/img/team/shrushti.jpeg", github: "https://github.com/ShrushtiSakala/", linkedin: "https://www.linkedin.com/in/shrushtisakala" },
+    { name: "Shrushti", role: "Product Engineer", image: "/assets/img/team/shrushti.jpeg", github: "https://github.com/ShrushtiSakala/", linkedin: "https://www.linkedin.com/in/shrushtisakala" },
     { name: "Toushika", role: "BD Manager", image: "/assets/img/team/toushika.jpeg", github: "https://github.com/Toushika", linkedin: "https://www.linkedin.com/in/toushika-islam-38a7323b/" },
 ]
 
