@@ -120,6 +120,7 @@ export default function ChatPage({ params }: ChatPageParams) {
 
   // useEffect to initialize the BPMN file
   useEffect(() => {
+    console.log('pythonUrl', config.PythonURL)
     const initializeFile = async () => {
       setIsMounted(false);
       const state = await checkFile();
