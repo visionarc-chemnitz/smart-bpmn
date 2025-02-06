@@ -72,9 +72,6 @@ const BpmnFilesTable: React.FC<BpmnFilesTableProps> = ({ files }: BpmnFilesTable
                 <TableCell>{file.isFavorite ? <Heart className='text-red-500' /> : <X className='text-red-500'/>}</TableCell>
               <TableCell>
                 <div className="flex justify-start gap-2">
-                  <Button variant="outline" size="sm" onClick={() => {}}>
-                    Download BPMN
-                  </Button>
                   <Button variant="outline" size="sm" onClick={() => downloadArc42(file.threadId)}>
                     Download Arc42
                   </Button>
