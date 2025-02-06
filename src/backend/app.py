@@ -4,6 +4,7 @@ import os
 from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from xhtml2pdf import pisa
 
 # import services
 from services import ChatService
@@ -127,7 +128,6 @@ async def get_thread_history(request: Request):
 @app.post("/generate-arc42")
 async def generate_arc42(request: Request):
     try:
-        # Parse the request body
         body = await request.json()
         thread_id = body.get("thread_id", "").strip()
         
@@ -136,28 +136,59 @@ async def generate_arc42(request: Request):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Thread ID is required"
             )
-            
+        
         config = await chat_service.get_thread_config(thread_id)
-        
         markdown_content = await chat_service.generate_arc42_doc(config)
-        # Convert markdown to HTML
-        # html_content = markdown2.markdown(markdown_content)
+        if markdown_content is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No thread history found"
+            )
         
-        # # Create temporary file
-        # with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as tmp:
-        #     tmp.write(html_content)
-        #     tmp_path = tmp.name
-            
-        # return FileResponse(
-        #     path=tmp_path,
-        #     filename="arc42_documentation.html",
-        #     media_type="text/html"
-        # )
-
-        return markdown_content
+        html_content = markdown2.markdown(markdown_content)
+        
+         # Wrap the content in a container div with a sky blue border
+        styled_html_content = f"""
+        <html>
+            <head>
+                <style>
+                    
+                   h2 {{
+                        color: #2E86C1;
+                        font-size: 1.5em;
+                        margin-bottom: 0.5em
+                    }}
+                </style>
+            </head>
+            <body>
+            <div class="header">
+            </div>
+                <div class="pdf-container">
+                    {html_content}
+                </div>
+            </body>
+        </html>
+        """
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+            pdf_file = tmp.name
+            pisa_status = pisa.CreatePDF(styled_html_content, dest=tmp)
+            tmp_path = tmp.name
+        
+        if pisa_status.err:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error generating PDF"
+            )
+        
+        return FileResponse(
+            path=tmp_path,
+            filename="arc42_documentation.pdf",
+            media_type="application/pdf"
+        )
 
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
