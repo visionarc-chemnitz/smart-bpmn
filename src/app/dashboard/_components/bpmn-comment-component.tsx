@@ -20,7 +20,8 @@ const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => {
   });
   
   BpmnCommentComponent.displayName = 'BpmnCommentComponent';
-  const { currentBpmn } = useWorkspaceStore();
+  const { currentBpmnXML } = useWorkspaceStore();
+  // console.log(currentBpmnXML)
 
   useEffect(() => {
     if (diagramXML) {
@@ -37,7 +38,7 @@ const BpmnCommentComponent = forwardRef((props: BpmnViewerProps, ref) => {
   const handleSaveComments = async () => {
     const xml = await exportXML();
     const requestBody = {
-      bpmnId: currentBpmn?.id,
+      bpmnId: currentBpmnXML?.id,
       xml: xml,
     };
     if (xml) {

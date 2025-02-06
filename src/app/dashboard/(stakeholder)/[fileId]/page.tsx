@@ -22,11 +22,16 @@ export default function StakeholderBpmnVersionPage({
     if (currentBpmnXML) {
       setXml(currentBpmnXML.xml);
       localStorage.setItem("bpmnXML", currentBpmnXML.xml);
+      localStorage.setItem("bpmnXMLId", currentBpmnXML.id);
     } else {
       const bpmnXML = localStorage.getItem("bpmnXML");
       if (bpmnXML) {
         setXml(bpmnXML);
       }
+    }
+    return () => {
+      localStorage.removeItem("bpmnXML");
+      localStorage.removeItem("bpmnXMLId");
     }
   }, [currentBpmnXML]);
 

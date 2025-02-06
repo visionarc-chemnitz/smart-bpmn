@@ -286,10 +286,9 @@ export const getBpmnFileVersion = async (bpmnId: string, userId: string) => {
   try {
     // TODO:Check this as it is not working returning empty object
     console.log('bpmnId =', bpmnId);
-    const bpmnFile = await prisma.bpmn.findFirst({
+    const bpmnFile = await prisma.bpmn.findUnique({
       where: {
         id: bpmnId,
-        createdBy: userId,
       },
       select: {
         id: true,

@@ -211,6 +211,11 @@ class ChatService:
         # Debug logging
         print(f"Gateway router - Category: {category}, Message count: {len(messages)}")
 
+        # Step 2: Check if we need to summarize (if more than 6 messages)
+        if len(messages) > 6:
+            print("Message threshold reached, routing to summarizer")
+            return "summarize_conversation"
+
         if is_interrupted:
             print("Interrupted flow, routing to human")
             return "human"
@@ -220,10 +225,6 @@ class ChatService:
             print("No category found, routing to categorizer")
             return "categorize"
 
-        # Step 2: Check if we need to summarize (if more than 6 messages)
-        if len(messages) > 6:
-            print("Message threshold reached, routing to summarizer")
-            return "summarize_conversation"
 
         # Step 3: Route based on category
         if category in ["greeting", "offtopic"]:

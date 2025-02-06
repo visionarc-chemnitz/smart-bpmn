@@ -7,6 +7,7 @@ import {
 import { BpmnModelerProps, BpmnModelerHookResult } from '@/types/board/board-types';
 import { useBpmnTheme } from './use-bpmn-theme';
 import { debounce } from 'lodash';
+import EmbeddedComments from 'bpmn-js-embedded-comments';
 
 interface IOverlays {
   add: (elementId: string, options: {
@@ -62,7 +63,8 @@ export const useBpmnModeler = ({
       },
       additionalModules: [
         BpmnPropertiesPanelModule,
-        BpmnPropertiesProviderModule
+        BpmnPropertiesProviderModule,
+        EmbeddedComments
       ],
       palette: {
         open: true
