@@ -15,7 +15,7 @@ const BpmnFilesTable: React.FC<BpmnFilesTableProps> = ({ files }: BpmnFilesTable
   const {setCurrentBpmn} = useWorkspaceStore()
   const downloadArc42 = async (threadId: string) => {
     try {
-      const response = await fetch('http://localhost:8000/generate-arc42', {
+      const response = await fetch('https://v-arc.vercel.app/generate-arc42', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
