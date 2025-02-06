@@ -95,7 +95,7 @@ export default function ChatPage({ params }: ChatPageParams) {
     async (threadId: string) => {
       try {
         const res = await apiWrapper({
-          url: config.PythonURL,
+          url: 'https://v-arc-backend.onrender.com/',
           uri: "thread-history",
           method: "POST",
           body: { thread_id: threadId, value: "history" },
@@ -120,7 +120,6 @@ export default function ChatPage({ params }: ChatPageParams) {
 
   // useEffect to initialize the BPMN file
   useEffect(() => {
-    console.log('pythonUrl', config.PythonURL)
     const initializeFile = async () => {
       setIsMounted(false);
       const state = await checkFile();
