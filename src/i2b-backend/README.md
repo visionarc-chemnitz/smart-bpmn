@@ -1,17 +1,7 @@
 ---
-title: Test
-emoji: ⚡
-colorFrom: red
-colorTo: gray
-sdk: docker
-pinned: false
----
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+# Image-2-BPMN Backend
 
----
-# BPMN Redrawer
-
-This folder contains the backend code for BPMN Redrawer, developed at University of Camerino.
+This folder contains the backend code for Image-2-BPMN feature.
 
 ## Prerequisites
 - [Python 3.8](https://www.python.org/downloads/) or greater;
@@ -53,10 +43,14 @@ From the [backend](./) folder:
 
 This project is based on the [BPMN-Redrawer](https://github.com/PROSLab/BPMN-Redrawer) project. For more details, you can refer to the research paper: [BPMN-Redrawer: An Open Source Tool for Redrawing BPMN Diagrams](https://ceur-ws.org/Vol-3216/paper_246.pdf).
 
+BPMN-Redrawer is open source, enabling anyone to access the code, apply changes, train new machine learning models starting from different datasets of BPMN images, and easily deploy them.
+
 ## Modifications
 
 - Updated initial image processing to directly pass numpy arrays for further processing without storing the image.
 - Updated model initiation to load the model at the start of the application, allowing each request to use the pre-loaded model.
 
-BPMN-Redrawer is open source, enabling anyone to access the code, apply changes, train new machine learning models starting from different datasets of BPMN images, and easily deploy them.
+## Deployed Version
+You can also check out the deployed version of our project on Hugging Face: [image2bpmn](https://huggingface.co/spaces/EshwariK/image2bpmn).
+
 ---
