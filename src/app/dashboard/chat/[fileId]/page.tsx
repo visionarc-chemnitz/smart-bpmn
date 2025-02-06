@@ -205,7 +205,7 @@ export default function ChatPage({ params }: ChatPageParams) {
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/chat`, {
+      const response = await fetch(`https://v-arc-backend.onrender.com/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
