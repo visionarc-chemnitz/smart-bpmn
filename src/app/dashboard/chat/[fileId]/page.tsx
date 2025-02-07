@@ -45,6 +45,7 @@ export default function ChatPage({ params }: ChatPageParams) {
   const [isMounted, setIsMounted] = useState<boolean>(false);  
   const [isSaving, setIsSaving] = useState<boolean>(false); // auto-save state
   const messageContainerRef = useRef<HTMLDivElement>(null);
+  const apiurl = process.env.BACKEND_URL || 'https://alive-rafaela-visionarc-1e255492.koyeb.app/'
 
   useLayoutEffect(() => {
     if (messageContainerRef.current) {
@@ -95,7 +96,7 @@ export default function ChatPage({ params }: ChatPageParams) {
     async (threadId: string) => {
       try {
         const res = await apiWrapper({
-          url: 'https://v-arc-backend.onrender.com/',
+          url: apiurl,
           uri: "thread-history",
           method: "POST",
           body: { thread_id: threadId, value: "history" },
@@ -125,6 +126,7 @@ export default function ChatPage({ params }: ChatPageParams) {
       const state = await checkFile();
       if (state?.threadId) {
         await fetchThreadHistory(state.threadId);
+        console.log("Thread history fetched successfully", state.threadId);
       }
       setIsMounted(true);
     };
@@ -205,7 +207,7 @@ export default function ChatPage({ params }: ChatPageParams) {
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
 
     try {
-      const response = await fetch(`https://v-arc-backend.onrender.com/chat`, {
+      const response = await fetch(`${apiurl}chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

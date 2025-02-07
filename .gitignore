@@ -44,6 +44,7 @@ prisma/migrations/
 
 # Python virtual environment
 src/backend/.venv/*
+.venv/*
 
 # Python cache
 __pycache__

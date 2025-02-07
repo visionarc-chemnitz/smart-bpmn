@@ -15,7 +15,8 @@ const BpmnFilesTable: React.FC<BpmnFilesTableProps> = ({ files }: BpmnFilesTable
   const {setCurrentBpmn} = useWorkspaceStore()
   const downloadArc42 = async (threadId: string) => {
     try {
-      const response = await fetch('https://v-arc-backend.onrender.com/generate-arc42', {
+    const apiurl = process.env.BACKEND_URL || 'https://alive-rafaela-visionarc-1e255492.koyeb.app'
+      const response = await fetch(`${apiurl}/generate-arc42`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
